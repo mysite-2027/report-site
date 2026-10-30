@@ -203,8 +203,8 @@ b.disabled=true;b.textContent="جارٍ إنشاء الملف…";
 try{
 var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
 var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
-var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),pw=210,ph=297,imgH=cv.height*pw/cv.width,k=imgH>ph?ph/imgH:1;
-pdf.addImage(cv.toDataURL("image/png"),"PNG",(pw-pw*k)/2,0,pw*k,imgH*k);
+var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true}),pw=210,ph=297,imgH=cv.height*pw/cv.width,k=imgH>ph?ph/imgH:1;
+pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);
 var nm=("تحليل درجات "+($("subj").value.trim()||"مادة")).replace(/[\\\/:*?"<>|]/g,"-");
 var a=document.createElement("a");a.href=URL.createObjectURL(pdf.output("blob"));a.download=nm+".pdf";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
 m.textContent="تم تجهيز الملف.";
