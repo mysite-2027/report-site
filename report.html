@@ -147,9 +147,9 @@ var b=$("pdf"),old=b.textContent,m=$("msg");m.textContent="";b.disabled=true;b.t
 try{
 var dl=window.claude?await window.claude.use("downloads"):null;
 if(!window.html2canvas||!window.jspdf){m.textContent="سيفتح مربع الطباعة، اختر منه «حفظ بصيغة PDF».";window.print();return}
-var cv=await html2canvas($("sheet"),{scale:2,backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
+var cv=await html2canvas($("sheet"),{scale:Math.min(3,Math.sqrt(12e6/($("sheet").offsetWidth*$("sheet").offsetHeight))),backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
 var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),pw=210,ph=297,sp=Math.round(cv.width*ph/pw),y=0,first=true;
-var imgH=cv.height*pw/cv.width;if(imgH<=ph*1.2){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.92),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);first=false;y=cv.height}
+var imgH=cv.height*pw/cv.width;if(imgH<=ph*1.2){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.97),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);first=false;y=cv.height}
 var sc=cv.width/$("sheet").offsetWidth,K=$("sheet").children,R=function(e){return e.getBoundingClientRect()},t0=R($("sheet")).top,nk=K.length,hb=Math.round((R(K[0]).bottom-t0)*sc),bandPx=Math.round(R(K[nk-1]).height*sc),cEnd=cv.height-bandPx,bd=[];
 for(var q=0;q<nk-1;q++)bd.push((R(K[q]).bottom-t0)*sc);
 while(y<cEnd-5){var cap=(first?sp:sp-hb)-bandPx,end=Math.min(y+cap,cEnd);if(end<cEnd){var cand=bd.filter(function(b){return b>y+cap*.4&&b<=end+1});if(cand.length)end=Math.min(cEnd,Math.round(Math.max.apply(null,cand)))}
@@ -157,7 +157,7 @@ var c=document.createElement("canvas");c.width=cv.width;c.height=sp;var x=c.getC
 var oy=0;if(!first){x.drawImage(cv,0,0,cv.width,hb,0,0,cv.width,hb);oy=hb}
 x.drawImage(cv,0,y,cv.width,end-y,0,oy,cv.width,end-y);
 x.drawImage(cv,0,cEnd,cv.width,bandPx,0,sp-bandPx,cv.width,bandPx);
-if(!first)pdf.addPage();pdf.addImage(c.toDataURL("image/jpeg",.92),"JPEG",0,0,pw,ph);first=false;y=end}
+if(!first)pdf.addPage();pdf.addImage(c.toDataURL("image/jpeg",.97),"JPEG",0,0,pw,ph);first=false;y=end}
 var nm=($("pname").value.replace("اسم البرنامج/النشاط:","").trim()||"تقرير-برنامج").replace(/[\\/:*?"<>|]/g,"-");
 var blob=pdf.output("blob");
 if(dl){await dl.save({filename:nm+".pdf",data:blob})}
