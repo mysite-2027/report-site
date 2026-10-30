@@ -51,7 +51,7 @@ table.imp{width:100%;border-collapse:collapse;font-size:.92em}
 table.imp th{background:var(--p);color:#fff;padding:4px 6px;border:1px solid var(--p)}
 table.imp td{border:1px solid var(--l);padding:4px 6px;text-align:center;vertical-align:top}
 .ev{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ev div{border:1.5px solid var(--l);border-radius:10px;height:48mm;display:flex;align-items:center;justify-content:center;color:#9aa8b2;overflow:hidden}
+.ev div{border:1.5px solid var(--l);border-radius:10px;height:44mm;display:flex;align-items:center;justify-content:center;color:#9aa8b2;overflow:hidden}
 .ev img{width:100%;height:100%;object-fit:cover}
 .sig{margin-top:auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;padding-top:10px}
 .sig b{display:block;color:var(--g1)}
@@ -144,8 +144,9 @@ var dl=window.claude?await window.claude.use("downloads"):null;
 if(!window.html2canvas||!window.jspdf){m.textContent="سيفتح مربع الطباعة، اختر منه «حفظ بصيغة PDF».";window.print();return}
 var cv=await html2canvas($("sheet"),{scale:2,backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
 var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),pw=210,ph=297,sp=Math.round(cv.width*ph/pw),y=0,first=true;
-var imgH=cv.height*pw/cv.width;if(imgH<=ph*1.1){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.92),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);first=false;y=cv.height}
-while(y<cv.height-5){var h=Math.min(sp,cv.height-y),c=document.createElement("canvas");c.width=cv.width;c.height=h;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,h);x.drawImage(cv,0,y,cv.width,h,0,0,cv.width,h);if(!first)pdf.addPage();pdf.addImage(c.toDataURL("image/jpeg",.92),"JPEG",0,0,pw,h*pw/cv.width);first=false;y+=sp}
+var imgH=cv.height*pw/cv.width;if(imgH<=ph*1.2){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.92),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);first=false;y=cv.height}
+var sc=cv.width/$("sheet").offsetWidth,top0=$("sheet").getBoundingClientRect().top,bd=Array.prototype.map.call($("sheet").children,function(e){return (e.getBoundingClientRect().bottom-top0)*sc});
+while(y<cv.height-5){var end=Math.min(y+sp,cv.height);if(end<cv.height){var cand=bd.filter(function(b){return b>y+sp*.4&&b<=end+1});if(cand.length)end=Math.min(cv.height,Math.round(Math.max.apply(null,cand)))}var h=end-y,c=document.createElement("canvas");c.width=cv.width;c.height=h;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,h);x.drawImage(cv,0,y,cv.width,h,0,0,cv.width,h);if(!first)pdf.addPage();pdf.addImage(c.toDataURL("image/jpeg",.92),"JPEG",0,0,pw,h*pw/cv.width);first=false;y=end}
 var nm=($("pname").value.replace("اسم البرنامج/النشاط:","").trim()||"تقرير-برنامج").replace(/[\\/:*?"<>|]/g,"-");
 var blob=pdf.output("blob");
 if(dl){await dl.save({filename:nm+".pdf",data:blob})}
