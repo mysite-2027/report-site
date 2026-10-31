@@ -33,7 +33,7 @@ button.del{border-color:var(--border);color:var(--muted);padding:3px 10px;margin
 .hint{font-size:.8rem;color:var(--muted);margin:4px 0 0}
 .hint a{color:var(--accent);font-weight:700}
 .stage{overflow-x:auto;padding-bottom:8px}
-.sheet{--p:#17445a;--g1:#00421e;--g2:#00682f;--tl:#008080;--b:#2c7db5;--gr:#3fac72;--t:#16242f;--l:#c9d3da;-webkit-print-color-adjust:exact;print-color-adjust:exact;-webkit-text-size-adjust:100%;text-size-adjust:100%;background:#fff;color:var(--t);width:210mm;min-height:297mm;margin:0 auto;padding:12mm 14mm;box-shadow:0 2px 14px rgba(0,0,0,.2);font-size:12.5px;display:flex;flex-direction:column;gap:9px}
+.sheet{--p:#17445a;--g1:#00421e;--g2:#00682f;--tl:#008080;--b:#2c7db5;--gr:#3fac72;--t:#0b1620;--l:#c9d3da;-webkit-print-color-adjust:exact;print-color-adjust:exact;-webkit-text-size-adjust:100%;text-size-adjust:100%;background:#fff;color:var(--t);width:210mm;min-height:297mm;margin:0 auto;padding:12mm 14mm;box-shadow:0 2px 14px rgba(0,0,0,.2);font-size:12.5px;font-weight:500;display:flex;flex-direction:column;gap:9px}
 .sh-head{display:flex;justify-content:space-between;align-items:center;gap:10px;position:relative;padding-bottom:12px}
 .sh-head::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--b),var(--gr))}
 .sh-head img{max-height:70px;max-width:190px;object-fit:contain;display:block}
@@ -83,7 +83,7 @@ body{background:#fff}
 </div>
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، واضغط عليه بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
-<label>أو ارفع ملف الشعار (اختياري)</label><input type="file" id="logo" accept="image/*">
+<label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logo" accept="image/*">
 <button type="button" class="del" id="logoDel">إزالة الشعار</button>
 <p class="hint">لا يتضمن هذا الموقع أي شعار حكومي. لإظهار شعار وزارة التعليم: افتح <a href="https://www.moe.gov.sa/Style%20Library/portal/assets/images/moe-logo.svg" target="_blank" rel="noopener">رابط الشعار</a> ثم احفظ الصورة (اضغط بالزر الأيمن واختر «حفظ باسم»)، ثم ارفعها هنا. وتجد الشعار أيضًا في <a href="https://www.moe.gov.sa/ar/mediacenter/PhotoLibrary/Documents/MOE_logo.zip" target="_blank" rel="noopener">ملف الوزارة المضغوط</a> وفي <a href="https://www.moe.gov.sa/ar/mediacenter/PhotoLibrary/Pages/moe_identity.aspx" target="_blank" rel="noopener">صفحة الهوية الرسمية</a>. تأكد من أن استخدامك للشعار مسموح في جهتك.</p></fieldset>
 <fieldset><legend>بيانات البرنامج</legend>
@@ -170,8 +170,8 @@ try{
 var dl=window.claude?await window.claude.use("downloads"):null;
 if(!window.html2canvas||!window.jspdf){m.textContent="سيفتح مربع الطباعة، اختر منه «حفظ بصيغة PDF».";window.print();return}
 var cv=await html2canvas($("sheet"),{scale:Math.min(3,Math.sqrt(12e6/($("sheet").offsetWidth*$("sheet").offsetHeight))),backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
-var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),pw=210,ph=297,sp=Math.round(cv.width*ph/pw),y=0,first=true;
-var imgH=cv.height*pw/cv.width;if(imgH<=ph*1.2){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.97),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);first=false;y=cv.height}
+var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true}),pw=210,ph=297,sp=Math.round(cv.width*ph/pw),y=0,first=true;
+var imgH=cv.height*pw/cv.width;if(imgH<=ph*1.2){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);first=false;y=cv.height}
 var sc=cv.width/$("sheet").offsetWidth,K=$("sheet").children,R=function(e){return e.getBoundingClientRect()},t0=R($("sheet")).top,nk=K.length,hb=Math.round((R(K[0]).bottom-t0)*sc),bandPx=Math.round(R(K[nk-1]).height*sc),cEnd=cv.height-bandPx,bd=[];
 for(var q=0;q<nk-1;q++)bd.push((R(K[q]).bottom-t0)*sc);
 while(y<cEnd-5){var cap=(first?sp:sp-hb)-bandPx,end=Math.min(y+cap,cEnd);if(end<cEnd){var cand=bd.filter(function(b){return b>y+cap*.4&&b<=end+1});if(cand.length)end=Math.min(cEnd,Math.round(Math.max.apply(null,cand)))}
@@ -179,7 +179,7 @@ var c=document.createElement("canvas");c.width=cv.width;c.height=sp;var x=c.getC
 var oy=0;if(!first){x.drawImage(cv,0,0,cv.width,hb,0,0,cv.width,hb);oy=hb}
 x.drawImage(cv,0,y,cv.width,end-y,0,oy,cv.width,end-y);
 x.drawImage(cv,0,cEnd,cv.width,bandPx,0,sp-bandPx,cv.width,bandPx);
-if(!first)pdf.addPage();pdf.addImage(c.toDataURL("image/jpeg",.97),"JPEG",0,0,pw,ph);first=false;y=end}
+if(!first)pdf.addPage();pdf.addImage(c.toDataURL("image/jpeg",.95),"JPEG",0,0,pw,ph);first=false;y=end}
 var nm=($("pname").value.replace("اسم البرنامج/النشاط:","").trim()||"تقرير-برنامج").replace(/[\\/:*?"<>|]/g,"-");
 var blob=pdf.output("blob");
 if(dl){await dl.save({filename:nm+".pdf",data:blob})}
