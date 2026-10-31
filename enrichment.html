@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>الخطة الإثرائية | مُيَسِّر التقارير المدرسية</title>
+<meta name="description" content="أنشئ خطة إثرائية جاهزة للطباعة: مظاهر التميز وأساليب وطرق التحفيز وجدول بالطلاب المتميزين ومستوى تقدم كل طالب.">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6f8;--surface:#fff;--text:#16242f;--muted:#5b6b78;--border:#d5dde3;--accent:#17445a;--onaccent:#fff;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (prefers-color-scheme:dark){:root{--bg:#10181f;--surface:#18232c;--text:#e8eef2;--muted:#9fb0bc;--border:#2c3b47;--accent:#5fa8d3;--onaccent:#0b141a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Tajawal","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.6}
+.top{padding:20px 16px 8px;max-width:1280px;margin:auto}
+.top a{color:var(--accent);text-decoration:none;font-size:.9rem}
+.top h1{margin:4px 0 0;font-size:1.5rem;color:var(--accent)}
+.top p{margin:4px 0 0;color:var(--muted);font-size:.95rem}
+.app{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:16px;padding:12px 16px 32px;max-width:1280px;margin:auto;align-items:start}
+@media(max-width:900px){.app{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+fieldset{border:0;border-bottom:1px dashed var(--border);margin:0 0 12px;padding:0 0 12px}
+legend{font-weight:700;color:var(--accent);padding:0;margin-bottom:6px}
+label{display:block;font-size:.88rem;color:var(--muted);margin:8px 0 2px}
+input,select,textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)}
+textarea{min-height:70px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row{border:1px solid var(--border);border-radius:10px;padding:8px;margin-top:8px;background:var(--bg)}
+.ck{display:flex;align-items:center;gap:8px;margin:4px 0;color:var(--text);font-size:.92rem}
+.ck input{width:auto}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);padding:7px 12px}
+button.main{background:var(--accent);color:var(--onaccent);width:100%;padding:11px;font-weight:700;margin-top:6px}
+button.del{border-color:var(--border);color:var(--muted);padding:3px 10px;margin-top:6px;font-size:.85rem}
+.hint{font-size:.8rem;color:var(--muted);margin:4px 0 0}
+.hint a{color:var(--accent);font-weight:700}
+.stage{overflow-x:auto;padding-bottom:8px}
+.sheet{--p:#17445a;--g1:#00421e;--g2:#00682f;--tl:#008080;--b:#2c7db5;--gr:#3fac72;--t:#0b1620;--l:#c9d3da;-webkit-print-color-adjust:exact;print-color-adjust:exact;-webkit-text-size-adjust:100%;text-size-adjust:100%;background:#fff;color:var(--t);width:210mm;min-height:297mm;margin:0 auto;padding:12mm 14mm;box-shadow:0 2px 14px rgba(0,0,0,.2);font-size:12.5px;font-weight:500;display:flex;flex-direction:column;gap:9px}
+.sh-head{display:flex;justify-content:space-between;align-items:center;gap:10px;position:relative;padding-bottom:12px}
+.sh-head::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--b),var(--gr))}
+.sh-head img{max-height:70px;max-width:190px;object-fit:contain;display:block}
+.sh-head .tx{text-align:center;font-weight:700;color:var(--tl);line-height:1.5}
+.sh-head .tx span{display:block;font-weight:500;color:var(--t)}
+.bar{background:var(--p);color:#fff;text-align:center;font-weight:700;font-size:1.25em;padding:9px 12px;border-radius:10px}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.info div{border:1.5px solid var(--p);border-radius:10px;padding:5px 10px;display:flex;gap:6px;justify-content:center;text-align:center}
+.info b{color:var(--g2);white-space:nowrap}
+.info .w{grid-column:1/-1}
+.sec{border:2px solid var(--p);border-radius:18px;padding:8px 14px;break-inside:avoid}
+.sec h3{margin:0 0 6px;color:var(--g1);font-size:1.05em}
+.sec p{margin:2px 0;text-align:right;white-space:pre-wrap}
+.meth{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px 10px}
+.meth div{font-size:1em}
+.ev{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ev div{border:1.5px solid var(--p);border-radius:10px;height:44mm;overflow:hidden}
+.ev img{width:100%;height:100%;object-fit:cover;display:block}
+.bx{display:inline-block;width:12px;height:12px;border:1.5px solid var(--p);border-radius:3px;vertical-align:middle;margin-inline-end:6px}
+.bx.on{background:var(--g2);border-color:var(--g2)}
+table.t{width:100%;border-collapse:collapse;font-size:1em;table-layout:fixed}
+table.t th{background:var(--p);color:#fff;padding:5px 6px;border:1px solid var(--p)}
+table.t td{border:1px solid var(--l);padding:5px 6px;text-align:center;vertical-align:middle;overflow-wrap:anywhere;height:32px}
+table.t td.n{text-align:right}
+.sig{margin-top:auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;padding-top:10px}
+.sig b{display:block;color:var(--g1)}
+.sig .st{height:26mm;display:flex;align-items:center;justify-content:center}
+.sig .st img{max-height:26mm;max-width:100%;object-fit:contain}
+.band{height:20px;margin:0 -14mm -12mm;background:linear-gradient(to bottom,var(--p) 65%,transparent 65%),linear-gradient(90deg,var(--b),var(--gr))}
+@media print{
+@page{size:A4;margin:0}
+body{background:#fff}
+.top,.panel{display:none}
+.app{display:block;padding:0;max-width:none}
+.stage{overflow:visible;padding:0}
+.sheet{box-shadow:none;margin:0;min-height:297mm}
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<header class="top"><a href="index.html">← الصفحة الرئيسية</a><h1>الخطة الإثرائية</h1><p>اكتب اسم المادة والطلاب المتميزين وأساليب وطرق التحفيز، فيظهر التقرير جاهزًا للحفظ.</p></header>
+<main class="app">
+<section class="panel">
+<fieldset><legend>بيانات الخطة (تُحفظ في متصفحك)</legend>
+<label>الإدارة العامة للتعليم</label><input id="dept">
+<label>اسم المدرسة</label><input id="school">
+<label>اسم المادة</label><input id="subj" placeholder="مثال: الرياضيات">
+<label>اسم المعلمة / المعلم</label><input id="teacher">
+<div class="two"><div><label>الصف (اختياري)</label><input id="cls" placeholder="ثاني متوسط"></div><div><label>الفصل / الشعبة (اختياري)</label><input id="sect" placeholder="2/ب"></div></div>
+<label>تاريخ التنفيذ (اختياري)</label><input id="pdate" placeholder="الفصل الأول 1448 هـ">
+<label>الصيغة</label><select id="gender"><option value="f">مؤنث</option><option value="m">مذكر</option></select>
+<p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، واضغط عليه بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
+<p class="hint" id="moeMsg"></p>
+<label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logoIn" accept="image/*">
+<button type="button" class="del" id="logoDel" style="width:100%">إزالة الشعار</button>
+<p class="hint">لا يتضمن هذا الموقع أي شعار حكومي. لإظهار شعار وزارة التعليم: افتح <a href="https://www.moe.gov.sa/Style%20Library/portal/assets/images/moe-logo.svg" target="_blank" rel="noopener">رابط الشعار</a> ثم احفظ الصورة (اضغط بالزر الأيمن واختر «حفظ باسم»)، ثم ارفعها هنا. وتجد الشعار أيضًا في <a href="https://www.moe.gov.sa/ar/mediacenter/PhotoLibrary/Documents/MOE_logo.zip" target="_blank" rel="noopener">ملف الوزارة المضغوط</a> وفي <a href="https://www.moe.gov.sa/ar/mediacenter/PhotoLibrary/Pages/moe_identity.aspx" target="_blank" rel="noopener">صفحة الهوية الرسمية</a>. تأكد من أن استخدامك للشعار مسموح في جهتك.</p>
+</fieldset>
+<fieldset><legend>مظاهر التميز (يمكن اختيار أكثر من خيار)</legend>
+<div id="causes"></div>
+<label>إضافة أخرى (اختياري)</label><input id="cauOther" placeholder="اكتب ما تريد إضافته"></fieldset>
+<fieldset><legend>أساليب وطرق التحفيز (يمكن اختيار أكثر من خيار)</legend>
+<div id="meths"></div></fieldset>
+<fieldset><legend>الإجراءات الإثرائية (يمكن اختيار أكثر من خيار)</legend>
+<div id="enrs"></div></fieldset>
+<fieldset><legend>جدول الطلاب</legend>
+<p class="hint" style="margin-top:0">أضف الطلاب المتميزين. تبقى الأسماء في متصفحك فقط ولا تُحفظ بعد إغلاق الصفحة.</p>
+<div id="rows"></div><button type="button" id="addRow" style="margin-top:8px">+ إضافة طالب</button></fieldset>
+<fieldset><legend>الشواهد (اختياري - حتى 4 صور)</legend><p class="hint" style="margin-top:0">إن لم تضف صورًا فلن يظهر قسم الشواهد في التقرير.</p><div class="two"><input type="file" class="ev-in" accept="image/*"><input type="file" class="ev-in" accept="image/*"><input type="file" class="ev-in" accept="image/*"><input type="file" class="ev-in" accept="image/*"></div></fieldset>
+<fieldset><legend>التوقيعات</legend>
+<label>اسم مديرة / مدير المدرسة</label><input id="principal">
+<label>صورة الختم (اختياري)</label><input type="file" id="stampIn" accept="image/*"><button type="button" class="del" id="stampDel" style="width:100%">إزالة الختم</button>
+<p class="hint">يُحفظ الختم والشعار في متصفحك ويظهران أيضًا في بقية النماذج.</p></fieldset>
+<button class="main" id="pdf" type="button">حفظ PDF</button>
+<button class="del" id="print" type="button" style="width:100%">طباعة</button>
+<button class="del" id="reset" type="button" style="width:100%">مسح بيانات الخطة</button>
+<p class="hint" id="pm"></p>
+</section>
+<section class="stage"><article class="sheet" id="sheet"></article></section>
+</main>
+<script>
+var $=function(i){return document.getElementById(i)};
+var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
+function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+var SET={};try{SET=JSON.parse(sto("rpt_settings")||"{}")}catch(e){}
+var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["dept","school","gender","teacher","principal"];
+var METH=["الثناء والتعزيز المعنوي","شهادات شكر وتقدير","نقاط ومكافآت تحفيزية","إسناد مهام قيادية","التكريم في الإذاعة المدرسية","التواصل مع ولي الأمر"];
+var ENR=["مشاريع وتجارب","أنشطة تفكير إبداعي وناقد","مسائل وتحديات متقدمة","القراءة الموسعة","تقديم الشرح للأقران","برامج وتطبيقات تعليمية","أوراق عمل إثرائية","التعلم الذاتي والاستكشاف","إشراكه في المسابقات والمبادرات"];
+var CAUSE=["تفوق دراسي وتحصيل مرتفع","مهارات تفكير عليا وإبداع","مشاركة صفية فاعلة","حب الاستطلاع والبحث","إنجاز المهام قبل أقرانه","مهارات قيادية وتعاونية"];
+var rows=[{n:"",s:"",a:"",d:"",r:""}],meths=[],enrs=[],causes=[],imgs=[null,null,null,null];
+SAVED.forEach(function(k){if(SET[k])$(k).value=SET[k]});
+if(!$("dept").value)$("dept").value="الإدارة العامة للتعليم بمنطقة الرياض";
+function shrink(file,max,type,cb){if(type==="image/png")max*=2;var r=new FileReader(),sv=/svg/i.test(file.type)||/\.svg$/i.test(file.name);
+r.onload=function(){var src=r.result;
+if(sv){var t=String(r.result),vb=t.match(/viewBox\s*=\s*["']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/i),w=vb?parseFloat(vb[1]):400,h=vb?parseFloat(vb[2]):200;
+t=t.replace(/<svg([^>]*)>/i,function(m,a){return "<svg"+a.replace(/\s(width|height)\s*=\s*["'][^"']*["']/gi,"")+' width="'+w+'" height="'+h+'">'});
+src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(t)}
+var im=new Image();im.onload=function(){var k=sv?max/Math.max(im.width,im.height):Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+if(type==="image/png"){var d=c.getContext("2d").getImageData(0,0,c.width,c.height).data,x0=c.width,y0=c.height,x1=-1,y1=-1;
+for(var y=0;y<c.height;y++)for(var x=0;x<c.width;x++){var o=(y*c.width+x)*4;if(d[o+3]>10&&(d[o]<245||d[o+1]<245||d[o+2]<245)){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}
+if(x1>x0&&y1>y0){var pd=Math.round(Math.max(c.width,c.height)*.02),c2=document.createElement("canvas");c2.width=x1-x0+1+2*pd;c2.height=y1-y0+1+2*pd;c2.getContext("2d").drawImage(c,x0,y0,x1-x0+1,y1-y0+1,pd,pd,x1-x0+1,y1-y0+1);c=c2}}
+cb(c.toDataURL(type,.82))};im.src=src};
+sv?r.readAsText(file):r.readAsDataURL(file)}
+$("meths").innerHTML=METH.map(function(m,i){return '<label class="ck"><input type="checkbox" data-m="'+i+'"> '+m+"</label>"}).join("");
+$("enrs").innerHTML=ENR.map(function(m,i){return '<label class="ck"><input type="checkbox" data-e="'+i+'"> '+m+"</label>"}).join("");
+$("causes").innerHTML=CAUSE.map(function(m,i){return '<label class="ck"><input type="checkbox" data-c="'+i+'"> '+m+"</label>"}).join("");
+function drawRows(){$("rows").innerHTML=rows.map(function(r,i){return '<div class="row" data-i="'+i+'"><label>اسم الطالب / الطالبة</label><input data-k="n" value="'+esc(r.n)+'"><button type="button" class="del" data-del="'+i+'">حذف</button></div>'}).join("")}
+function render(){
+var f=$("gender").value==="f",S=f?"الطالبات":"الطلاب",one=f?"الطالبة":"الطالب",v=function(i){return $(i).value.trim()};
+var filled=rows.filter(function(r){return r.n||r.s||r.a||r.d||r.r}),cnt=rows.filter(function(r){return r.n.trim()}).length,show=filled.slice();
+while(show.length<5)show.push({n:"",s:"",a:"",d:"",r:""});
+var tb=show.map(function(r,i){return "<tr><td>"+(i+1)+'</td><td class="n">'+esc(r.n)+"</td>"+"</tr>"}).join("");
+var ch=CAUSE.map(function(m,i){return "<div><i class=\"bx"+(causes.indexOf(i)>-1?" on":"")+"\"></i>"+m+"</div>"}).join(""),co=v("cauOther"),ca='<div class="sec"><h3>مظاهر التميز</h3><div class="meth">'+ch+"</div>"+(co?"<p><b>أخرى:</b> "+esc(co)+"</p>":"")+"</div>";
+var mh=METH.map(function(m,i){return "<div><i class=\"bx"+(meths.indexOf(i)>-1?" on":"")+"\"></i>"+m+"</div>"}).join("");
+var evs=imgs.filter(Boolean).map(function(d){return '<div><img alt="" src="'+d+'"></div>'}).join("");
+var eh=ENR.map(function(m,i){return "<div><i class=\"bx"+(enrs.indexOf(i)>-1?" on":"")+"\"></i>"+m+"</div>"}).join("");
+var L=logo;
+$("sheet").innerHTML=
+'<div class="sh-head"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
+'<div class="bar">الخطة الإثرائية لمادة '+esc(v("subj")||"…")+"</div>"+
+'<div class="info"><div class="w"><b>اسم '+(f?"المعلمة":"المعلم")+":</b>"+esc(v("teacher")||"—")+"</div><div><b>الصف:</b>"+esc(v("cls")||"—")+"</div><div><b>الفصل / الشعبة:</b>"+esc(v("sect")||"—")+"</div><div><b>تاريخ التنفيذ:</b>"+esc(v("pdate")||"—")+"</div><div><b>عدد "+S+":</b>"+cnt+"</div></div>"+
+ca+'<div class="sec"><h3>أساليب وطرق التحفيز</h3><div class="meth">'+mh+"</div></div>"+
+'<div class="sec"><h3>الإجراءات الإثرائية</h3><div class="meth">'+eh+"</div></div>"+
+'<div class="sec"><h3>جدول الخطة الإثرائية</h3><table class="t"><tr><th style="width:8%">م</th><th style="width:92%">اسم '+one+'</th></tr>'+tb+"</table></div>"+
+(evs?'<div class="sec"><h3>الشواهد</h3><div class="ev">'+evs+"</div></div>":"")+
+'<div class="sig"><div><b>'+(f?"المعلمة":"المعلم")+"</b>"+esc(v("teacher"))+'</div><div><b>الختم</b><div class="st">'+(stamp?'<img alt="" src="'+stamp+'">':"")+"</div></div><div><b>"+(f?"مديرة المدرسة":"مدير المدرسة")+"</b>"+esc(v("principal"))+"</div></div>"+
+'<div class="band"></div>'
+}
+["dept","school","subj","teacher","cls","sect","pdate","gender","cauOther","principal"].forEach(function(i){$(i).addEventListener("input",function(){if(SAVED.indexOf(i)>-1){SET[i]=$(i).value;sto("rpt_settings",JSON.stringify(SET))}render()})});
+$("meths").addEventListener("change",function(e){var i=+e.target.dataset.m;if(isNaN(i))return;var k=meths.indexOf(i);if(e.target.checked&&k<0)meths.push(i);if(!e.target.checked&&k>-1)meths.splice(k,1);render()});
+$("enrs").addEventListener("change",function(e){var i=+e.target.dataset.e;if(isNaN(i))return;var k=enrs.indexOf(i);if(e.target.checked&&k<0)enrs.push(i);if(!e.target.checked&&k>-1)enrs.splice(k,1);render()});
+$("causes").addEventListener("change",function(e){var i=+e.target.dataset.c;if(isNaN(i))return;var k=causes.indexOf(i);if(e.target.checked&&k<0)causes.push(i);if(!e.target.checked&&k>-1)causes.splice(k,1);render()});
+$("rows").addEventListener("change",function(e){var d=e.target.closest(".row");if(d&&e.target.tagName==="SELECT"){rows[+d.dataset.i][e.target.dataset.k]=e.target.value;render()}});
+$("rows").addEventListener("input",function(e){var d=e.target.closest(".row");if(d&&e.target.dataset.k){rows[+d.dataset.i][e.target.dataset.k]=e.target.value;render()}});
+$("rows").addEventListener("click",function(e){var i=e.target.dataset.del;if(i!=null){rows.splice(+i,1);if(!rows.length)rows.push({n:"",s:"",a:"",d:"",r:""});drawRows();render()}});
+$("addRow").onclick=function(){rows.push({n:"",s:"",a:"",d:"",r:""});drawRows()};
+$("reset").onclick=function(){rows=[{n:"",s:"",a:"",d:"",r:""}];meths=[];enrs=[];causes=[];imgs=[null,null,null,null];Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el){el.value=""});Array.prototype.forEach.call(document.querySelectorAll("#meths input,#enrs input,#causes input"),function(c){c.checked=false});["subj","cauOther","cls","sect","pdate"].forEach(function(i){$(i).value=""});drawRows();render()};
+Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el,i){el.onchange=function(e){var f=e.target.files[0];if(f)shrink(f,900,"image/jpeg",function(d){imgs[i]=d;render()});else{imgs[i]=null;render()}}});
+$("logoIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render()})};
+$("logoDel").onclick=function(){logo=null;$("logoIn").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
+$("stampIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,500,"image/png",function(d){stamp=d;sto("rpt_stamp",d);render()})};
+$("stampDel").onclick=function(){stamp=null;$("stampIn").value="";try{localStorage.removeItem("rpt_stamp")}catch(e){}render()};
+document.addEventListener("paste",function(e){var cd=e.clipboardData;if(!cd)return;var m=$("moeMsg"),
+done=function(f){e.preventDefault();shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render();m.textContent="تمت إضافة الشعار من الحافظة."})},fs=cd.files||[],i,mm;
+for(i=0;i<fs.length;i++){if(/^image\//.test(fs[i].type)){done(fs[i]);return}}
+var tx=cd.getData("text/plain")||"",ht=cd.getData("text/html")||"";
+if(/<svg[\s>]/i.test(tx)){done(new File([tx],"logo.svg",{type:"image/svg+xml"}));return}
+if((mm=ht.match(/<img[^>]+src=["'](data:image\/[^"']+)["']/i))){e.preventDefault();fetch(mm[1]).then(function(r){return r.blob()}).then(function(bl){shrink(new File([bl],"logo",{type:bl.type}),400,"image/png",function(d){logo=d;sto("rpt_logo",d);render();m.textContent="تمت إضافة الشعار من الحافظة."})});return}
+var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!=="file")return;
+m.textContent=cd.types&&cd.types.length?"لم أجد صورة في الحافظة (المحتوى: "+Array.prototype.join.call(cd.types,"، ")+"). احفظ الصورة بدل نسخها ثم ارفعها.":"الحافظة فارغة."});
+
+$("print").onclick=function(){window.print();$("pm").textContent="إن لم تظهر نافذة الطباعة فافتح الصفحة في نافذة متصفح مستقلة."};
+$("pdf").onclick=async function(){
+var b=$("pdf"),old=b.textContent,m=$("pm"),sh=$("sheet");m.textContent="";
+if(!window.html2canvas||!window.jspdf){m.textContent="تعذّر تحميل مكتبة الحفظ. تأكد من اتصالك بالإنترنت أو استخدم زر الطباعة.";return}
+b.disabled=true;b.textContent="جارٍ إنشاء الملف…";
+try{
+var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
+var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
+var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true}),pw=210,ph=297,H=Math.round(cv.width*ph/pw),y=0,first=true,imgH=cv.height*pw/cv.width;
+if(imgH<=ph*1.2){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);y=cv.height}
+var sc=cv.width/sh.offsetWidth,K=sh.children,R=function(e){return e.getBoundingClientRect()},t0=R(sh).top,nk=K.length,hb=Math.round((R(K[0]).bottom-t0)*sc),bandPx=Math.round(R(K[nk-1]).height*sc),cEnd=cv.height-bandPx,bs=[],br=[];
+for(var q=0;q<nk-1;q++)bs.push((R(K[q]).bottom-t0)*sc);
+Array.prototype.forEach.call(sh.querySelectorAll("tr"),function(e){br.push((R(e).bottom-t0)*sc)});
+while(y<cEnd-5){var cap=(first?H:H-hb)-bandPx,end=Math.min(y+cap,cEnd);
+if(end<cEnd){var pick=function(arr,lo){var c=arr.filter(function(z){return z>lo&&z<=end+1});return c.length?Math.max.apply(null,c):null};var e1=pick(bs,y+cap*.7)||pick(br,y+cap*.4)||pick(bs,y+cap*.4);if(e1)end=Math.min(cEnd,Math.round(e1))}
+var c=document.createElement("canvas");c.width=cv.width;c.height=H;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,H);
+var oy=0;if(!first){x.drawImage(cv,0,0,cv.width,hb,0,0,cv.width,hb);oy=hb}
+x.drawImage(cv,0,y,cv.width,end-y,0,oy,cv.width,end-y);
+x.drawImage(cv,0,cEnd,cv.width,bandPx,0,H-bandPx,cv.width,bandPx);
+if(!first)pdf.addPage();pdf.addImage(c.toDataURL("image/jpeg",.95),"JPEG",0,0,pw,ph);first=false;y=end}
+var nm=("الخطة الإثرائية "+($("subj").value.trim()||"")).trim().replace(/[\\\/:*?"<>|]/g,"-");
+var a=document.createElement("a");a.href=URL.createObjectURL(pdf.output("blob"));a.download=nm+".pdf";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
+m.textContent="تم تجهيز الملف.";
+}catch(e){m.textContent="تعذّر إنشاء الملف تلقائيًا. استخدم زر الطباعة ثم اختر «حفظ بصيغة PDF»."}
+finally{b.disabled=false;b.textContent=old}
+};
+drawRows();render();
+</script>
+</body>
+</html>
