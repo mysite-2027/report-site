@@ -170,7 +170,7 @@ function tplDecor(){return tplK==="waves"?wavesSvg():tplK==="rings"?ringsSvg():t
 var SFX="";
 var ornK=sto("rpt_cert_orn")||"star";if(ornK==="floral")ornK="star";
 function curOrn(){return ORN.filter(function(o){return o.k===ornK})[0]||ORN[0]}
-function cornerSvg(rot,pos){var o=curOrn();if(!o.corner)return"";return '<svg class="corner" style="'+pos+'" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="rotate('+rot+' 50 50)">'+o.corner(TC)+'</g></svg>'}
+function cornerSvg(rot,pos){var o=curOrn();if(!o.corner)return"";return '<svg class="corner" width="84" height="84" style="'+pos+'" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="rotate('+rot+' 50 50)">'+o.corner(TC)+'</g></svg>'}
 function dividerSvg(){var o=tplK==="classic"?curOrn():ORN[0],c=TC;if(!o.mid)return"";return '<svg class="orn" width="380" height="26" viewBox="0 0 380 26" xmlns="http://www.w3.org/2000/svg"><path d="M10 13H150" stroke="'+c.g2+'" stroke-width="1.6"/><path d="M230 13H370" stroke="'+c.g2+'" stroke-width="1.6"/><circle cx="4" cy="13" r="3" fill="'+c.g2+'"/><circle cx="376" cy="13" r="3" fill="'+c.g2+'"/>'+(o.k==="geo"?"":'<circle cx="160" cy="13" r="3" fill="'+c.gr+'"/><circle cx="220" cy="13" r="3" fill="'+c.gr+'"/>')+o.mid(c)+'</svg>'}
 function edgeSvg(v,pos,id){var o=curOrn();if(!o.tile)return"";return '<svg class="edge" style="'+pos+'" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="'+id+SFX+'" width="20" height="10" patternUnits="userSpaceOnUse"'+(v?' patternTransform="rotate(90)"':"")+'>'+o.tile(TC)+'</pattern></defs><rect width="100%" height="100%" fill="url(#'+id+SFX+')"/></svg>'}
 function edgesAll(){return edgeSvg(0,"top:11px;left:100px;width:calc(100% - 200px);height:10px","eT")+edgeSvg(0,"bottom:11px;left:100px;width:calc(100% - 200px);height:10px","eB")+edgeSvg(1,"top:100px;height:calc(100% - 200px);left:11px;width:10px","eL")+edgeSvg(1,"top:100px;height:calc(100% - 200px);right:11px;width:10px","eR")}
@@ -192,6 +192,7 @@ cb(c.toDataURL(type,.82))};im.src=src};
 sv?r.readAsText(file):r.readAsDataURL(file)}
 if(ornK==="classic"||ornK==="geo"||ornK==="floral")ornK="star";
 var GAL=[{t:"classic",o:"star",n:"إطار نجمة"},{t:"classic",o:"formal",n:"إطار رسمي"},{t:"classic",o:"none",n:"إطار بسيط"},{t:"waves",o:"star",n:"موجات"},{t:"rings",o:"star",n:"حلقات"},{t:"frame",o:"star",n:"إطار ملوّن بشرائط"},{t:"cream",o:"star",n:"أوجه مثلثة"},{t:"facets",o:"star",n:"أوجه هندسية"}];
+function fixSvg(h){return h.replace(/<svg ([^>]*?)style="([^"]*)"/g,function(m,pre,st){var w=(st.match(/(?:^|;)width:([^;]+)/)||[])[1],hh=(st.match(/(?:^|;)height:([^;]+)/)||[])[1];function n(v,full){if(!v)return null;if(/calc/.test(v))return full-200;if(/%/.test(v))return full;return parseFloat(v)}var W=n(w,1032),H=n(hh,500);return "<svg "+pre+(W&&!/\swidth=/.test(" "+pre)?'width="'+W+'" ':"")+(H&&!/\sheight=/.test(" "+pre)?'height="'+H+'" ':"")+'style="'+st+'"'})}
 function sheetHtml(t,o,sfx){var f=$("gender").value==="f",v=function(i){return $(i).value.trim()},L=logo,ty=v("rtype"),nm=v("rname"),rs=v("rreason"),dt=v("rdate"),st=tplK,so=ornK,ss=SFX,out;tplK=t;ornK=o;SFX=sfx;try{out=
 '<div class="cf'+({waves:" tw",rings:" tr",frame:" tf",cream:" tc",facets:" tt"}[tplK]||"")+'"'+""+'>'+tplDecor()+'<div class="sh-head"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
 '<div class="ct">شهادة شكر وتقدير</div>'+dividerSvg()+
@@ -200,7 +201,7 @@ function sheetHtml(t,o,sfx){var f=$("gender").value==="f",v=function(i){return $
 "<p>"+(rs?"وذلك على "+esc(rs)+"،":"وذلك تقديرًا لجهودكم المتميزة،")+" متمنّين لكم دوام التوفيق والنجاح.</p>"+
 (dt?'<p class="dt">التاريخ: '+esc(dt)+"</p>":"")+"</div>"+
 '<div class="sig"><div><b>'+(ROLES[+$("role").value||0][f?1:0])+"</b>"+esc(v("teacher"))+'</div><div><b>الختم</b><div class="st">'+(stamp?'<img alt="" src="'+stamp+'">':"")+"</div></div><div><b>"+(f?"مديرة المدرسة":"مدير المدرسة")+"</b>"+esc(v("principal"))+"</div></div></div>"+
-'<div class="band"></div>';}finally{tplK=st;ornK=so;SFX=ss}return out}
+'<div class="band"></div>';}finally{tplK=st;ornK=so;SFX=ss}return fixSvg(out)}
 function varsStyle(){return ["p","g1","g2","tl","b","gr"].map(function(k){return "--"+k+":"+TC[k]}).join(";")}
 function buildGal(){$("gal").innerHTML=GAL.map(function(g,i){return '<button type="button" data-i="'+i+'" class="'+(g.t===tplK&&(g.t!=="classic"||g.o===ornK)?"on":"")+'"><div class="thw"><div class="sheet mini" style="'+varsStyle()+'">'+sheetHtml(g.t,g.o,"g"+i)+'</div></div><span>'+g.n+"</span></button>"}).join("");fitThumbs()}
 function fitThumbs(){Array.prototype.forEach.call(document.querySelectorAll("#gal .thw"),function(w){var m=w.firstChild,k=w.clientWidth/m.offsetWidth;m.style.transform="scale("+k+")"})}
@@ -227,12 +228,14 @@ var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!
 m.textContent=cd.types&&cd.types.length?"لم أجد صورة في الحافظة (المحتوى: "+Array.prototype.join.call(cd.types,"، ")+"). احفظ الصورة بدل نسخها ثم ارفعها.":"الحافظة فارغة."});
 
 $("print").onclick=function(){window.print();$("pm").textContent="إن لم تظهر نافذة الطباعة فافتح الصفحة في نافذة متصفح مستقلة."};
+function rasterOne(el){return new Promise(function(res){try{var W=Math.round(el.getBoundingClientRect().width),H=Math.round(el.getBoundingClientRect().height);if(!W||!H){res(false);return}var c=el.cloneNode(true);c.setAttribute("width",W);c.setAttribute("height",H);c.removeAttribute("style");c.removeAttribute("class");if(!c.getAttribute("xmlns"))c.setAttribute("xmlns","http://www.w3.org/2000/svg");var xml=new XMLSerializer().serializeToString(c),im=new Image();im.onload=function(){try{var k=2,cv=document.createElement("canvas");cv.width=W*k;cv.height=H*k;cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);var img=document.createElement("img");img.className=el.getAttribute("class")||"";img.setAttribute("style",el.getAttribute("style")||"");img.style.width=W+"px";img.style.height=H+"px";img.alt="";img.src=cv.toDataURL("image/png");el.parentNode.replaceChild(img,el);res(true)}catch(e){res(false)}};im.onerror=function(){res(false)};im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(xml)}catch(e){res(false)}})}
+async function rasterAll(root){var l=Array.prototype.slice.call(root.querySelectorAll("svg")),i;for(i=0;i<l.length;i++)await rasterOne(l[i])}
 $("pdf").onclick=async function(){
 var b=$("pdf"),old=b.textContent,m=$("pm"),sh=$("sheet");m.textContent="";
 if(!window.html2canvas||!window.jspdf){m.textContent="تعذّر تحميل مكتبة الحفظ. تأكد من اتصالك بالإنترنت أو استخدم زر الطباعة.";return}
 b.disabled=true;b.textContent="جارٍ إنشاء الملف…";
 try{
-sh.style.transform="none";await new Promise(function(r){setTimeout(r,60)});
+sh.style.transform="none";await new Promise(function(r){setTimeout(r,60)});await rasterAll(sh);
 var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
 var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1400,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
 var pdf=new window.jspdf.jsPDF({orientation:"landscape",unit:"mm",format:"a4",compress:true});
@@ -241,7 +244,7 @@ var nm=("شهادة شكر "+($("rname").value.trim()||"")).trim().replace(/[\\\
 var a=document.createElement("a");a.href=URL.createObjectURL(pdf.output("blob"));a.download=nm+".pdf";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
 m.textContent="تم تجهيز الملف.";
 }catch(e){m.textContent="تعذّر إنشاء الملف تلقائيًا. استخدم زر الطباعة ثم اختر «حفظ بصيغة PDF»."}
-finally{b.disabled=false;b.textContent=old;fit()}
+finally{b.disabled=false;b.textContent=old;render();fit()}
 };
 function fit(){var st=document.querySelector(".stage"),sh=$("sheet");sh.style.transform="none";st.style.height="";var k=Math.min(1,st.clientWidth/sh.offsetWidth);if(k<1){sh.style.transformOrigin="top right";sh.style.transform="scale("+k+")";st.style.height=Math.ceil(sh.offsetHeight*k+6)+"px"}}
 window.addEventListener("resize",function(){fit();fitThumbs()});window.addEventListener("load",function(){fit();fitThumbs()});
