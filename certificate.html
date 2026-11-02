@@ -209,6 +209,8 @@ function render(){
 applyTheme();
 $("sheet").innerHTML=sheetHtml(tplK,ornK,"");buildGal()
 }
+function syncType(){var f=$("gender").value==="f",c=$("rtype").value;if(c==="الطالبة"||c==="الطالب")$("rtype").value=f?"الطالبة":"الطالب";else if(c==="المعلمة"||c==="المعلم")$("rtype").value=f?"المعلمة":"المعلم";else if(c==="ولي أمر الطالب"||c==="ولي أمر الطالبة")$("rtype").value=f?"ولي أمر الطالبة":"ولي أمر الطالب"}
+$("gender").addEventListener("change",syncType);
 ["dept","school","teacher","gender","principal","role","rtype","rname","rreason","rdate"].forEach(function(i){var h=function(){if(SAVED.indexOf(i)>-1){SET[i]=$(i).value;sto("rpt_settings",JSON.stringify(SET))}render()};$(i).addEventListener("input",h);$(i).addEventListener("change",h)});
 $("reset").onclick=function(){["rname","rreason","rdate"].forEach(function(i){$(i).value=""});render()};
 $("logoIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render()})};
@@ -243,7 +245,7 @@ finally{b.disabled=false;b.textContent=old;fit()}
 };
 function fit(){var st=document.querySelector(".stage"),sh=$("sheet");sh.style.transform="none";st.style.height="";var k=Math.min(1,st.clientWidth/sh.offsetWidth);if(k<1){sh.style.transformOrigin="top right";sh.style.transform="scale("+k+")";st.style.height=Math.ceil(sh.offsetHeight*k+6)+"px"}}
 window.addEventListener("resize",function(){fit();fitThumbs()});window.addEventListener("load",function(){fit();fitThumbs()});
-render();fit();
+syncType();render();fit();
 </script>
 </body>
 </html>
