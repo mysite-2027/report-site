@@ -116,6 +116,12 @@ body{background:#fff}
 <datalist id="reasons"><option value="التفوق الدراسي"><option value="الجهود المتميزة"><option value="الالتزام والانضباط"><option value="المشاركة الفاعلة في الأنشطة"><option value="التعاون والإسهامات المتميزة"><option value="التميز في الأداء"></datalist>
 <label>التاريخ (اختياري)</label><input id="rdate" placeholder="1448/02/10 هـ">
 </fieldset>
+<fieldset><legend>عدة شهادات دفعة واحدة (اختياري)</legend>
+<label>قائمة الأسماء (كل اسم في سطر)</label><textarea id="names" rows="5" placeholder="سارة بنت عبدالله&#10;نورة بنت محمد | التفوق الدراسي&#10;ريم بنت خالد"></textarea>
+<p class="hint">تُنشأ شهادة لكل سطر بنفس الشكل واللون والبيانات أعلاه. لتخصيص سبب التكريم لاسم معيّن اكتبه بعد الخط العمودي ( | ). الحد الأقصى 40 اسمًا.</p>
+<button class="main" id="pdfAll" type="button">حفظ شهادات القائمة في ملف PDF واحد</button>
+<p class="hint" id="namesCnt"></p>
+</fieldset>
 <fieldset><legend>التوقيعات</legend>
 <label>اسم مديرة / مدير المدرسة</label><input id="principal">
 <label>صورة الختم (اختياري)</label><input type="file" id="stampIn" accept="image/*"><button type="button" class="del" id="stampDel" style="width:100%">إزالة الختم</button>
@@ -213,7 +219,7 @@ $("sheet").innerHTML=sheetHtml(tplK,ornK,"");buildGal()
 function syncType(){var f=$("gender").value==="f",c=$("rtype").value;if(c==="الطالبة"||c==="الطالب")$("rtype").value=f?"الطالبة":"الطالب";else if(c==="المعلمة"||c==="المعلم")$("rtype").value=f?"المعلمة":"المعلم";else if(c==="ولي أمر الطالب"||c==="ولي أمر الطالبة")$("rtype").value=f?"ولي أمر الطالبة":"ولي أمر الطالب"}
 $("gender").addEventListener("change",syncType);
 ["dept","school","teacher","gender","principal","role","rtype","rname","rreason","rdate"].forEach(function(i){var h=function(){if(SAVED.indexOf(i)>-1){SET[i]=$(i).value;sto("rpt_settings",JSON.stringify(SET))}render()};$(i).addEventListener("input",h);$(i).addEventListener("change",h)});
-$("reset").onclick=function(){["rname","rreason","rdate"].forEach(function(i){$(i).value=""});render()};
+$("reset").onclick=function(){$("names").value="";cntNames();["rname","rreason","rdate"].forEach(function(i){$(i).value=""});render()};
 $("logoIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render()})};
 $("logoDel").onclick=function(){logo=null;$("logoIn").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
 $("stampIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,500,"image/png",function(d){stamp=d;sto("rpt_stamp",d);render()})};
@@ -228,8 +234,34 @@ var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!
 m.textContent=cd.types&&cd.types.length?"لم أجد صورة في الحافظة (المحتوى: "+Array.prototype.join.call(cd.types,"، ")+"). احفظ الصورة بدل نسخها ثم ارفعها.":"الحافظة فارغة."});
 
 $("print").onclick=function(){window.print();$("pm").textContent="إن لم تظهر نافذة الطباعة فافتح الصفحة في نافذة متصفح مستقلة."};
+function parseNames(){return $("names").value.split(/\n/).map(function(l){return l.trim()}).filter(Boolean).map(function(l){var i=l.indexOf("|");return i<0?{n:l,r:""}:{n:l.slice(0,i).trim(),r:l.slice(i+1).trim()}}).filter(function(x){return x.n})}
+function cntNames(){var c=parseNames().length;$("namesCnt").textContent=c?"عدد الشهادات: "+c:""}
+$("names").addEventListener("input",cntNames);
 function rasterOne(el){return new Promise(function(res){try{var W=Math.round(el.getBoundingClientRect().width),H=Math.round(el.getBoundingClientRect().height);if(!W||!H){res(false);return}var c=el.cloneNode(true);c.setAttribute("width",W);c.setAttribute("height",H);c.removeAttribute("style");c.removeAttribute("class");if(!c.getAttribute("xmlns"))c.setAttribute("xmlns","http://www.w3.org/2000/svg");var xml=new XMLSerializer().serializeToString(c),im=new Image();im.onload=function(){try{var k=2,cv=document.createElement("canvas");cv.width=W*k;cv.height=H*k;cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);var img=document.createElement("img");img.className=el.getAttribute("class")||"";img.setAttribute("style",el.getAttribute("style")||"");img.style.width=W+"px";img.style.height=H+"px";img.alt="";img.src=cv.toDataURL("image/png");el.parentNode.replaceChild(img,el);res(true)}catch(e){res(false)}};im.onerror=function(){res(false)};im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(xml)}catch(e){res(false)}})}
 async function rasterAll(root){var l=Array.prototype.slice.call(root.querySelectorAll("svg")),i;for(i=0;i<l.length;i++)await rasterOne(l[i])}
+$("pdfAll").onclick=async function(){
+var list=parseNames(),b=$("pdfAll"),old=b.textContent,m=$("pm"),sh=$("sheet");m.textContent="";
+if(!list.length){m.textContent="اكتب اسمًا واحدًا على الأقل في القائمة.";return}
+if(list.length>40){m.textContent="الحد الأقصى 40 اسمًا في المرة الواحدة. قسّم القائمة على أكثر من ملف.";return}
+if(!window.html2canvas||!window.jspdf){m.textContent="تعذّر تحميل مكتبة الحفظ. تأكد من اتصالك بالإنترنت.";return}
+var keepN=$("rname").value,keepR=$("rreason").value;
+b.disabled=true;$("pdf").disabled=true;
+try{
+var pdf=new window.jspdf.jsPDF({orientation:"landscape",unit:"mm",format:"a4",compress:true});
+for(var i=0;i<list.length;i++){
+b.textContent="جارٍ إنشاء "+(i+1)+" من "+list.length+"…";
+$("rname").value=list[i].n;$("rreason").value=list[i].r||keepR;render();
+sh.style.transform="none";await new Promise(function(r){setTimeout(r,60)});await rasterAll(sh);
+var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
+var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1400,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
+if(i>0)pdf.addPage("a4","landscape");
+pdf.addImage(cv.toDataURL("image/jpeg",.92),"JPEG",0,0,297,210);
+}
+var a=document.createElement("a");a.href=URL.createObjectURL(pdf.output("blob"));a.download="شهادات شكر ("+list.length+").pdf";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
+m.textContent="تم تجهيز الملف، وعدد الشهادات فيه: "+list.length+".";
+}catch(e){m.textContent="تعذّر إنشاء الملف. جرّب عددًا أقل من الأسماء."}
+finally{$("rname").value=keepN;$("rreason").value=keepR;b.disabled=false;$("pdf").disabled=false;b.textContent=old;render();fit()}
+};
 $("pdf").onclick=async function(){
 var b=$("pdf"),old=b.textContent,m=$("pm"),sh=$("sheet");m.textContent="";
 if(!window.html2canvas||!window.jspdf){m.textContent="تعذّر تحميل مكتبة الحفظ. تأكد من اتصالك بالإنترنت أو استخدم زر الطباعة.";return}
