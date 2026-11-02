@@ -60,6 +60,8 @@ button.del{border-color:var(--border);color:var(--muted);padding:3px 10px;margin
 .cf.tr::before{top:8px;right:8px;bottom:8px;left:8px;border:1px solid var(--p);border-radius:8px;opacity:.55}
 .cf.tw .ct,.cf.tr .ct{background:none;color:var(--g1);font-family:"Aref Ruqaa","Tajawal",serif;font-weight:700;font-size:3.1em;padding:0;margin-top:4px;line-height:1.5}
 .decor{position:absolute;display:block}
+.cf.tr .sh-head{margin:0 74px}
+.cf.tt .sh-head{margin:0 44px}
 .gal{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
 .gal button{padding:4px;border:2px solid var(--border);border-radius:10px;background:var(--bg);display:flex;flex-direction:column;gap:4px;align-items:stretch;color:var(--text);font-size:.8rem}
 .gal button.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
@@ -208,7 +210,8 @@ function sheetHtml(t,o,sfx){var f=$("gender").value==="f",v=function(i){return $
 '<div class="sig"><div><b>'+(ROLES[+$("role").value||0][f?1:0])+"</b>"+esc(v("teacher"))+'</div><div><b>الختم</b><div class="st">'+(stamp?'<img alt="" src="'+stamp+'">':"")+"</div></div><div><b>"+(f?"مديرة المدرسة":"مدير المدرسة")+"</b>"+esc(v("principal"))+"</div></div></div>"+
 '<div class="band"></div>';}finally{tplK=st;ornK=so;SFX=ss}return fixSvg(out)}
 function varsStyle(){return ["p","g1","g2","tl","b","gr"].map(function(k){return "--"+k+":"+TC[k]}).join(";")}
-function buildGal(){$("gal").innerHTML=GAL.map(function(g,i){return '<button type="button" data-i="'+i+'" class="'+(g.t===tplK&&(g.t!=="classic"||g.o===ornK)?"on":"")+'"><div class="thw"><div class="sheet mini" style="'+varsStyle()+'">'+sheetHtml(g.t,g.o,"g"+i)+'</div></div><span>'+g.n+"</span></button>"}).join("");fitThumbs()}
+function buildGal(){var g=$("gal"),bs=g.querySelectorAll("button");if(bs.length!==GAL.length){g.innerHTML=GAL.map(function(x,i){return '<button type="button" data-i="'+i+'"><div class="thw"><div class="sheet mini"></div></div><span>'+x.n+"</span></button>"}).join("");bs=g.querySelectorAll("button")}
+GAL.forEach(function(x,i){var b=bs[i],m=b.querySelector(".mini");b.className=(x.t===tplK&&(x.t!=="classic"||x.o===ornK))?"on":"";m.setAttribute("style",varsStyle()+(m.style.transform?";transform:"+m.style.transform:""));m.innerHTML=sheetHtml(x.t,x.o,"g"+i)});fitThumbs()}
 function fitThumbs(){Array.prototype.forEach.call(document.querySelectorAll("#gal .thw"),function(w){var m=w.firstChild,k=w.clientWidth/m.offsetWidth;m.style.transform="scale("+k+")"})}
 $("gal").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;var g=GAL[+b.dataset.i];tplK=g.t;ornK=g.o;sto("rpt_cert_tpl",tplK);sto("rpt_cert_orn",ornK);render()});
 function render(){
