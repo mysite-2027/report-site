@@ -50,8 +50,8 @@ button.del{border-color:var(--border);color:var(--muted);padding:3px 10px;margin
 .meth{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px 10px}
 .meth div{font-size:1em}
 .ev{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ev div{border:1.5px solid var(--p);border-radius:10px;height:44mm;overflow:hidden}
-.ev img{width:100%;height:100%;object-fit:cover;display:block}
+.ev div{border:1.5px solid var(--p);border-radius:10px;height:34mm;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff}
+.ev img{width:100%;height:100%;object-fit:contain;display:block}
 .bx{display:inline-block;width:12px;height:12px;border:1.5px solid var(--p);border-radius:3px;vertical-align:middle;margin-inline-end:6px}
 .bx.on{background:var(--g2);border-color:var(--g2)}
 table.t{width:100%;border-collapse:collapse;font-size:1em;table-layout:fixed}
@@ -199,16 +199,20 @@ var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
 var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
 var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true}),pw=210,ph=297,H=Math.round(cv.width*ph/pw),y=0,first=true,imgH=cv.height*pw/cv.width;
 if(imgH<=ph*1.2){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);y=cv.height}
-var sc=cv.width/sh.offsetWidth,K=sh.children,R=function(e){return e.getBoundingClientRect()},t0=R(sh).top,nk=K.length,hb=Math.round((R(K[0]).bottom-t0)*sc),bandPx=Math.round(R(K[nk-1]).height*sc),cEnd=cv.height-bandPx,bs=[],br=[];
-for(var q=0;q<nk-1;q++)bs.push((R(K[q]).bottom-t0)*sc);
+var sc=cv.width/sh.offsetWidth,K=sh.children,R=function(e){return e.getBoundingClientRect()},t0=R(sh).top,nk=K.length,hb=Math.round((R(K[0]).bottom-t0)*sc),bandPx=Math.round(R(K[nk-1]).height*sc),bandY=cv.height-bandPx,SG=K[nk-2],sigTop=Math.round((R(SG).top-t0)*sc),sigPx=Math.round(R(SG).height*sc),gap=Math.round(10*sc),cEnd=sigTop,bs=[],br=[],extra=false;
+for(var q=0;q<nk-2;q++)bs.push((R(K[q]).bottom-t0)*sc);
 Array.prototype.forEach.call(sh.querySelectorAll("tr"),function(e){br.push((R(e).bottom-t0)*sc)});
+var mkPage=function(){var c=document.createElement("canvas");c.width=cv.width;c.height=H;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,H);return{c:c,x:x}};
+var addSig=function(P){P.x.drawImage(cv,0,sigTop,cv.width,sigPx,0,H-bandPx-gap-sigPx,cv.width,sigPx)};
+var addBand=function(P){P.x.drawImage(cv,0,bandY,cv.width,bandPx,0,H-bandPx,cv.width,bandPx)};
+var push=function(P){if(!first)pdf.addPage();pdf.addImage(P.c.toDataURL("image/jpeg",.95),"JPEG",0,0,pw,ph);first=false};
 while(y<cEnd-5){var cap=(first?H:H-hb)-bandPx,end=Math.min(y+cap,cEnd);
 if(end<cEnd){var pick=function(arr,lo){var c=arr.filter(function(z){return z>lo&&z<=end+1});return c.length?Math.max.apply(null,c):null};var e1=pick(bs,y+cap*.7)||pick(br,y+cap*.4)||pick(bs,y+cap*.4);if(e1)end=Math.min(cEnd,Math.round(e1))}
-var c=document.createElement("canvas");c.width=cv.width;c.height=H;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,H);
-var oy=0;if(!first){x.drawImage(cv,0,0,cv.width,hb,0,0,cv.width,hb);oy=hb}
-x.drawImage(cv,0,y,cv.width,end-y,0,oy,cv.width,end-y);
-x.drawImage(cv,0,cEnd,cv.width,bandPx,0,H-bandPx,cv.width,bandPx);
-if(!first)pdf.addPage();pdf.addImage(c.toDataURL("image/jpeg",.95),"JPEG",0,0,pw,ph);first=false;y=end}
+var P=mkPage(),oy=0;if(!first){P.x.drawImage(cv,0,0,cv.width,hb,0,0,cv.width,hb);oy=hb}
+P.x.drawImage(cv,0,y,cv.width,end-y,0,oy,cv.width,end-y);
+if(end>=cEnd){if(H-bandPx-gap-sigPx-(oy+end-y)>=gap)addSig(P);else extra=true}
+addBand(P);push(P);y=end}
+if(extra){var P2=mkPage();if(!first)P2.x.drawImage(cv,0,0,cv.width,hb,0,0,cv.width,hb);addSig(P2);addBand(P2);push(P2)}
 var nm=("تقرير جلسة مجتمع التعلم المهني "+($("num").value.trim()||"")).trim().replace(/[\\\/:*?"<>|]/g,"-");
 var a=document.createElement("a");a.href=URL.createObjectURL(pdf.output("blob"));a.download=nm+".pdf";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
 m.textContent="تم تجهيز الملف.";
