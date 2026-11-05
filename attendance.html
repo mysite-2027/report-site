@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>كشف حضور وتوقيع الطالبات | مُيَسِّر التقارير المدرسية</title>
-<meta name="description" content="أنشئ كشف حضور وتوقيع للطالبات في ورشة عمل أو تدريب جاهزًا للطباعة: بيانات البرنامج وجدول بالأسماء وخانة توقيع لكل طالبة.">
+<title>كشف حضور وتوقيع | مُيَسِّر التقارير المدرسية</title>
+<meta name="description" content="أنشئ كشف حضور وتوقيع للطلاب أو المعلمين في ورشة عمل أو تدريب جاهزًا للطباعة: بيانات البرنامج وجدول بالأسماء وخانة توقيع لكل حاضر.">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f3f6f8;--surface:#fff;--text:#16242f;--muted:#5b6b78;--border:#d5dde3;--accent:#17445a;--onaccent:#fff;-webkit-text-size-adjust:100%;text-size-adjust:100%}
@@ -95,17 +95,18 @@ table.at2 td.nm{text-align:right}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-<header class="top"><a href="index.html">← الصفحة الرئيسية</a><h1>كشف حضور وتوقيع الطالبات</h1><p>اكتب بيانات الورشة أو التدريب وأسماء الحاضرات، فيظهر الكشف جاهزًا للطباعة والتوقيع.</p></header>
+<header class="top"><a href="index.html">← الصفحة الرئيسية</a><h1>كشف حضور وتوقيع</h1><p>اكتب بيانات الورشة أو التدريب وأسماء الحاضرين، فيظهر الكشف جاهزًا للطباعة والتوقيع.</p></header>
 <main class="app">
 <section class="panel">
 <fieldset><legend>بيانات البرنامج (تُحفظ في متصفحك)</legend>
 <label>الإدارة العامة للتعليم</label><input id="dept">
 <label>اسم المدرسة</label><input id="school">
 <label>الصيغة (مؤنث / مذكر)</label><select id="gv"><option value="f">مؤنث</option><option value="m">مذكر</option></select>
+<label>الحاضرون</label><select id="att"><option value="s">طلاب</option><option value="t">معلمون</option><option value="a">إداريون</option><option value="p">أولياء أمور</option></select>
 <label>اسم البرنامج / الورشة</label><input id="prog" placeholder="مثال: ورشة الذكاء الاصطناعي">
 <label>اسم المنفذ (اختياري)</label><input id="tname">
 <div class="two"><div><label>اليوم / التاريخ</label><input id="vdate" placeholder="الأحد 1448/3/27"></div><div><label>الحصة (اختياري)</label><input id="vtime" list="periods" placeholder="الثالثة"><datalist id="periods"><option value="الأولى"><option value="الثانية"><option value="الثالثة"><option value="الرابعة"><option value="الخامسة"><option value="السادسة"><option value="السابعة"></datalist></div></div>
-<div class="two"><div><label>المكان (اختياري)</label><input id="place" list="places" placeholder="اختر أو اكتب"><datalist id="places"><option value="الفصل"><option value="معمل الحاسب الآلي"><option value="معمل العلوم"><option value="غرفة المصادر"><option value="الساحة الداخلية"><option value="الساحة الخارجية"></datalist></div><div><label>الصف (اختياري)</label><input id="cls"></div></div>
+<div class="two"><div><label>المكان (اختياري)</label><input id="place" list="places" placeholder="اختر أو اكتب"><datalist id="places"><option value="الفصل"><option value="معمل الحاسب الآلي"><option value="معمل العلوم"><option value="غرفة المصادر"><option value="الساحة الداخلية"><option value="الساحة الخارجية"></datalist></div><div id="clsBox"><label>الصف (اختياري)</label><input id="cls"></div></div>
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، واضغط عليه بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
 <label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logoIn" accept="image/*">
@@ -113,7 +114,7 @@ table.at2 td.nm{text-align:right}
 <p class="hint">لا يتضمن هذا الموقع أي شعار حكومي. لإظهار شعار وزارة التعليم: افتح <a href="https://www.moe.gov.sa/Style%20Library/portal/assets/images/moe-logo.svg" target="_blank" rel="noopener">رابط الشعار</a> ثم احفظ الصورة (اضغط بالزر الأيمن واختر «حفظ باسم»)، ثم ارفعها هنا. وتجد الشعار أيضًا في <a href="https://www.moe.gov.sa/ar/mediacenter/PhotoLibrary/Documents/MOE_logo.zip" target="_blank" rel="noopener">ملف الوزارة المضغوط</a> وفي <a href="https://www.moe.gov.sa/ar/mediacenter/PhotoLibrary/Pages/moe_identity.aspx" target="_blank" rel="noopener">صفحة الهوية الرسمية</a>. تأكد من أن استخدامك للشعار مسموح في جهتك.</p>
 </fieldset>
 <fieldset><legend>الأسماء</legend>
-<p class="hint" style="margin-top:0">اكتب اسمًا في كل سطر. ويمكنك إضافة الصف بعد علامة | مثل: «نورة محمد | 2/ب». اكتب في الحقل أدناه عدد صفوف الجدول (عدد الطالبات)، فتظهر الأسماء في الصفوف الأولى وتبقى الباقية فارغة للكتابة باليد. وبدون أسماء ولا رقم يُنشأ 30 صفًا، ومع أسماء بدون رقم يظهر صف لكل اسم.</p>
+<p class="hint" style="margin-top:0">اكتب اسمًا في كل سطر. ويمكنك إضافة عمود ثانٍ بعد علامة | مثل: «نورة محمد | 2/ب» (الصف للطلاب، أو التخصص للمعلمين، أو المهمة للإداريين). اكتب في الحقل أدناه عدد صفوف الجدول (عدد الحاضرين)، فتظهر الأسماء في الصفوف الأولى وتبقى الباقية فارغة للكتابة باليد. وبدون أسماء ولا رقم يُنشأ 30 صفًا، ومع أسماء بدون رقم يظهر صف لكل اسم.</p>
 <textarea id="names" style="min-height:120px"></textarea>
 <label id="blL">عدد الصفوف (عدد طالبات الفصل)</label><input id="blank" inputmode="numeric" placeholder="30">
 <p class="hint" id="cnt"></p></fieldset>
@@ -149,22 +150,23 @@ if(x1>x0&&y1>y0){var pd=Math.round(Math.max(c.width,c.height)*.02),c2=document.c
 cb(c.toDataURL(type,.82))};im.src=src};
 sv?r.readAsText(file):r.readAsDataURL(file)}
 
-var IDS=["dept","school","gv","prog","tname","vdate","vtime","place","cls","names","blank","principal"];
+var IDS=["dept","school","gv","att","prog","tname","vdate","vtime","place","cls","names","blank","principal"];
 SAVED.forEach(function(k){if(SET[k]&&$(k))$(k).value=SET[k]});
 function parse(){return String($("names").value||"").split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean).map(function(x){var p=x.split("|");return{n:p[0].trim(),c:(p[1]||"").trim()}})}
 function render(){
-var v=function(i){return $(i).value.trim()},f=$("gv").value==="f",S=f?"الطالبات":"الطلاب",nm=parse(),n=nm.length,bl=parseInt(v("blank"),10)||0;
+var v=function(i){return $(i).value.trim()},f=$("gv").value==="f",AT=$("att").value,TY={s:[f?"الطالبات":"الطلاب",f?"الطالبة":"الطالب","الصف","عدد "+(f?"طالبات":"طلاب")+" الفصل"],t:[f?"المعلمات":"المعلمين",f?"المعلمة":"المعلم","التخصص","عدد الحاضرين"],a:[f?"الإداريات":"الإداريين",f?"الإدارية":"الإداري","المهمة","عدد الحاضرين"],p:["أولياء الأمور","ولي الأمر","الطالب","عدد الحاضرين"]}[AT],S=TY[0],nm=parse(),n=nm.length,bl=parseInt(v("blank"),10)||0;
 $("cnt").textContent=n?"عدد الأسماء: "+n:"";
 var rows=nm.slice(),hasC=nm.some(function(r){return r.c});
 var total=n?Math.max(n,bl):(bl||30);
 while(rows.length<total)rows.push({n:"",c:""});
 var tb=rows.map(function(r,i){return "<tr><td>"+(i+1)+'</td><td class="nm">'+esc(r.n)+"</td>"+(hasC?"<td>"+esc(r.c)+"</td>":"")+"<td></td></tr>"}).join("");
-var th='<tr><th style="width:7%">م</th><th style="width:'+(hasC?"43":"58")+'%">اسم '+(f?"الطالبة":"الطالب")+"</th>"+(hasC?'<th style="width:15%">الصف</th>':"")+'<th style="width:35%">التوقيع</th></tr>';
-var IT=[["اسم البرنامج","prog",1,1],["المنفذ","tname",0,v("tname")],["اليوم / التاريخ","vdate",0,1],["الحصة","vtime",0,v("vtime")],["المكان","place",0,v("place")],["الصف","cls",0,v("cls")]].filter(function(x){return x[3]}),col=0;
+var th='<tr><th style="width:7%">م</th><th style="width:'+(hasC?"43":"58")+'%">اسم '+TY[1]+"</th>"+(hasC?'<th style="width:15%">'+TY[2]+'</th>':"")+'<th style="width:35%">التوقيع</th></tr>';
+var IT=[["اسم البرنامج","prog",1,1],["المنفذ","tname",0,v("tname")],["اليوم / التاريخ","vdate",0,1],["الحصة","vtime",0,v("vtime")],["المكان","place",0,v("place")],["الصف","cls",0,AT==="s"?v("cls"):""]].filter(function(x){return x[3]}),col=0;
 IT.forEach(function(x,i){if(x[2]){col=0;return}if(col===0&&(i===IT.length-1||IT[i+1][2]))x[2]=1;else col=1-col});
 var info=function(x){return '<div'+(x[2]?' class="w"':"")+"><b>"+x[0]+":</b>"+esc(v(x[1])||"—")+"</div>"};
 var L=logo;
-$("blL").textContent="عدد الصفوف ("+(f?"عدد طالبات الفصل":"عدد طلاب الفصل")+")";
+$("clsBox").style.display=AT==="s"?"":"none";
+$("blL").textContent="عدد الصفوف ("+TY[3]+")";
 $("sheet").innerHTML=
 '<div class="sh-head"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
 '<div class="bar">كشف حضور وتوقيع '+S+"</div>"+
