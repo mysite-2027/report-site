@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>كشف حضور وتوقيع الطالبات | مُيَسِّر التقارير المدرسية</title>
+<meta name="description" content="أنشئ كشف حضور وتوقيع للطالبات في ورشة عمل أو تدريب جاهزًا للطباعة: بيانات البرنامج وجدول بالأسماء وخانة توقيع لكل طالبة.">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6f8;--surface:#fff;--text:#16242f;--muted:#5b6b78;--border:#d5dde3;--accent:#17445a;--onaccent:#fff;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (prefers-color-scheme:dark){:root{--bg:#10181f;--surface:#18232c;--text:#e8eef2;--muted:#9fb0bc;--border:#2c3b47;--accent:#5fa8d3;--onaccent:#0b141a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Tajawal","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.6}
+.top{padding:20px 16px 8px;max-width:1280px;margin:auto}
+.top a{color:var(--accent);text-decoration:none;font-size:.9rem}
+.top h1{margin:4px 0 0;font-size:1.5rem;color:var(--accent)}
+.top p{margin:4px 0 0;color:var(--muted);font-size:.95rem}
+.app{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:16px;padding:12px 16px 32px;max-width:1280px;margin:auto;align-items:start}
+@media(max-width:900px){.app{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+fieldset{border:0;border-bottom:1px dashed var(--border);margin:0 0 12px;padding:0 0 12px}
+legend{font-weight:700;color:var(--accent);padding:0;margin-bottom:6px}
+label{display:block;font-size:.88rem;color:var(--muted);margin:8px 0 2px}
+input,select,textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)}
+textarea{min-height:70px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row{border:1px solid var(--border);border-radius:10px;padding:8px;margin-top:8px;background:var(--bg)}
+.ck{display:flex;align-items:center;gap:8px;margin:4px 0;color:var(--text);font-size:.92rem}
+.ck input{width:auto}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);padding:7px 12px}
+button.main{background:var(--accent);color:var(--onaccent);width:100%;padding:11px;font-weight:700;margin-top:6px}
+button.del{border-color:var(--border);color:var(--muted);padding:3px 10px;margin-top:6px;font-size:.85rem}
+.hint{font-size:.8rem;color:var(--muted);margin:4px 0 0}
+.hint a{color:var(--accent);font-weight:700}
+.stage{overflow-x:auto;padding-bottom:8px}
+.sheet{--p:#17445a;--g1:#00421e;--g2:#00682f;--tl:#008080;--b:#2c7db5;--gr:#3fac72;--t:#0b1620;--l:#c9d3da;-webkit-print-color-adjust:exact;print-color-adjust:exact;-webkit-text-size-adjust:100%;text-size-adjust:100%;background:#fff;color:var(--t);width:210mm;min-height:297mm;margin:0 auto;padding:12mm 14mm;box-shadow:0 2px 14px rgba(0,0,0,.2);font-size:12.5px;font-weight:500;display:flex;flex-direction:column;gap:9px}
+.sh-head{display:flex;justify-content:space-between;align-items:center;gap:10px;position:relative;padding-bottom:12px}
+.sh-head::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--b),var(--gr))}
+.sh-head img{max-height:70px;max-width:190px;object-fit:contain;display:block}
+.sh-head .tx{text-align:center;font-weight:700;color:var(--tl);line-height:1.5}
+.sh-head .tx span{display:block;font-weight:500;color:var(--t)}
+.bar{background:var(--p);color:#fff;text-align:center;font-weight:700;font-size:1.25em;padding:9px 12px;border-radius:10px}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.info div{border:1.5px solid var(--p);border-radius:10px;padding:5px 10px;display:flex;gap:6px;justify-content:center;text-align:center}
+.info b{color:var(--g2);white-space:nowrap}
+.info .w{grid-column:1/-1}
+.sec{border:2px solid var(--p);border-radius:18px;padding:8px 14px;break-inside:avoid}
+.sec h3{margin:0 0 6px;color:var(--g1);font-size:1.05em;text-align:center}
+.sec p{margin:2px 0;text-align:right;white-space:pre-wrap}
+.meth{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px 10px}
+.meth div{font-size:1em}
+.ev{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ev div{border:1.5px solid var(--p);border-radius:10px;height:34mm;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff}
+.ev img{width:100%;height:100%;object-fit:contain;display:block}
+.bx{display:inline-block;width:12px;height:12px;border:1.5px solid var(--p);border-radius:3px;vertical-align:middle;margin-inline-end:6px}
+.bx.on{background:var(--g2);border-color:var(--g2)}
+table.t{width:100%;border-collapse:collapse;font-size:1em;table-layout:fixed}
+table.t th{background:var(--p);color:#fff;padding:5px 6px;border:1px solid var(--p)}
+table.t td{border:1px solid var(--l);padding:5px 6px;text-align:center;vertical-align:middle;overflow-wrap:anywhere;height:32px}
+table.t td.n{text-align:right}
+.sig{margin-top:auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;padding-top:10px}
+.sig b{display:block;color:var(--g1)}
+.sig .st{height:26mm;display:flex;align-items:center;justify-content:center}
+.sig .st img{max-height:26mm;max-width:100%;object-fit:contain}
+.band{height:20px;margin:0 -14mm -12mm;background:linear-gradient(to bottom,var(--p) 65%,transparent 65%),linear-gradient(90deg,var(--b),var(--gr))}
+@media print{
+@page{size:A4;margin:0}
+body{background:#fff}
+.top,.panel{display:none}
+.app{display:block;padding:0;max-width:none}
+.stage{overflow:visible;padding:0}
+.sheet{box-shadow:none;margin:0;min-height:297mm}
+}
+.lst{margin:0;padding:0;list-style:none}
+.sec.ctr p,.sec.ctr li{text-align:center}
+.lst li{margin:2px 0;text-align:right}
+.two-c{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.two-c .sec{height:100%}
+table.at td.nm{text-align:right}
+table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
+.sig3{margin-top:auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;padding-top:10px}
+.sig3 b{display:block;color:var(--g1)}
+.sig3 .st{height:26mm;display:flex;align-items:center;justify-content:center}
+.sig3 .st img{max-height:26mm;max-width:100%;object-fit:contain}
+.sig3 .sg{height:26mm}
+table.at2 td{height:36px}
+table.at2 td.nm{text-align:right}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<header class="top"><a href="index.html">← الصفحة الرئيسية</a><h1>كشف حضور وتوقيع الطالبات</h1><p>اكتب بيانات الورشة أو التدريب وأسماء الحاضرات، فيظهر الكشف جاهزًا للطباعة والتوقيع.</p></header>
+<main class="app">
+<section class="panel">
+<fieldset><legend>بيانات البرنامج (تُحفظ في متصفحك)</legend>
+<label>الإدارة العامة للتعليم</label><input id="dept">
+<label>اسم المدرسة</label><input id="school">
+<label>الصيغة (مؤنث / مذكر)</label><select id="gv"><option value="f">مؤنث</option><option value="m">مذكر</option></select>
+<label>اسم البرنامج / الورشة</label><input id="prog" placeholder="مثال: ورشة الذكاء الاصطناعي">
+<label>اسم المنفذ (اختياري)</label><input id="tname">
+<div class="two"><div><label>اليوم / التاريخ</label><input id="vdate" placeholder="الأحد 1448/3/27"></div><div><label>الحصة (اختياري)</label><input id="vtime" list="periods" placeholder="الثالثة"><datalist id="periods"><option value="الأولى"><option value="الثانية"><option value="الثالثة"><option value="الرابعة"><option value="الخامسة"><option value="السادسة"><option value="السابعة"></datalist></div></div>
+<div class="two"><div><label>المكان (اختياري)</label><input id="place" list="places" placeholder="اختر أو اكتب"><datalist id="places"><option value="الفصل"><option value="معمل الحاسب الآلي"><option value="معمل العلوم"><option value="غرفة المصادر"><option value="الساحة الداخلية"><option value="الساحة الخارجية"></datalist></div><div><label>الصف / الفئة (اختياري)</label><input id="cls"></div></div>
+<p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، واضغط عليه بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
+<p class="hint" id="moeMsg"></p>
+<label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logoIn" accept="image/*">
+<button type="button" class="del" id="logoDel" style="width:100%">إزالة الشعار</button>
+<p class="hint">لا يتضمن هذا الموقع أي شعار حكومي. لإظهار شعار وزارة التعليم: افتح <a href="https://www.moe.gov.sa/Style%20Library/portal/assets/images/moe-logo.svg" target="_blank" rel="noopener">رابط الشعار</a> ثم احفظ الصورة (اضغط بالزر الأيمن واختر «حفظ باسم»)، ثم ارفعها هنا. وتجد الشعار أيضًا في <a href="https://www.moe.gov.sa/ar/mediacenter/PhotoLibrary/Documents/MOE_logo.zip" target="_blank" rel="noopener">ملف الوزارة المضغوط</a> وفي <a href="https://www.moe.gov.sa/ar/mediacenter/PhotoLibrary/Pages/moe_identity.aspx" target="_blank" rel="noopener">صفحة الهوية الرسمية</a>. تأكد من أن استخدامك للشعار مسموح في جهتك.</p>
+</fieldset>
+<fieldset><legend>الأسماء</legend>
+<p class="hint" style="margin-top:0">اكتب اسمًا في كل سطر. ويمكنك إضافة الصف بعد علامة | مثل: «نورة محمد | 2/ب». وإن لم تكتب أسماء فاكتب في الحقل أدناه عدد الطالبات، فيُنشأ جدول بعدد الصفوف نفسه لتكتب الطالبات بخط اليد (وبدون رقم يُنشأ 10 صفوف). أما مع وجود أسماء فالرقم يضيف صفوفًا فارغة بعدها.</p>
+<textarea id="names" style="min-height:120px"></textarea>
+<label id="blL">عدد الصفوف (عدد طالبات الفصل)</label><input id="blank" inputmode="numeric" placeholder="مثال: 30">
+<p class="hint" id="cnt"></p></fieldset>
+<fieldset><legend>التوقيعات</legend>
+<label>اسم مديرة / مدير المدرسة</label><input id="principal">
+<label>صورة الختم (اختياري)</label><input type="file" id="stampIn" accept="image/*"><button type="button" class="del" id="stampDel" style="width:100%">إزالة الختم</button>
+<p class="hint">يُحفظ الختم والشعار في متصفحك ويظهران أيضًا في بقية النماذج.</p></fieldset>
+<button class="main" id="pdf" type="button">حفظ PDF</button>
+<button class="del" id="print" type="button" style="width:100%">طباعة</button>
+<button class="del" id="reset" type="button" style="width:100%">مسح بيانات الكشف</button>
+<p class="hint" id="pm"></p>
+</section>
+<section class="stage"><article class="sheet" id="sheet"></article></section>
+</main>
+<script>
+var $=function(i){return document.getElementById(i)};
+var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
+function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+var SET={};try{SET=JSON.parse(sto("rpt_settings")||"{}")}catch(e){}
+var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["dept","school","principal","gv","tname"];
+var imgs=[null,null,null,null],acts=[],ACT=["قراءة موجهة","مراجعة دروس سابقة","حل أوراق عمل","نشاط إثرائي","ألعاب تعليمية","مناقشة وحوار","متابعة الدفاتر والواجبات","تعزيز القيم والسلوك","مسابقات","ورشة عمل","حصة إرشادية"];
+SAVED.forEach(function(k){if(SET[k])$(k).value=SET[k]});
+if(!$("dept").value)$("dept").value="الإدارة العامة للتعليم بمنطقة الرياض";
+function shrink(file,max,type,cb){if(type==="image/png")max*=2;var r=new FileReader(),sv=/svg/i.test(file.type)||/\.svg$/i.test(file.name);
+r.onload=function(){var src=r.result;
+if(sv){var t=String(r.result),vb=t.match(/viewBox\s*=\s*["']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/i),w=vb?parseFloat(vb[1]):400,h=vb?parseFloat(vb[2]):200;
+t=t.replace(/<svg([^>]*)>/i,function(m,a){return "<svg"+a.replace(/\s(width|height)\s*=\s*["'][^"']*["']/gi,"")+' width="'+w+'" height="'+h+'">'});
+src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(t)}
+var im=new Image();im.onload=function(){var k=sv?max/Math.max(im.width,im.height):Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+if(type==="image/png"){var d=c.getContext("2d").getImageData(0,0,c.width,c.height).data,x0=c.width,y0=c.height,x1=-1,y1=-1;
+for(var y=0;y<c.height;y++)for(var x=0;x<c.width;x++){var o=(y*c.width+x)*4;if(d[o+3]>10&&(d[o]<245||d[o+1]<245||d[o+2]<245)){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}
+if(x1>x0&&y1>y0){var pd=Math.round(Math.max(c.width,c.height)*.02),c2=document.createElement("canvas");c2.width=x1-x0+1+2*pd;c2.height=y1-y0+1+2*pd;c2.getContext("2d").drawImage(c,x0,y0,x1-x0+1,y1-y0+1,pd,pd,x1-x0+1,y1-y0+1);c=c2}}
+cb(c.toDataURL(type,.82))};im.src=src};
+sv?r.readAsText(file):r.readAsDataURL(file)}
+
+var IDS=["dept","school","gv","prog","tname","vdate","vtime","place","cls","names","blank","principal"];
+SAVED.forEach(function(k){if(SET[k]&&$(k))$(k).value=SET[k]});
+function parse(){return String($("names").value||"").split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean).map(function(x){var p=x.split("|");return{n:p[0].trim(),c:(p[1]||"").trim()}})}
+function render(){
+var v=function(i){return $(i).value.trim()},f=$("gv").value==="f",S=f?"الطالبات":"الطلاب",nm=parse(),n=nm.length,bl=parseInt(v("blank"),10)||0;
+$("cnt").textContent=n?"عدد الأسماء: "+n:"";
+var rows=nm.slice(),hasC=nm.some(function(r){return r.c});
+var total=n?n+bl:(bl||10);
+while(rows.length<total)rows.push({n:"",c:""});
+var tb=rows.map(function(r,i){return "<tr><td>"+(i+1)+'</td><td class="nm">'+esc(r.n)+"</td>"+(hasC?"<td>"+esc(r.c)+"</td>":"")+"<td></td></tr>"}).join("");
+var th='<tr><th style="width:7%">م</th><th style="width:'+(hasC?"43":"58")+'%">اسم '+(f?"الطالبة":"الطالب")+"</th>"+(hasC?'<th style="width:15%">الصف</th>':"")+'<th style="width:35%">التوقيع</th></tr>';
+var info=function(l,w,full){return '<div'+(full?' class="w"':"")+"><b>"+l+":</b>"+esc(v(w)||"—")+"</div>"};
+var L=logo;
+$("blL").textContent=n?"عدد الصفوف الفارغة الإضافية (اختياري)":"عدد الصفوف ("+(f?"عدد طالبات الفصل":"عدد طلاب الفصل")+")";
+$("sheet").innerHTML=
+'<div class="sh-head"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
+'<div class="bar">كشف حضور وتوقيع '+S+"</div>"+
+'<div class="info">'+info("اسم البرنامج","prog",1)+(v("tname")?info("المنفذ","tname"):"")+info("اليوم / التاريخ","vdate")+(v("vtime")?info("الحصة","vtime"):"")+(v("place")?info("المكان","place"):"")+(v("cls")?info("الصف / الفئة","cls"):"")+"</div>"+
+'<table class="t at2">'+th+tb+"</table>"+
+'<div class="sig3"><div><b>'+(f?"المنفذة":"المنفذ")+'</b><div class="sg"></div>'+esc(v("tname"))+'</div><div><b>الختم</b><div class="st">'+(stamp?'<img alt="" src="'+stamp+'">':"")+"</div></div><div><b>"+(f?"مديرة المدرسة":"مدير المدرسة")+'</b><div class="sg"></div>'+esc(v("principal"))+"</div></div>"+
+'<div class="band"></div>'
+}
+IDS.forEach(function(i){$(i).addEventListener("input",function(){if(SAVED.indexOf(i)>-1){SET[i]=$(i).value;sto("rpt_settings",JSON.stringify(SET))}render()});$(i).addEventListener("change",render)});
+$("reset").onclick=function(){["prog","vdate","vtime","place","cls","names","blank"].forEach(function(i){$(i).value=""});render()};
+$("logoIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render()})};
+$("logoDel").onclick=function(){logo=null;$("logoIn").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
+$("stampIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,500,"image/png",function(d){stamp=d;sto("rpt_stamp",d);render()})};
+$("stampDel").onclick=function(){stamp=null;$("stampIn").value="";try{localStorage.removeItem("rpt_stamp")}catch(e){}render()};
+document.addEventListener("paste",function(e){var cd=e.clipboardData;if(!cd)return;var m=$("moeMsg"),
+done=function(f){e.preventDefault();shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render();m.textContent="تمت إضافة الشعار من الحافظة."})},fs=cd.files||[],i,mm;
+for(i=0;i<fs.length;i++){if(/^image\//.test(fs[i].type)){done(fs[i]);return}}
+var tx=cd.getData("text/plain")||"",ht=cd.getData("text/html")||"";
+if(/<svg[\s>]/i.test(tx)){done(new File([tx],"logo.svg",{type:"image/svg+xml"}));return}
+if((mm=ht.match(/<img[^>]+src=["'](data:image\/[^"']+)["']/i))){e.preventDefault();fetch(mm[1]).then(function(r){return r.blob()}).then(function(bl){shrink(new File([bl],"logo",{type:bl.type}),400,"image/png",function(d){logo=d;sto("rpt_logo",d);render();m.textContent="تمت إضافة الشعار من الحافظة."})});return}
+var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!=="file")return;
+m.textContent=cd.types&&cd.types.length?"لم أجد صورة في الحافظة (المحتوى: "+Array.prototype.join.call(cd.types,"، ")+"). احفظ الصورة بدل نسخها ثم ارفعها.":"الحافظة فارغة."});
+
+$("print").onclick=function(){window.print();$("pm").textContent="إن لم تظهر نافذة الطباعة فافتح الصفحة في نافذة متصفح مستقلة."};
+$("pdf").onclick=async function(){
+var b=$("pdf"),old=b.textContent,m=$("pm"),sh=$("sheet");m.textContent="";
+if(!window.html2canvas||!window.jspdf){m.textContent="تعذّر تحميل مكتبة الحفظ. تأكد من اتصالك بالإنترنت أو استخدم زر الطباعة.";return}
+b.disabled=true;b.textContent="جارٍ إنشاء الملف…";
+try{
+var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
+var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
+var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true}),pw=210,ph=297,H=Math.round(cv.width*ph/pw),y=0,first=true,imgH=cv.height*pw/cv.width;
+if(imgH<=ph*1.2){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);y=cv.height}
+var sc=cv.width/sh.offsetWidth,K=sh.children,R=function(e){return e.getBoundingClientRect()},t0=R(sh).top,nk=K.length,hb=Math.round((R(K[0]).bottom-t0)*sc),bandPx=Math.round(R(K[nk-1]).height*sc),bandY=cv.height-bandPx,SG=K[nk-2],sigTop=Math.round((R(SG).top-t0)*sc),sigPx=Math.round(R(SG).height*sc),gap=Math.round(10*sc),cEnd=sigTop,bs=[],br=[],extra=false;
+for(var q=0;q<nk-2;q++)bs.push((R(K[q]).bottom-t0)*sc);
+Array.prototype.forEach.call(sh.querySelectorAll("tr"),function(e){br.push((R(e).bottom-t0)*sc)});
+var mkPage=function(){var c=document.createElement("canvas");c.width=cv.width;c.height=H;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,H);return{c:c,x:x}};
+var addSig=function(P){P.x.drawImage(cv,0,sigTop,cv.width,sigPx,0,H-bandPx-gap-sigPx,cv.width,sigPx)};
+var addBand=function(P){P.x.drawImage(cv,0,bandY,cv.width,bandPx,0,H-bandPx,cv.width,bandPx)};
+var push=function(P){if(!first)pdf.addPage();pdf.addImage(P.c.toDataURL("image/jpeg",.95),"JPEG",0,0,pw,ph);first=false};
+while(y<cEnd-5){var cap=(first?H:H-hb)-bandPx,end=Math.min(y+cap,cEnd);
+if(end<cEnd){var pick=function(arr,lo){var c=arr.filter(function(z){return z>lo&&z<=end+1});return c.length?Math.max.apply(null,c):null};var e1=pick(bs,y+cap*.7)||pick(br,y+cap*.4)||pick(bs,y+cap*.4);if(e1)end=Math.min(cEnd,Math.round(e1))}
+var P=mkPage(),oy=0;if(!first){P.x.drawImage(cv,0,0,cv.width,hb,0,0,cv.width,hb);oy=hb}
+P.x.drawImage(cv,0,y,cv.width,end-y,0,oy,cv.width,end-y);
+if(end>=cEnd){if(H-bandPx-gap-sigPx-(oy+end-y)>=gap)addSig(P);else extra=true}
+addBand(P);push(P);y=end}
+if(extra){var P2=mkPage();if(!first)P2.x.drawImage(cv,0,0,cv.width,hb,0,0,cv.width,hb);addSig(P2);addBand(P2);push(P2)}
+var nm=("كشف حضور "+($("prog").value.trim()||"")).trim().replace(/[\\\/:*?"<>|]/g,"-");
+var a=document.createElement("a");a.href=URL.createObjectURL(pdf.output("blob"));a.download=nm+".pdf";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
+m.textContent="تم تجهيز الملف.";
+}catch(e){m.textContent="تعذّر إنشاء الملف تلقائيًا. استخدم زر الطباعة ثم اختر «حفظ بصيغة PDF»."}
+finally{b.disabled=false;b.textContent=old}
+};
+render();
+</script>
+</body>
+</html>
