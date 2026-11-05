@@ -83,7 +83,12 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 .sig3 .st{height:26mm;display:flex;align-items:center;justify-content:center}
 .sig3 .st img{max-height:26mm;max-width:100%;object-fit:contain}
 .sig3 .sg{height:26mm}
-table.at2 td{height:36px}
+table.at2 td{height:22px;padding:1px 6px;line-height:1.35}
+.sheet{gap:6px}
+.sig3{padding-top:4px}
+.sig3 .sg{height:12mm}
+.sig3 .st{height:18mm}
+.sig3 .st img{max-height:18mm}
 table.at2 td.nm{text-align:right}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -100,7 +105,7 @@ table.at2 td.nm{text-align:right}
 <label>اسم البرنامج / الورشة</label><input id="prog" placeholder="مثال: ورشة الذكاء الاصطناعي">
 <label>اسم المنفذ (اختياري)</label><input id="tname">
 <div class="two"><div><label>اليوم / التاريخ</label><input id="vdate" placeholder="الأحد 1448/3/27"></div><div><label>الحصة (اختياري)</label><input id="vtime" list="periods" placeholder="الثالثة"><datalist id="periods"><option value="الأولى"><option value="الثانية"><option value="الثالثة"><option value="الرابعة"><option value="الخامسة"><option value="السادسة"><option value="السابعة"></datalist></div></div>
-<div class="two"><div><label>المكان (اختياري)</label><input id="place" list="places" placeholder="اختر أو اكتب"><datalist id="places"><option value="الفصل"><option value="معمل الحاسب الآلي"><option value="معمل العلوم"><option value="غرفة المصادر"><option value="الساحة الداخلية"><option value="الساحة الخارجية"></datalist></div><div><label>الصف / الفئة (اختياري)</label><input id="cls"></div></div>
+<div class="two"><div><label>المكان (اختياري)</label><input id="place" list="places" placeholder="اختر أو اكتب"><datalist id="places"><option value="الفصل"><option value="معمل الحاسب الآلي"><option value="معمل العلوم"><option value="غرفة المصادر"><option value="الساحة الداخلية"><option value="الساحة الخارجية"></datalist></div><div><label>الصف (اختياري)</label><input id="cls"></div></div>
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، واضغط عليه بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
 <label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logoIn" accept="image/*">
@@ -108,7 +113,7 @@ table.at2 td.nm{text-align:right}
 <p class="hint">لا يتضمن هذا الموقع أي شعار حكومي. لإظهار شعار وزارة التعليم: افتح <a href="https://www.moe.gov.sa/Style%20Library/portal/assets/images/moe-logo.svg" target="_blank" rel="noopener">رابط الشعار</a> ثم احفظ الصورة (اضغط بالزر الأيمن واختر «حفظ باسم»)، ثم ارفعها هنا. وتجد الشعار أيضًا في <a href="https://www.moe.gov.sa/ar/mediacenter/PhotoLibrary/Documents/MOE_logo.zip" target="_blank" rel="noopener">ملف الوزارة المضغوط</a> وفي <a href="https://www.moe.gov.sa/ar/mediacenter/PhotoLibrary/Pages/moe_identity.aspx" target="_blank" rel="noopener">صفحة الهوية الرسمية</a>. تأكد من أن استخدامك للشعار مسموح في جهتك.</p>
 </fieldset>
 <fieldset><legend>الأسماء</legend>
-<p class="hint" style="margin-top:0">اكتب اسمًا في كل سطر. ويمكنك إضافة الصف بعد علامة | مثل: «نورة محمد | 2/ب». وإن لم تكتب أسماء فاكتب في الحقل أدناه عدد الطالبات، فيُنشأ جدول بعدد الصفوف نفسه لتكتب الطالبات بخط اليد (وبدون رقم يُنشأ 30 صفًا). أما مع وجود أسماء فالرقم يضيف صفوفًا فارغة بعدها.</p>
+<p class="hint" style="margin-top:0">اكتب اسمًا في كل سطر. ويمكنك إضافة الصف بعد علامة | مثل: «نورة محمد | 2/ب». اكتب في الحقل أدناه عدد صفوف الجدول (عدد الطالبات)، فتظهر الأسماء في الصفوف الأولى وتبقى الباقية فارغة للكتابة باليد. وبدون أسماء ولا رقم يُنشأ 30 صفًا، ومع أسماء بدون رقم يظهر صف لكل اسم.</p>
 <textarea id="names" style="min-height:120px"></textarea>
 <label id="blL">عدد الصفوف (عدد طالبات الفصل)</label><input id="blank" inputmode="numeric" placeholder="30">
 <p class="hint" id="cnt"></p></fieldset>
@@ -151,17 +156,19 @@ function render(){
 var v=function(i){return $(i).value.trim()},f=$("gv").value==="f",S=f?"الطالبات":"الطلاب",nm=parse(),n=nm.length,bl=parseInt(v("blank"),10)||0;
 $("cnt").textContent=n?"عدد الأسماء: "+n:"";
 var rows=nm.slice(),hasC=nm.some(function(r){return r.c});
-var total=n?n+bl:(bl||30);
+var total=n?Math.max(n,bl):(bl||30);
 while(rows.length<total)rows.push({n:"",c:""});
 var tb=rows.map(function(r,i){return "<tr><td>"+(i+1)+'</td><td class="nm">'+esc(r.n)+"</td>"+(hasC?"<td>"+esc(r.c)+"</td>":"")+"<td></td></tr>"}).join("");
 var th='<tr><th style="width:7%">م</th><th style="width:'+(hasC?"43":"58")+'%">اسم '+(f?"الطالبة":"الطالب")+"</th>"+(hasC?'<th style="width:15%">الصف</th>':"")+'<th style="width:35%">التوقيع</th></tr>';
-var info=function(l,w,full){return '<div'+(full?' class="w"':"")+"><b>"+l+":</b>"+esc(v(w)||"—")+"</div>"};
+var IT=[["اسم البرنامج","prog",1,1],["المنفذ","tname",0,v("tname")],["اليوم / التاريخ","vdate",0,1],["الحصة","vtime",0,v("vtime")],["المكان","place",0,v("place")],["الصف","cls",0,v("cls")]].filter(function(x){return x[3]}),col=0;
+IT.forEach(function(x,i){if(x[2]){col=0;return}if(col===0&&(i===IT.length-1||IT[i+1][2]))x[2]=1;else col=1-col});
+var info=function(x){return '<div'+(x[2]?' class="w"':"")+"><b>"+x[0]+":</b>"+esc(v(x[1])||"—")+"</div>"};
 var L=logo;
-$("blL").textContent=n?"عدد الصفوف الفارغة الإضافية (اختياري)":"عدد الصفوف ("+(f?"عدد طالبات الفصل":"عدد طلاب الفصل")+")";
+$("blL").textContent="عدد الصفوف ("+(f?"عدد طالبات الفصل":"عدد طلاب الفصل")+")";
 $("sheet").innerHTML=
 '<div class="sh-head"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
 '<div class="bar">كشف حضور وتوقيع '+S+"</div>"+
-'<div class="info">'+info("اسم البرنامج","prog",1)+(v("tname")?info("المنفذ","tname"):"")+info("اليوم / التاريخ","vdate")+(v("vtime")?info("الحصة","vtime"):"")+(v("place")?info("المكان","place"):"")+(v("cls")?info("الصف / الفئة","cls"):"")+"</div>"+
+'<div class="info">'+IT.map(info).join("")+"</div>"+
 '<table class="t at2">'+th+tb+"</table>"+
 '<div class="sig3"><div><b>'+(f?"المنفذة":"المنفذ")+'</b><div class="sg"></div>'+esc(v("tname"))+'</div><div><b>الختم</b><div class="st">'+(stamp?'<img alt="" src="'+stamp+'">':"")+"</div></div><div><b>"+(f?"مديرة المدرسة":"مدير المدرسة")+'</b><div class="sg"></div>'+esc(v("principal"))+"</div></div>"+
 '<div class="band"></div>'
