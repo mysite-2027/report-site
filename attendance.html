@@ -104,9 +104,9 @@ table.at2 td.nm{text-align:right}
 <label>الصيغة (مؤنث / مذكر)</label><select id="gv"><option value="f">مؤنث</option><option value="m">مذكر</option></select>
 <label>الحاضرون</label><select id="att"><option value="s">طلاب</option><option value="t">معلمون</option><option value="a">إداريون</option><option value="p">أولياء أمور</option></select>
 <label>اسم البرنامج / الورشة</label><input id="prog" placeholder="مثال: ورشة الذكاء الاصطناعي">
-<label>اسم المنفذ (اختياري)</label><input id="tname">
+<label>اسم المنفذ / المنفذة (اختياري)</label><input id="tname">
 <div class="two"><div><label>اليوم / التاريخ</label><input id="vdate" placeholder="الأحد 1448/3/27"></div><div><label>الحصة (اختياري)</label><input id="vtime" list="periods" placeholder="الثالثة"><datalist id="periods"><option value="الأولى"><option value="الثانية"><option value="الثالثة"><option value="الرابعة"><option value="الخامسة"><option value="السادسة"><option value="السابعة"></datalist></div></div>
-<div class="two"><div><label>المكان (اختياري)</label><input id="place" list="places" placeholder="اختر أو اكتب"><datalist id="places"><option value="الفصل"><option value="معمل الحاسب الآلي"><option value="معمل العلوم"><option value="غرفة المصادر"><option value="الساحة الداخلية"><option value="الساحة الخارجية"></datalist></div><div id="clsBox"><label>الصف (اختياري)</label><input id="cls"></div></div>
+<div class="two"><div><label>المكان (اختياري)</label><input id="place" list="places" placeholder="اختر أو اكتب"><datalist id="places"><option value="الفصل"><option value="معمل الحاسب الآلي"><option value="معمل العلوم"><option value="غرفة المصادر"><option value="الساحة الداخلية"><option value="الساحة الخارجية"><option value="غرفة المعلمات"><option value="غرفة المديرة"><option value="غرفة الاجتماعات"></datalist></div><div id="clsBox"><label>الصف (اختياري)</label><input id="cls"></div></div>
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، واضغط عليه بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
 <label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logoIn" accept="image/*">
@@ -161,7 +161,7 @@ var total=n?Math.max(n,bl):(bl||30);
 while(rows.length<total)rows.push({n:"",c:""});
 var tb=rows.map(function(r,i){return "<tr><td>"+(i+1)+'</td><td class="nm">'+esc(r.n)+"</td>"+(hasC?"<td>"+esc(r.c)+"</td>":"")+"<td></td></tr>"}).join("");
 var th='<tr><th style="width:7%">م</th><th style="width:'+(hasC?"43":"58")+'%">اسم '+TY[1]+"</th>"+(hasC?'<th style="width:15%">'+TY[2]+'</th>':"")+'<th style="width:35%">التوقيع</th></tr>';
-var IT=[["اسم البرنامج","prog",1,1],["المنفذ","tname",0,v("tname")],["اليوم / التاريخ","vdate",0,1],["الحصة","vtime",0,v("vtime")],["المكان","place",0,v("place")],["الصف","cls",0,AT==="s"?v("cls"):""]].filter(function(x){return x[3]}),col=0;
+var IT=[["اسم البرنامج","prog",1,1],[f?"المنفذة":"المنفذ","tname",0,v("tname")],["اليوم / التاريخ","vdate",0,1],["الحصة","vtime",0,v("vtime")],["المكان","place",0,v("place")],["الصف","cls",0,AT==="s"?v("cls"):""]].filter(function(x){return x[3]}),col=0;
 IT.forEach(function(x,i){if(x[2]){col=0;return}if(col===0&&(i===IT.length-1||IT[i+1][2]))x[2]=1;else col=1-col});
 var info=function(x){return '<div'+(x[2]?' class="w"':"")+"><b>"+x[0]+":</b>"+esc(v(x[1])||"—")+"</div>"};
 var L=logo;
