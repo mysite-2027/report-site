@@ -108,9 +108,9 @@ table.at2 td.nm{text-align:right}
 <p class="hint">لا يتضمن هذا الموقع أي شعار حكومي. لإظهار شعار وزارة التعليم: افتح <a href="https://www.moe.gov.sa/Style%20Library/portal/assets/images/moe-logo.svg" target="_blank" rel="noopener">رابط الشعار</a> ثم احفظ الصورة (اضغط بالزر الأيمن واختر «حفظ باسم»)، ثم ارفعها هنا. وتجد الشعار أيضًا في <a href="https://www.moe.gov.sa/ar/mediacenter/PhotoLibrary/Documents/MOE_logo.zip" target="_blank" rel="noopener">ملف الوزارة المضغوط</a> وفي <a href="https://www.moe.gov.sa/ar/mediacenter/PhotoLibrary/Pages/moe_identity.aspx" target="_blank" rel="noopener">صفحة الهوية الرسمية</a>. تأكد من أن استخدامك للشعار مسموح في جهتك.</p>
 </fieldset>
 <fieldset><legend>الأسماء</legend>
-<p class="hint" style="margin-top:0">اكتب اسمًا في كل سطر. ويمكنك إضافة الصف بعد علامة | مثل: «نورة محمد | 2/ب». وإن لم تكتب أسماء فاكتب في الحقل أدناه عدد الطالبات، فيُنشأ جدول بعدد الصفوف نفسه لتكتب الطالبات بخط اليد (وبدون رقم يُنشأ 10 صفوف). أما مع وجود أسماء فالرقم يضيف صفوفًا فارغة بعدها.</p>
+<p class="hint" style="margin-top:0">اكتب اسمًا في كل سطر. ويمكنك إضافة الصف بعد علامة | مثل: «نورة محمد | 2/ب». وإن لم تكتب أسماء فاكتب في الحقل أدناه عدد الطالبات، فيُنشأ جدول بعدد الصفوف نفسه لتكتب الطالبات بخط اليد (وبدون رقم يُنشأ 30 صفًا). أما مع وجود أسماء فالرقم يضيف صفوفًا فارغة بعدها.</p>
 <textarea id="names" style="min-height:120px"></textarea>
-<label id="blL">عدد الصفوف (عدد طالبات الفصل)</label><input id="blank" inputmode="numeric" placeholder="مثال: 30">
+<label id="blL">عدد الصفوف (عدد طالبات الفصل)</label><input id="blank" inputmode="numeric" placeholder="30">
 <p class="hint" id="cnt"></p></fieldset>
 <fieldset><legend>التوقيعات</legend>
 <label>اسم مديرة / مدير المدرسة</label><input id="principal">
@@ -151,7 +151,7 @@ function render(){
 var v=function(i){return $(i).value.trim()},f=$("gv").value==="f",S=f?"الطالبات":"الطلاب",nm=parse(),n=nm.length,bl=parseInt(v("blank"),10)||0;
 $("cnt").textContent=n?"عدد الأسماء: "+n:"";
 var rows=nm.slice(),hasC=nm.some(function(r){return r.c});
-var total=n?n+bl:(bl||10);
+var total=n?n+bl:(bl||30);
 while(rows.length<total)rows.push({n:"",c:""});
 var tb=rows.map(function(r,i){return "<tr><td>"+(i+1)+'</td><td class="nm">'+esc(r.n)+"</td>"+(hasC?"<td>"+esc(r.c)+"</td>":"")+"<td></td></tr>"}).join("");
 var th='<tr><th style="width:7%">م</th><th style="width:'+(hasC?"43":"58")+'%">اسم '+(f?"الطالبة":"الطالب")+"</th>"+(hasC?'<th style="width:15%">الصف</th>':"")+'<th style="width:35%">التوقيع</th></tr>';
