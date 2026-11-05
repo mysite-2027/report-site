@@ -98,7 +98,7 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 <label>الصفة</label><select id="role"><option value="t">معلم</option><option value="c">موجه طلابي</option></select>
 <label>اسم المنفذ (المعلم أو الموجه الطلابي)</label><input id="tname">
 <div class="two"><div><label>اليوم / التاريخ</label><input id="vdate" placeholder="الأحد 1448/3/27"></div><div><label>رقم الحصة</label><input id="period" list="periods" placeholder="الثالثة"><datalist id="periods"><option value="الأولى"><option value="الثانية"><option value="الثالثة"><option value="الرابعة"><option value="الخامسة"><option value="السادسة"><option value="السابعة"></datalist></div></div>
-<div class="two"><div><label>الصف / الفصل</label><input id="cls" placeholder="ثاني متوسط / 2"></div><div><label>عدد الطلاب (اختياري)</label><input id="cnt" inputmode="numeric"></div></div>
+<div class="two"><div><label>الصف / الفصل</label><input id="cls" placeholder="ثاني متوسط / 2"></div><div><label id="cntL">عدد الطالبات (اختياري)</label><input id="cnt" inputmode="numeric"></div></div>
 <label>المادة (اختياري)</label><input id="subj">
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، واضغط عليه بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
@@ -158,10 +158,11 @@ var info=function(l,w,full){return '<div'+(full?' class="w"':"")+"><b>"+l+":</b>
 var ah=ACT.map(function(m,i){return "<div><i class=\"bx"+(acts.indexOf(i)>-1?" on":"")+"\"></i>"+m+"</div>"}).join(""),ao=v("actOther");
 var evs=imgs.filter(Boolean).map(function(d){return '<div><img alt="" src="'+d+'"></div>'}).join("");
 var L=logo;
+$("cntL").textContent=(f?"عدد الطالبات":"عدد الطلاب")+" (اختياري)";
 $("sheet").innerHTML=
 '<div class="sh-head"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
 '<div class="bar">تقرير حصة انتظار</div>'+
-'<div class="info">'+info("اسم "+EX,"tname",1)+info("اليوم / التاريخ","vdate")+info("رقم الحصة","period")+info("الصف / الفصل","cls")+(v("subj")?info("المادة","subj"):"")+(v("cnt")?info("عدد الطلاب","cnt"):"")+"</div>"+
+'<div class="info">'+info("اسم "+EX,"tname",1)+info("اليوم / التاريخ","vdate")+info("رقم الحصة","period")+info("الصف / الفصل","cls")+(v("subj")?info("المادة","subj"):"")+(v("cnt")?info(f?"عدد الطالبات":"عدد الطلاب","cnt"):"")+"</div>"+
 '<div class="sec"><h3>الأنشطة المنفذة</h3><div class="meth">'+ah+"</div>"+(ao?"<p><b>أخرى:</b> "+esc(ao)+"</p>":"")+"</div>"+
 '<div class="sec ctr"><h3>العنوان</h3><p>'+esc(v("topic")||"—")+"</p></div>"+
 (v("goals")?'<div class="sec ctr"><h3>الأهداف</h3>'+numl($("goals").value)+"</div>":"")+
