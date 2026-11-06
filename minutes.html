@@ -117,7 +117,6 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 <label id="nmL">أسماء الحاضرات</label><p class="hint" id="nmH" style="margin-top:0">اكتب الاسم والوظيفة والصفة في كل صف. الصفة تُكتب تلقائيًا: أول اسم رئيس اللجنة، والثاني نائب الرئيس، والباقي أعضاء، ويمكنك كتابة صفة أخرى بدلها. وعند اختيار لجنة أو فريق معروف (التحصيل الدراسي، الإدارية، التميز، الأمن والسلامة: 8 أعضاء؛ التوجيه الطلابي: 7؛ الصندوق المدرسي والتربية الخاصة: 6) يظهر عدد الأعضاء ووظائف الأول والثاني تلقائيًا، ويمكنك إضافة صفوف أو حذفها أو تعديل أي خانة. والصفوف الفارغة لا تظهر.</p>
 <div id="arows"></div><button type="button" id="addA" style="margin-top:8px">+ إضافة صف</button>
 <p class="hint" id="cnt"></p></fieldset>
-<fieldset><legend>الشواهد (اختياري - حتى 4 صور)</legend><p class="hint" style="margin-top:0">إن لم تضف صورًا فلن يظهر قسم الشواهد في المحضر.</p><div class="two"><input type="file" class="ev-in" accept="image/*"><input type="file" class="ev-in" accept="image/*"><input type="file" class="ev-in" accept="image/*"><input type="file" class="ev-in" accept="image/*"></div></fieldset>
 <fieldset><legend>التوقيعات</legend>
 <label>اسم مديرة / مدير المدرسة</label><input id="principal">
 <label>صورة الختم (اختياري)</label><input type="file" id="stampIn" accept="image/*"><button type="button" class="del" id="stampDel" style="width:100%">إزالة الختم</button>
@@ -173,14 +172,12 @@ var kd=v("kind"),dy=v("vday"),dt=v("vdate"),nu=v("num"),dsc=v("disc"),
 op="فإنه"+(dy?" في يوم "+dy:"")+(dt?(dy?" الموافق ":" بتاريخ ")+dt:"")+" تم عقد الاجتماع"+(nu?" "+nu:"")+(kd?" الخاص ب"+kd:"")+(dsc?" وتم مناقشة الأعمال التالية:":"."),
 opening='<div class="sec"><p style="font-weight:700">الحمد لله رب العالمين، والصلاة والسلام على سيد المرسلين، محمد وعلى آله وصحبه وسلم، وبعد:</p><p style="font-weight:700">'+esc(op)+"</p>"+(dsc?numl($("disc").value):"")+"</div>",
 decs=v("dec")?'<div class="sec"><p style="font-weight:700">وفي ختام الاجتماع تم الوصول إلى النتائج والتوصيات الآتية:</p>'+numl($("dec").value)+"</div>":"";
-var evs=imgs.filter(Boolean).map(function(d){return '<div><img alt="" src="'+d+'"></div>'}).join("");
 var L=logo;
 $("sheet").innerHTML=
 '<div class="sh-head"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
 '<div class="bar">محضر اجتماع</div>'+
 '<div class="info">'+IT.map(info).join("")+"</div>"+
 (n||isT?at:"")+opening+decs+
-(evs?'<div class="sec"><h3>الشواهد</h3><div class="ev">'+evs+"</div></div>":"")+
 '<div class="sig3" style="grid-template-columns:1fr 1fr"><div><b>الختم</b><div class="st">'+(stamp?'<img alt="" src="'+stamp+'">':"")+"</div></div><div><b>"+(f?"مديرة المدرسة":"مدير المدرسة")+'</b>'+esc(v("principal"))+'<div class="sg"></div></div></div>'+
 '<div class="band"></div>'
 }
@@ -190,7 +187,6 @@ $("arows").addEventListener("click",function(e){var i=e.target.dataset.del;if(i!
 $("addA").onclick=function(){AR.push({n:"",j:"",r:""});drawA();render()};
 drawA();
 $("reset").onclick=function(){["kind","num","vday","vdate","vtime","place","disc","dec"].forEach(function(i){$(i).value=""});AR=[0,1,2,3,4,5].map(function(){return{n:"",j:"",r:""}});drawA();imgs=[null,null,null,null];Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el){el.value=""});render()};
-Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el,i){el.onchange=function(e){var f=e.target.files[0];if(f)shrink(f,900,"image/jpeg",function(d){imgs[i]=d;render()});else{imgs[i]=null;render()}}});
 $("logoIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render()})};
 $("logoDel").onclick=function(){logo=null;$("logoIn").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
 $("stampIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,500,"image/png",function(d){stamp=d;sto("rpt_stamp",d);render()})};
