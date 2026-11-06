@@ -23,6 +23,11 @@ legend{font-weight:700;color:var(--accent);padding:0;margin-bottom:6px}
 label{display:block;font-size:.88rem;color:var(--muted);margin:8px 0 2px}
 input,select,textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)}
 textarea{min-height:70px;resize:vertical}
+.arow{display:grid;grid-template-columns:22px 1.6fr 1fr 1fr 30px;gap:6px;align-items:center;margin-top:6px}
+.arow .an{font-size:12px;color:var(--muted,#667);text-align:center}
+.arow input{min-width:0;padding:7px 8px;font-size:13px}
+.arow .x{padding:4px;border:1px solid var(--border);border-radius:8px;background:transparent;cursor:pointer;line-height:1}
+@media(max-width:560px){.arow{grid-template-columns:22px 1fr 1fr 30px}.arow input[data-k=n]{grid-column:2/4}.arow .x{grid-column:4;grid-row:1}.arow input[data-k=j]{grid-column:2}.arow input[data-k=r]{grid-column:3}}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .row{border:1px solid var(--border);border-radius:10px;padding:8px;margin-top:8px;background:var(--bg)}
 .ck{display:flex;align-items:center;gap:8px;margin:4px 0;color:var(--text);font-size:.92rem}
@@ -97,7 +102,7 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 <label>اللجنة / الفريق</label><input id="kind" list="kinds" placeholder="اختر أو اكتب"><datalist id="kinds"><option value="لجنة التوجيه الطلابي"><option value="لجنة التحصيل الدراسي"><option value="لجنة التميز"><option value="اللجنة الإدارية"><option value="فريق الأمن والسلامة"><option value="فريق الصندوق المدرسي"><option value="فريق التربية الخاصة"></datalist>
 <div class="two"><div><label>رقم الاجتماع (اختياري)</label><input id="num" placeholder="الأول"></div><div><label>اليوم</label><select id="vday"><option value="">اختر اليوم</option><option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option><option>الأربعاء</option><option>الخميس</option><option>الجمعة</option><option>السبت</option></select></div></div>
 <div class="two"><div><label>التاريخ</label><input id="vdate" placeholder="1448/3/27 هـ"></div><div><label>الوقت (اختياري)</label><input id="vtime" placeholder="من 8:00 إلى 9:00"></div></div>
-<div class="two"><div><label>المكان (اختياري)</label><input id="place" list="places" placeholder="اختر أو اكتب"><datalist id="places"><option value="غرفة المعلمات"><option value="غرفة المديرة"><option value="غرفة الوكيلة"><option value="غرفة الاجتماعات"><option value="غرفة المصادر"><option value="معمل الحاسب الآلي"><option value="الفصل"></datalist></div><div><label>رئيس الاجتماع (اختياري)</label><input id="chair"></div></div>
+<label>المكان (اختياري)</label><input id="place" list="places" placeholder="اختر أو اكتب"><datalist id="places"><option value="غرفة المعلمات"><option value="غرفة المديرة"><option value="غرفة الوكيلة"><option value="غرفة الاجتماعات"><option value="غرفة المصادر"><option value="معمل الحاسب الآلي"><option value="الفصل"></datalist>
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، واضغط عليه بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
 <label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logoIn" accept="image/*">
@@ -108,12 +113,12 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 <p class="hint" style="margin-top:0">اكتب كل نقطة في سطر مستقل وستُرقَّم تلقائيًا. يبدأ المحضر تلقائيًا بعبارة «تم عقد اجتماع ... هذا اليوم ...» من اسم اللجنة والتاريخ اللذين كتبتهما، وتظهر عبارة «وفي ختام الاجتماع…» فوق النتائج والتوصيات.</p>
 <label>الأعمال التي تمت مناقشتها</label><textarea id="disc"></textarea>
 <label>القرارات والتوصيات</label><textarea id="dec"></textarea></fieldset>
-<fieldset><legend>الحاضرات</legend>
-<label id="nmL">أسماء الحاضرات (اسم في كل سطر)</label><textarea id="names" style="min-height:110px"></textarea>
+<fieldset><legend id="lgN">الحاضرات</legend>
+<label id="nmL">أسماء الحاضرات</label><p class="hint" id="nmH" style="margin-top:0">اكتب الاسم والوظيفة والصفة في كل صف. الصفة تُكتب تلقائيًا: أول اسم رئيس اللجنة، والثاني نائب الرئيس، والباقي أعضاء، ويمكنك كتابة صفة أخرى بدلها. وعند اختيار لجنة أو فريق معروف (التحصيل الدراسي، الإدارية، التميز، الأمن والسلامة: 8 أعضاء؛ التوجيه الطلابي: 7؛ الصندوق المدرسي والتربية الخاصة: 6) يظهر عدد الأعضاء ووظائف الأول والثاني تلقائيًا، ويمكنك إضافة صفوف أو حذفها أو تعديل أي خانة. والصفوف الفارغة لا تظهر.</p>
+<div id="arows"></div><button type="button" id="addA" style="margin-top:8px">+ إضافة صف</button>
 <p class="hint" id="cnt"></p></fieldset>
 <fieldset><legend>الشواهد (اختياري - حتى 4 صور)</legend><p class="hint" style="margin-top:0">إن لم تضف صورًا فلن يظهر قسم الشواهد في المحضر.</p><div class="two"><input type="file" class="ev-in" accept="image/*"><input type="file" class="ev-in" accept="image/*"><input type="file" class="ev-in" accept="image/*"><input type="file" class="ev-in" accept="image/*"></div></fieldset>
 <fieldset><legend>التوقيعات</legend>
-<label>اسم كاتب / كاتبة المحضر</label><input id="writer">
 <label>اسم مديرة / مدير المدرسة</label><input id="principal">
 <label>صورة الختم (اختياري)</label><input type="file" id="stampIn" accept="image/*"><button type="button" class="del" id="stampDel" style="width:100%">إزالة الختم</button>
 <p class="hint">يُحفظ الختم والشعار في متصفحك ويظهران أيضًا في بقية النماذج.</p></fieldset>
@@ -129,7 +134,7 @@ var $=function(i){return document.getElementById(i)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 var SET={};try{SET=JSON.parse(sto("rpt_settings")||"{}")}catch(e){}
-var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["dept","school","principal","gv","writer"];
+var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["dept","school","principal","gv"];
 var imgs=[null,null,null,null];
 SAVED.forEach(function(k){if(SET[k])$(k).value=SET[k]});
 if(!$("dept").value)$("dept").value="الإدارة العامة للتعليم بمنطقة الرياض";
@@ -145,36 +150,45 @@ if(x1>x0&&y1>y0){var pd=Math.round(Math.max(c.width,c.height)*.02),c2=document.c
 cb(c.toDataURL(type,.82))};im.src=src};
 sv?r.readAsText(file):r.readAsDataURL(file)}
 
-var IDS=["dept","school","gv","kind","num","vday","vdate","vtime","place","chair","disc","dec","names","writer","principal"];
+var AR=[0,1,2,3,4,5].map(function(){return{n:"",j:"",r:""}});
+function drawA(){$("arows").innerHTML=AR.map(function(r,i){return '<div class="arow" data-i="'+i+'"><span class="an">'+(i+1)+'</span><input data-k="n" placeholder="الاسم" value="'+esc(r.n)+'"><input data-k="j" placeholder="الوظيفة" value="'+esc(r.j)+'"><input data-k="r" placeholder="الصفة" value="'+esc(r.r)+'"><button type="button" class="x" data-del="'+i+'" title="حذف">×</button></div>'}).join("")}
+var IDS=["dept","school","gv","kind","num","vday","vdate","vtime","place","disc","dec","principal"];
 function lines(t){return String(t||"").split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean)}
 function numl(t){return '<ul class="lst">'+lines(t).map(function(x,i){return "<li>"+(i+1)+". "+esc(x)+"</li>"}).join("")+"</ul>"}
 function render(){
-var v=function(i){return $(i).value.trim()},f=$("gv").value==="f",nm=lines($("names").value),n=nm.length;
-$("cnt").textContent=n?"عدد "+(f?"الحاضرات":"الحاضرين")+": "+n:"";$("nmL").textContent="أسماء "+(f?"الحاضرات":"الحاضرين")+" (اسم في كل سطر)";
-var IT=[["اللجنة / الفريق","kind",1,1],["رقم الاجتماع","num",0,v("num")],["اليوم / التاريخ","",0,1,(((v("vday")?v("vday")+" ":"")+v("vdate")).trim()||"—")],["الوقت","vtime",0,v("vtime")],["المكان","place",0,v("place")],["عدد "+(f?"الحاضرات":"الحاضرين"),"",0,n,String(n)],["رئيس الاجتماع","chair",0,v("chair")]].filter(function(x){return x[3]}),col=0;
+var CN={"لجنة التحصيل الدراسي":8,"اللجنة الإدارية":8,"لجنة التميز":8,"فريق الأمن والسلامة":8,"فريق الصندوق المدرسي":6,"فريق التربية الخاصة":6,"لجنة التوجيه الطلابي":7},kv=$("kind").value.trim(),cn=CN[kv],isT=!!cn;if(isT&&window.PADD!==kv){window.PADD=kv;var emp=AR.every(function(r){return!(r.n.trim()||r.j.trim()||r.r.trim())});if(emp)AR.length=Math.min(AR.length,cn);while(AR.length<cn)AR.push({n:"",j:"",r:""});drawA()}if(!isT)window.PADD="";
+var v=function(i){return $(i).value.trim()},f=$("gv").value==="f",DJ=function(k){var c=$("kind").value.trim();if(c==="لجنة التحصيل الدراسي"||c==="اللجنة الإدارية")return k===0?(f?"مديرة المدرسة":"مدير المدرسة"):k===1?(f?"وكيلة المدرسة":"وكيل المدرسة"):"";if(c==="فريق الأمن والسلامة"||c==="فريق الصندوق المدرسي"||c==="فريق التربية الخاصة")return k===0?"وكيل"+(f?"ة":"")+" المدرسة":"";if(c==="لجنة التميز")return k===0?(f?"مديرة المدرسة":"مدير المدرسة"):"";if(c==="لجنة التوجيه الطلابي")return k===0?"وكيل"+(f?"ة":"")+" المدرسة للشؤون الطلابية":k===1?(f?"الموجهة الطلابية":"الموجه الطلابي"):"";return""},DR=function(k){return k===0?(f?"رئيسة ":"رئيس ")+(/^فريق/.test($("kind").value.trim())?"الفريق":"اللجنة"):k===1?($("kind").value.trim()==="لجنة التوجيه الطلابي"?(f?"عضوة ومقررة":"عضو ومقرر"):(f?"نائبة الرئيس":"نائب الرئيس")):(f?"عضوة":"عضو")},nm=AR.filter(function(r){return r.n.trim()||r.j.trim()||r.r.trim()}),n=nm.length;
+$("cnt").textContent=n?"عدد "+(f?"الحاضرات":"الحاضرين")+": "+n:"";$("lgN").textContent=f?"الحاضرات":"الحاضرين";Array.prototype.forEach.call(document.querySelectorAll("#arows .arow"),function(d,k){var x=d.querySelector("input[data-k=r]");if(x)x.placeholder=DR(k);var y=d.querySelector("input[data-k=j]");if(y)y.placeholder=DJ(k)||"الوظيفة"});
+var PL=["غرفة المعلمات",f?"غرفة المديرة":"غرفة المدير",f?"غرفة الوكيلة":"غرفة الوكيل","غرفة الاجتماعات","غرفة المصادر","معمل الحاسب الآلي","الفصل"],pk=PL.join("|");if($("places").dataset.k!==pk){$("places").dataset.k=pk;$("places").innerHTML=PL.map(function(x){return '<option value="'+x+'">'}).join("")}
+$("nmL").textContent="أسماء "+(f?"الحاضرات":"الحاضرين")+"";
+var IT=[["اللجنة / الفريق","kind",1,1],["رقم الاجتماع","num",0,v("num")],["اليوم / التاريخ","",0,1,(((v("vday")?v("vday")+" ":"")+v("vdate")).trim()||"—")],["الوقت","vtime",0,v("vtime")],["المكان","place",0,v("place")],["عدد "+(f?"الحاضرات":"الحاضرين"),"",0,n,String(n)]].filter(function(x){return x[3]}),col=0;
 IT.forEach(function(x,i){if(x[2]){col=0;return}if(col===0&&(i===IT.length-1||IT[i+1][2]))x[2]=1;else col=1-col});
 var info=function(x){return '<div'+(x[2]?' class="w"':"")+"><b>"+x[0]+":</b>"+esc(x[4]!==undefined?x[4]:(v(x[1])||"—"))+"</div>"};
 var sec=function(h,id){return v(id)?'<div class="sec ctr"><h3>'+h+"</h3>"+numl($(id).value)+"</div>":""};
-var k=Math.max(4,Math.ceil(n/2)),tr="",i;
-for(i=0;i<k;i++){var r=function(j){return j<n?"<td>"+(j+1)+'</td><td class="nm">'+esc(nm[j])+"</td><td></td>":"<td></td><td></td><td></td>"};tr+="<tr>"+r(i)+'<td class="sp"></td>'+r(i+k)+"</tr>"}
-var at='<div class="sec"><h3>أسماء وتواقيع '+(f?"الحاضرات":"الحاضرين")+'</h3><table class="t at"><tr><th style="width:5%">م</th><th style="width:25%">الاسم</th><th style="width:19%">التوقيع</th><th class="sp"></th><th style="width:5%">م</th><th style="width:25%">الاسم</th><th style="width:19%">التوقيع</th></tr>'+tr+"</table></div>";
+var rowsN=Math.max(isT?AR.length:4,n),tr="",i;
+for(i=0;i<rowsN;i++){var p=i<n?[nm[i].n.trim(),nm[i].j.trim(),nm[i].r.trim()]:[];if(i<n&&!p[2])p[2]=DR(i);if(i<n&&!p[1])p[1]=DJ(i);tr+="<tr><td>"+(i<n?i+1:"")+'</td><td class="nm">'+esc(p[0]||"")+"</td><td>"+esc(p[1]||"")+"</td><td>"+esc(p[2]||"")+"</td><td></td></tr>"}
+var at='<div class="sec"><h3>توقيع '+(f?"عضوات ":"أعضاء ")+(v("kind")||"اللجنة")+'</h3><table class="t at"><tr><th style="width:6%">م</th><th style="width:30%">الاسم</th><th style="width:20%">الوظيفة</th><th style="width:20%">الصفة</th><th style="width:24%">التوقيع</th></tr>'+tr+"</table></div>";
 var kd=v("kind"),dy=v("vday"),dt=v("vdate"),nu=v("num"),dsc=v("disc"),
-op="فإنه"+(dy?" في يوم "+dy:"")+(dt?(dy?" الموافق ":" بتاريخ ")+dt:"")+" تم عقد الاجتماع"+(nu?" رقم "+nu:"")+(kd?" الخاص ب"+kd:"")+(dsc?" وتم مناقشة الأعمال التالية:":"."),
+op="فإنه"+(dy?" في يوم "+dy:"")+(dt?(dy?" الموافق ":" بتاريخ ")+dt:"")+" تم عقد الاجتماع"+(nu?" "+nu:"")+(kd?" الخاص ب"+kd:"")+(dsc?" وتم مناقشة الأعمال التالية:":"."),
 opening='<div class="sec"><p>الحمد لله رب العالمين، والصلاة والسلام على سيد المرسلين، محمد وعلى آله وصحبه وسلم، وبعد:</p><p>'+esc(op)+"</p>"+(dsc?numl($("disc").value):"")+"</div>",
-decs=v("dec")?'<div class="sec"><h3>القرارات والتوصيات</h3><p>وفي ختام الاجتماع تم الوصول إلى النتائج والتوصيات الآتية:</p>'+numl($("dec").value)+"</div>":"";
+decs=v("dec")?'<div class="sec"><p>وفي ختام الاجتماع تم الوصول إلى النتائج والتوصيات الآتية:</p>'+numl($("dec").value)+"</div>":"";
 var evs=imgs.filter(Boolean).map(function(d){return '<div><img alt="" src="'+d+'"></div>'}).join("");
 var L=logo;
 $("sheet").innerHTML=
 '<div class="sh-head"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
 '<div class="bar">محضر اجتماع</div>'+
 '<div class="info">'+IT.map(info).join("")+"</div>"+
-(n?at:"")+opening+decs+
+(n||isT?at:"")+opening+decs+
 (evs?'<div class="sec"><h3>الشواهد</h3><div class="ev">'+evs+"</div></div>":"")+
-'<div class="sig3"><div><b>'+(f?"كاتبة المحضر":"كاتب المحضر")+'</b><div class="sg"></div>'+esc(v("writer"))+'</div><div><b>الختم</b><div class="st">'+(stamp?'<img alt="" src="'+stamp+'">':"")+"</div></div><div><b>"+(f?"مديرة المدرسة":"مدير المدرسة")+'</b><div class="sg"></div>'+esc(v("principal"))+"</div></div>"+
+'<div class="sig3" style="grid-template-columns:1fr 1fr"><div><b>الختم</b><div class="st">'+(stamp?'<img alt="" src="'+stamp+'">':"")+"</div></div><div><b>"+(f?"مديرة المدرسة":"مدير المدرسة")+'</b><div class="sg"></div>'+esc(v("principal"))+"</div></div>"+
 '<div class="band"></div>'
 }
 IDS.forEach(function(i){$(i).addEventListener("input",function(){if(SAVED.indexOf(i)>-1){SET[i]=$(i).value;sto("rpt_settings",JSON.stringify(SET))}render()})});
-$("reset").onclick=function(){["kind","num","vday","vdate","vtime","place","chair","disc","dec","names"].forEach(function(i){$(i).value=""});imgs=[null,null,null,null];Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el){el.value=""});render()};
+$("arows").addEventListener("input",function(e){var d=e.target.closest(".arow");if(d&&e.target.dataset.k){AR[+d.dataset.i][e.target.dataset.k]=e.target.value;render()}});
+$("arows").addEventListener("click",function(e){var i=e.target.dataset.del;if(i!=null){AR.splice(+i,1);if(!AR.length)AR.push({n:"",j:"",r:""});drawA();render()}});
+$("addA").onclick=function(){AR.push({n:"",j:"",r:""});drawA();render()};
+drawA();
+$("reset").onclick=function(){["kind","num","vday","vdate","vtime","place","disc","dec"].forEach(function(i){$(i).value=""});AR=[0,1,2,3,4,5].map(function(){return{n:"",j:"",r:""}});drawA();imgs=[null,null,null,null];Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el){el.value=""});render()};
 Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el,i){el.onchange=function(e){var f=e.target.files[0];if(f)shrink(f,900,"image/jpeg",function(d){imgs[i]=d;render()});else{imgs[i]=null;render()}}});
 $("logoIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render()})};
 $("logoDel").onclick=function(){logo=null;$("logoIn").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
