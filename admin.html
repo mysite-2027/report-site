@@ -73,13 +73,13 @@ function show(on){$("login").hidden=on;$("app").hidden=!on;if(on)load()}
 call("/api/admin/users").then(function(x){show(x.ok)});
 $("lf").onsubmit=function(e){e.preventDefault();call("/api/admin/login","POST",{password:$("ap").value}).then(function(x){if(x.ok)show(true);else $("lm").textContent=x.j.error||"خطأ"})};
 $("lo").onclick=function(){call("/api/admin/logout","POST").then(function(){show(false)})};
-var KIND={new_device:["جهاز جديد","m"],over_limit:["تجاوز الأجهزة","w"],blocked:["جهاز مرفوض","w"],concurrent:["استخدام متزامن","w"],extend:["تمديد","m"],suspend:["إيقاف","x"],revoke:["إزالة الأجهزة","m"]};
+var KIND={new_device:["جهاز جديد","m"],over_limit:["تجاوز الأجهزة","w"],blocked:["جهاز مرفوض","w"],user_remove:["حذف جهاز (مستخدم)","w"],concurrent:["استخدام متزامن","w"],extend:["تمديد","m"],suspend:["إيقاف","x"],revoke:["إزالة الأجهزة","m"]};
 function load(){
  call("/api/admin/users").then(function(x){if(!x.ok)return;var us=x.j.users;$("cnt").textContent="("+us.length+")";
   $("mail").textContent=x.j.mailer?"تنبيهات الإيميل: مفعّلة":"تنبيهات الإيميل: غير مفعّلة (تظهر الأحداث هنا فقط)";
   $("users").innerHTML=us.map(function(u){
    var st=!u.active?'<span class="tag x">موقوف</span>':u.days_left<0?'<span class="tag x">منتهي</span>':u.days_left<=3?'<span class="tag w">ينتهي قريبًا</span>':'<span class="tag">فعّال</span>';
-   var fl=(u.flags?'<span class="tag w">'+u.flags+' تنبيه/7 أيام</span> ':'')+(u.devs>u.max_devices?'<span class="tag x">تجاوز الأجهزة</span>':'');
+   var fl=(u.flags?'<span class="tag w">'+u.flags+' تنبيه/7 أيام</span> ':'')+(u.devs>u.max_devices?'<span class="tag x">تجاوز الأجهزة</span>':'')+(u.cities>1?' <span class="tag x">أجهزة في '+u.cities+' مدن/دول خلال 7 أيام</span>':'');
    return '<div class="u" data-id="'+u.id+'"><div class="h"><span class="em">'+esc(u.email)+'</span><span>'+st+' '+fl+'</span></div>'+
    '<div class="meta">'+(u.name?esc(u.name)+' — ':'')+'ينتهي: '+esc(u.expires_text)+' ('+u.days_left+' يوم) — الأجهزة: '+u.devs+' من '+u.max_devices+' — آخر دخول: '+esc(u.last_text)+'</div>'+
    '<div class="acts"><button data-a="extend" data-d="30">+30 يوم</button><button data-a="extend" data-d="180">+6 أشهر</button><button class="g" data-a="devices">الأجهزة</button><button class="g" data-a="reset">كلمة مرور جديدة</button><button class="g" data-a="revoke">إزالة كل الأجهزة</button>'+

@@ -21,6 +21,7 @@ h1{color:var(--green);font-size:1.4rem;margin:8px 0 16px}
 .dev{padding:8px 0;border-bottom:1px solid var(--border);font-size:.95rem}
 .dev:last-child{border:0}
 .rm{float:left;background:#fff;border:1px solid #c0392b;color:#c0392b;border-radius:8px;padding:2px 12px;font:inherit;font-size:.85rem;cursor:pointer}
+.rules ul{margin:0;padding:0 20px 0 0;line-height:1.9}.rules li{margin-bottom:4px}.rules ol{margin:6px 0;padding:0 22px 0 0;line-height:1.8}.rules small{color:var(--muted)}
 .dev small{color:var(--muted);display:block}
 .tag{display:inline-block;background:var(--green);color:#fff;border-radius:99px;padding:0 10px;font-size:.8rem;margin-right:6px}
 label{display:block;font-weight:700;margin:10px 0 4px;font-size:.95rem}
@@ -38,6 +39,24 @@ button,.btn{display:inline-block;margin-top:12px;padding:10px 20px;border:0;bord
   <h1>حسابي</h1>
   <div class="card" id="info"><h2>الاشتراك</h2><div class="row"><span>البريد</span><b id="em" dir="ltr">…</b></div><div class="row"><span>ينتهي في</span><b id="ex">…</b></div><div class="row"><span>المتبقي</span><b id="dl">…</b></div></div>
   <div class="card"><h2>الأجهزة المسجّلة (<span id="dc">0</span> من <span id="mx">3</span>)</h2><div id="devs"></div></div>
+  <div class="card rules"><h2>قواعد الاشتراك</h2>
+    <ul>
+      <li><b>الاشتراك شخصي</b> لصاحب البريد فقط، ولا تجوز مشاركته مع الآخرين.</li>
+      <li>يمكنك الدخول من <b><span class="mxr">3</span> أجهزة كحد أقصى</b>. كل متصفح مختلف على الجهاز نفسه يُحسب جهازًا مستقلًا.</li>
+      <li><b>الجهاز الإضافي يُرفض.</b> لتسجيل جهاز جديد اتبع هذه الخطوات:
+        <ol>
+          <li>ادخل من <b>أحد أجهزتك المسجّلة سابقًا</b>، فالجهاز الجديد لا يستطيع الدخول قبل ذلك.</li>
+          <li>افتح «حسابي» من الشريط أسفل الصفحة.</li>
+          <li>اضغط «حذف» بجانب الجهاز الذي لا تستخدمه من قائمة الأجهزة أعلاه.</li>
+          <li>ارجع إلى الجهاز الجديد وسجّل الدخول.</li>
+        </ol>
+        <small>إن فقدت كل أجهزتك المسجّلة فتواصل معنا لنفرّغ لك الأجهزة.</small>
+      </li>
+      <li>يحق لك <b>حذف جهازين فقط كل 30 يومًا</b>. إن احتجت أكثر من ذلك فتواصل معنا.</li>
+      <li>يُرصد الدخول المتزامن من أجهزة مختلفة، ويُرصد الدخول من مدن مختلفة خلال أيام قليلة.</li>
+      <li>عند تكرار المخالفة يظهر لك تحذير أحمر، وقد يُوقَف الحساب دون استرداد المبلغ.</li>
+    </ul>
+  </div>
   <div class="card">
     <h2>تغيير كلمة المرور</h2>
     <form id="pf">
@@ -53,7 +72,7 @@ var $=function(i){return document.getElementById(i)};
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 fetch("/api/me").then(function(r){if(!r.ok){location.href="/login";return}return r.json()}).then(function(m){
  if(!m)return;$("em").textContent=m.email;$("ex").textContent=m.expires_text;$("dl").textContent=m.days_left+" يوم";
- $("dc").textContent=m.devices.length;$("mx").textContent=m.max_devices;
+ $("dc").textContent=m.devices.length;$("mx").textContent=m.max_devices;document.querySelectorAll(".mxr").forEach(function(e){e.textContent=m.max_devices});
  $("devs").innerHTML=m.devices.map(function(d){return '<div class="dev"><b>'+esc(d.label)+'</b>'+(d.current?'<span class="tag">هذا الجهاز</span>':'<button class="rm" data-d="'+esc(d.did)+'">حذف</button>')+'<small>'+esc(d.where)+' — آخر استخدام: '+esc(d.last)+'</small></div>'}).join("")||"—";
 });
 $("devs").onclick=function(e){var b=e.target.closest(".rm");if(!b||!confirm("حذف هذا الجهاز؟ سيخرج منه الحساب فورًا."))return;
