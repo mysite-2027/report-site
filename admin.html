@@ -73,7 +73,7 @@ function show(on){$("login").hidden=on;$("app").hidden=!on;if(on)load()}
 call("/api/admin/users").then(function(x){show(x.ok)});
 $("lf").onsubmit=function(e){e.preventDefault();call("/api/admin/login","POST",{password:$("ap").value}).then(function(x){if(x.ok)show(true);else $("lm").textContent=x.j.error||"خطأ"})};
 $("lo").onclick=function(){call("/api/admin/logout","POST").then(function(){show(false)})};
-var KIND={new_device:["جهاز جديد","m"],over_limit:["تجاوز الأجهزة","w"],concurrent:["استخدام متزامن","w"],extend:["تمديد","m"],suspend:["إيقاف","x"],revoke:["إزالة الأجهزة","m"]};
+var KIND={new_device:["جهاز جديد","m"],over_limit:["تجاوز الأجهزة","w"],blocked:["جهاز مرفوض","w"],concurrent:["استخدام متزامن","w"],extend:["تمديد","m"],suspend:["إيقاف","x"],revoke:["إزالة الأجهزة","m"]};
 function load(){
  call("/api/admin/users").then(function(x){if(!x.ok)return;var us=x.j.users;$("cnt").textContent="("+us.length+")";
   $("mail").textContent=x.j.mailer?"تنبيهات الإيميل: مفعّلة":"تنبيهات الإيميل: غير مفعّلة (تظهر الأحداث هنا فقط)";
