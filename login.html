@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>تسجيل الدخول | مُيَسِّر التقارير المدرسية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6f8;--surface:#fff;--text:#16242f;--muted:#5b6b78;--border:#d5dde3;--navy:#17445a;--green:#00682f;--blue:#2c7db5;--lg:#3fac72;--err:#b42318}
+@media (prefers-color-scheme:dark){:root{--bg:#10181f;--surface:#18232c;--text:#e8eef2;--muted:#9fb0bc;--border:#2c3b47;--green:#52c1b4;--err:#ff8a80}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px;background:var(--bg);color:var(--text);font-family:"Tajawal","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.7}
+.box{width:100%;max-width:420px;background:var(--surface);border:2px solid var(--navy);border-radius:20px;overflow:hidden}
+.top{background:var(--navy);color:#fff;text-align:center;padding:22px 18px;position:relative}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:linear-gradient(90deg,var(--blue),var(--lg))}
+.top b{font-size:1.25rem;display:block}
+.top span{opacity:.9;font-size:.95rem}
+form{padding:22px}
+label{display:block;font-weight:700;margin:12px 0 4px;font-size:.95rem}
+input{width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}
+input:focus{outline:2px solid var(--blue);border-color:var(--blue)}
+button{width:100%;margin-top:18px;padding:12px;border:0;border-radius:10px;background:var(--green);color:#fff;font:inherit;font-weight:800;font-size:1.05rem;cursor:pointer}
+button:disabled{opacity:.6}
+.msg{min-height:1.4em;margin-top:12px;color:var(--err);font-weight:700;font-size:.95rem}
+.msg.info{color:var(--text)}
+.note{margin:0 22px 22px;padding:12px 14px;border:1.5px dashed var(--border);border-radius:12px;font-size:.9rem;color:var(--muted)}
+.note b{color:var(--text)}
+.contact{text-align:center;margin:0 22px 20px;font-size:.95rem}
+.contact a{color:var(--green);font-weight:700}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="top"><b>مُيَسِّر التقارير المدرسية</b><span>تسجيل الدخول للمشتركين</span></div>
+  <form id="f" autocomplete="on">
+    <label for="email">البريد الإلكتروني</label>
+    <input id="email" type="email" inputmode="email" autocomplete="username" required dir="ltr">
+    <label for="pw">كلمة المرور</label>
+    <input id="pw" type="password" autocomplete="current-password" required dir="ltr">
+    <button id="go" type="submit">دخول</button>
+    <div class="msg" id="msg" role="alert"></div>
+  </form>
+  <div class="note"><b>الاشتراك شخصي.</b> يُسمح بالدخول من 3 أجهزة كحد أقصى، ومشاركة الحساب مع الآخرين غير مسموحة وقد تؤدي إلى إيقافه.</div>
+  <div class="contact" id="contact" hidden>للاشتراك أو الاستفسار: <a id="clink" href="#" target="_blank" rel="noopener"></a></div>
+</div>
+<script>
+// ضع هنا وسيلة التواصل لتظهر للزوار (اتركها فارغة لإخفائها)، مثال: رابط واتساب
+var CONTACT_TEXT="muyassir.reports@gmail.com", CONTACT_URL="mailto:muyassir.reports@gmail.com";
+var q=new URLSearchParams(location.search),m=document.getElementById("msg");
+if(CONTACT_TEXT&&CONTACT_URL){document.getElementById("contact").hidden=false;var a=document.getElementById("clink");a.textContent=CONTACT_TEXT;a.href=CONTACT_URL}
+var why={expired:"انتهى اشتراكك. تواصل مع المسؤول للتجديد.",suspended:"الحساب موقوف. تواصل مع المسؤول.",removed:"تم إنهاء هذه الجلسة. سجّل الدخول من جديد."}[q.get("r")];
+if(why){m.textContent=why}
+document.getElementById("f").onsubmit=function(e){
+ e.preventDefault();var b=document.getElementById("go");b.disabled=true;m.className="msg info";m.textContent="جارٍ التحقق…";
+ fetch("/api/login",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email:document.getElementById("email").value,password:document.getElementById("pw").value})})
+ .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})})
+ .then(function(x){
+  if(x.ok){var n=q.get("next");location.href=/^[a-z0-9_-]+\.html$/i.test(n||"")?"/"+n:"/"}
+  else{m.className="msg";m.textContent=x.j.error||"تعذّر تسجيل الدخول";b.disabled=false}})
+ .catch(function(){m.className="msg";m.textContent="تعذّر الاتصال. حاول مرة أخرى.";b.disabled=false});
+};
+</script>
+</body>
+</html>

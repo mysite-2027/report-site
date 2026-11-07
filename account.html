@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>حسابي | مُيَسِّر التقارير المدرسية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6f8;--surface:#fff;--text:#16242f;--muted:#5b6b78;--border:#d5dde3;--navy:#17445a;--green:#00682f;--blue:#2c7db5;--lg:#3fac72;--err:#b42318}
+@media (prefers-color-scheme:dark){:root{--bg:#10181f;--surface:#18232c;--text:#e8eef2;--muted:#9fb0bc;--border:#2c3b47;--green:#52c1b4;--err:#ff8a80}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Tajawal","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.7}
+.wrap{max-width:640px;margin:auto;padding:18px}
+h1{color:var(--green);font-size:1.4rem;margin:8px 0 16px}
+.card{background:var(--surface);border:2px solid var(--navy);border-radius:16px;padding:16px 18px;margin-bottom:14px}
+.card h2{margin:0 0 8px;font-size:1.05rem;color:var(--green)}
+.row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)}
+.row:last-child{border:0}
+.row span{color:var(--muted)}
+.dev{padding:8px 0;border-bottom:1px solid var(--border);font-size:.95rem}
+.dev:last-child{border:0}
+.dev small{color:var(--muted);display:block}
+.tag{display:inline-block;background:var(--green);color:#fff;border-radius:99px;padding:0 10px;font-size:.8rem;margin-right:6px}
+label{display:block;font-weight:700;margin:10px 0 4px;font-size:.95rem}
+input{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}
+button,.btn{display:inline-block;margin-top:12px;padding:10px 20px;border:0;border-radius:10px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+.btn.g{background:none;color:var(--text);border:1.5px solid var(--border)}
+.msg{margin-top:8px;font-weight:700;min-height:1.3em}
+.warn{color:var(--err)}
+.top{display:flex;gap:10px;flex-wrap:wrap}
+.top .btn{margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>حسابي</h1>
+  <div class="card" id="info"><h2>الاشتراك</h2><div class="row"><span>البريد</span><b id="em" dir="ltr">…</b></div><div class="row"><span>ينتهي في</span><b id="ex">…</b></div><div class="row"><span>المتبقي</span><b id="dl">…</b></div></div>
+  <div class="card"><h2>الأجهزة المسجّلة (<span id="dc">0</span> من <span id="mx">3</span>)</h2><div id="devs"></div></div>
+  <div class="card">
+    <h2>تغيير كلمة المرور</h2>
+    <form id="pf">
+      <label for="o">كلمة المرور الحالية</label><input id="o" type="password" autocomplete="current-password" dir="ltr" required>
+      <label for="n">كلمة المرور الجديدة (8 أحرف على الأقل)</label><input id="n" type="password" autocomplete="new-password" dir="ltr" minlength="8" required>
+      <button type="submit">حفظ</button><div class="msg" id="pm"></div>
+    </form>
+  </div>
+  <div class="top"><a class="btn" href="/">العودة للنماذج</a><button class="btn g" id="out" type="button" style="margin:0">تسجيل الخروج</button></div>
+</div>
+<script>
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+fetch("/api/me").then(function(r){if(!r.ok){location.href="/login";return}return r.json()}).then(function(m){
+ if(!m)return;$("em").textContent=m.email;$("ex").textContent=m.expires_text;$("dl").textContent=m.days_left+" يوم";
+ $("dc").textContent=m.devices.length;$("mx").textContent=m.max_devices;
+ $("devs").innerHTML=m.devices.map(function(d){return '<div class="dev"><b>'+esc(d.label)+'</b>'+(d.current?'<span class="tag">هذا الجهاز</span>':'')+'<small>'+esc(d.where)+' — آخر استخدام: '+esc(d.last)+'</small></div>'}).join("")||"—";
+});
+$("out").onclick=function(){fetch("/api/logout",{method:"POST",headers:{"content-type":"application/json"},body:"{}"}).then(function(){location.href="/login"})};
+$("pf").onsubmit=function(e){e.preventDefault();var m=$("pm");m.className="msg";m.textContent="…";
+ fetch("/api/password",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({old:$("o").value,new:$("n").value})})
+ .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})}).then(function(x){
+  if(x.ok){m.textContent="تم تغيير كلمة المرور. أُنهيت جلساتك على الأجهزة الأخرى.";$("pf").reset()}else{m.className="msg warn";m.textContent=x.j.error||"تعذّر الحفظ"}});
+};
+</script>
+</body>
+</html>

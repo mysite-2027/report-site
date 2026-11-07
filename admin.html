@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>لوحة المسؤول | مُيَسِّر التقارير المدرسية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6f8;--surface:#fff;--text:#16242f;--muted:#5b6b78;--border:#d5dde3;--navy:#17445a;--green:#00682f;--blue:#2c7db5;--err:#b42318;--warn:#b54708}
+@media (prefers-color-scheme:dark){:root{--bg:#10181f;--surface:#18232c;--text:#e8eef2;--muted:#9fb0bc;--border:#2c3b47;--green:#52c1b4;--err:#ff8a80;--warn:#fdb022}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Tajawal","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.6}
+.wrap{max-width:980px;margin:auto;padding:16px}
+h1{color:var(--green);font-size:1.4rem;margin:6px 0 14px}
+h2{font-size:1.1rem;margin:0 0 10px;color:var(--green)}
+.card{background:var(--surface);border:2px solid var(--navy);border-radius:16px;padding:14px 16px;margin-bottom:14px}
+label{display:block;font-weight:700;font-size:.9rem;margin:8px 0 3px}
+input,select{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}
+button{padding:8px 14px;border:0;border-radius:9px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+button.g{background:none;color:var(--text);border:1.5px solid var(--border)}
+button.r{background:var(--err)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end}
+.msg{margin-top:8px;font-weight:700}
+.pw{background:#fff4d6;color:#4a3500;border:1.5px solid #e0b100;border-radius:10px;padding:10px 12px;margin-top:10px;direction:ltr;text-align:left;word-break:break-all}
+.pw b{font-size:1.1rem}
+.u{border-top:1px solid var(--border);padding:12px 0}
+.u:first-child{border:0}
+.u .h{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.u .em{font-weight:800;direction:ltr}
+.tag{border-radius:99px;padding:1px 10px;font-size:.8rem;color:#fff;background:var(--green)}
+.tag.x{background:var(--err)}.tag.w{background:var(--warn)}.tag.m{background:var(--muted)}
+.meta{color:var(--muted);font-size:.9rem;margin:4px 0}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.acts button{padding:5px 10px;font-size:.85rem}
+.ev{font-size:.9rem;border-top:1px solid var(--border);padding:6px 0}
+.ev small{color:var(--muted)}
+.dv{font-size:.88rem;background:var(--bg);border-radius:8px;padding:6px 10px;margin-top:6px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+#login{max-width:380px;margin:60px auto}
+@media (max-width:520px){.wrap{padding:10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div id="login" class="card" hidden>
+  <h2>دخول المسؤول</h2>
+  <form id="lf"><label for="ap">كلمة مرور المسؤول</label><input id="ap" type="password" autocomplete="current-password" dir="ltr" required>
+  <button type="submit" style="margin-top:12px;width:100%">دخول</button><div class="msg warn" id="lm" style="color:var(--err)"></div></form>
+</div>
+<div id="app" hidden>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h1>لوحة المسؤول</h1><button class="g" id="lo">خروج</button></div>
+  <div class="card">
+    <h2>إضافة مشترك</h2>
+    <form id="af" class="grid">
+      <div><label>البريد الإلكتروني</label><input id="ae" type="email" dir="ltr" required></div>
+      <div><label>الاسم (اختياري)</label><input id="an"></div>
+      <div><label>مدة الاشتراك (أيام)</label><input id="ad" type="number" min="1" value="30"></div>
+      <div><label>عدد الأجهزة</label><input id="am" type="number" min="1" max="10" value="3"></div>
+      <div><label>كلمة مرور (اتركها فارغة لتُولَّد)</label><input id="ap2" dir="ltr"></div>
+      <div><button type="submit" style="width:100%">إضافة</button></div>
+    </form>
+    <div id="am2" class="msg"></div><div id="apw"></div>
+  </div>
+  <div class="card"><h2>المشتركون <span id="cnt" class="meta"></span></h2><div id="mail" class="meta"></div><div id="users"></div></div>
+  <div class="card"><h2>سجل الأحداث (آخر 150)</h2><div id="events"></div></div>
+</div>
+</div>
+<script>
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function call(path,method,data){return fetch(path,{method:method||"GET",headers:{"content-type":"application/json"},body:method==="POST"?JSON.stringify(data||{}):undefined}).then(function(r){return r.json().then(function(j){if(r.status===401&&path.indexOf("login")<0){show(false)}return{ok:r.ok,j:j}})})}
+function show(on){$("login").hidden=on;$("app").hidden=!on;if(on)load()}
+call("/api/admin/users").then(function(x){show(x.ok)});
+$("lf").onsubmit=function(e){e.preventDefault();call("/api/admin/login","POST",{password:$("ap").value}).then(function(x){if(x.ok)show(true);else $("lm").textContent=x.j.error||"خطأ"})};
+$("lo").onclick=function(){call("/api/admin/logout","POST").then(function(){show(false)})};
+var KIND={new_device:["جهاز جديد","m"],over_limit:["تجاوز الأجهزة","w"],concurrent:["استخدام متزامن","w"],extend:["تمديد","m"],suspend:["إيقاف","x"],revoke:["إزالة الأجهزة","m"]};
+function load(){
+ call("/api/admin/users").then(function(x){if(!x.ok)return;var us=x.j.users;$("cnt").textContent="("+us.length+")";
+  $("mail").textContent=x.j.mailer?"تنبيهات الإيميل: مفعّلة":"تنبيهات الإيميل: غير مفعّلة (تظهر الأحداث هنا فقط)";
+  $("users").innerHTML=us.map(function(u){
+   var st=!u.active?'<span class="tag x">موقوف</span>':u.days_left<0?'<span class="tag x">منتهي</span>':u.days_left<=3?'<span class="tag w">ينتهي قريبًا</span>':'<span class="tag">فعّال</span>';
+   var fl=(u.flags?'<span class="tag w">'+u.flags+' تنبيه/7 أيام</span> ':'')+(u.devs>u.max_devices?'<span class="tag x">تجاوز الأجهزة</span>':'');
+   return '<div class="u" data-id="'+u.id+'"><div class="h"><span class="em">'+esc(u.email)+'</span><span>'+st+' '+fl+'</span></div>'+
+   '<div class="meta">'+(u.name?esc(u.name)+' — ':'')+'ينتهي: '+esc(u.expires_text)+' ('+u.days_left+' يوم) — الأجهزة: '+u.devs+' من '+u.max_devices+' — آخر دخول: '+esc(u.last_text)+'</div>'+
+   '<div class="acts"><button data-a="extend" data-d="30">+30 يوم</button><button data-a="extend" data-d="180">+6 أشهر</button><button class="g" data-a="devices">الأجهزة</button><button class="g" data-a="reset">كلمة مرور جديدة</button><button class="g" data-a="revoke">إزالة كل الأجهزة</button>'+
+   (u.active?'<button class="g" data-a="suspend">إيقاف</button>':'<button data-a="activate">تفعيل</button>')+'<button class="r" data-a="delete">حذف</button></div><div class="dvs"></div><div class="pwo"></div></div>'}).join("")||'<div class="meta">لا يوجد مشتركون بعد.</div>'});
+ call("/api/admin/events").then(function(x){if(!x.ok)return;$("events").innerHTML=x.j.events.map(function(e){var k=KIND[e.kind]||[e.kind,"m"];return '<div class="ev"><span class="tag '+k[1]+'">'+esc(k[0])+'</span> <b dir="ltr">'+esc(e.email)+'</b> — '+esc(e.detail)+' <small>'+esc(e.text)+'</small></div>'}).join("")||'<div class="meta">لا أحداث.</div>'});
+}
+$("af").onsubmit=function(e){e.preventDefault();
+ call("/api/admin/user","POST",{email:$("ae").value,name:$("an").value,days:+$("ad").value,max_devices:+$("am").value,password:$("ap2").value}).then(function(x){
+  if(x.ok){$("am2").textContent="تمت الإضافة. أرسل البيانات التالية للمشترك (لن تظهر كلمة المرور مرة أخرى):";$("am2").style.color="var(--green)";
+   $("apw").innerHTML='<div class="pw">البريد: <b>'+esc(x.j.email)+'</b><br>كلمة المرور: <b>'+esc(x.j.password)+'</b></div>';$("af").reset();$("ad").value=30;$("am").value=3;load()}
+  else{$("am2").style.color="var(--err)";$("am2").textContent=x.j.error||"خطأ";$("apw").innerHTML=""}})};
+$("users").onclick=function(e){
+ var b=e.target.closest("button");if(!b)return;var box=b.closest(".u"),id=box.dataset.id,a=b.dataset.a;
+ if(a==="devices"){call("/api/admin/user/"+id+"/devices").then(function(x){box.querySelector(".dvs").innerHTML=x.j.devices.map(function(d){return '<div class="dv"><span><b>'+esc(d.label)+'</b> — '+esc(d.where)+'<br><small>أول دخول: '+esc(d.first)+' — آخر استخدام: '+esc(d.last)+'</small></span><button class="g" data-a="rmdev" data-dev="'+d.id+'">إزالة</button></div>'}).join("")||'<div class="meta">لا أجهزة.</div>'});return}
+ if(a==="rmdev"){call("/api/admin/user/"+id+"/device","POST",{device:+b.dataset.dev}).then(function(){load()});return}
+ if(a==="delete"&&!confirm("حذف المشترك نهائيًا؟"))return;
+ if((a==="revoke"||a==="suspend")&&!confirm("تأكيد؟"))return;
+ call("/api/admin/user/"+id+"/"+a,"POST",{days:+b.dataset.d||30}).then(function(x){
+  if(a==="reset"&&x.ok)box.querySelector(".pwo").innerHTML='<div class="pw">كلمة المرور الجديدة: <b>'+esc(x.j.password)+'</b></div>';
+  else load()})};
+</script>
+</body>
+</html>
