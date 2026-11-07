@@ -3,6 +3,7 @@
 // اختياري للتنبيهات بالإيميل: RESEND_API_KEY و ALERT_EMAIL.
 
 const DAY = 864e5, MIN = 6e4;
+const REMOVE_LIMIT = 2;
 const SESSION_DAYS = 30, DEVICE_WINDOW = 30 * DAY;
 const enc = new TextEncoder();
 
@@ -199,8 +200,16 @@ async function api(req, env, ctx, url, p) {
     if (p === "/api/device" && m === "POST") {
       const b = await body(req), d = String(b.did || "");
       if (!/^[0-9a-f]{32}$/.test(d) || d === u.did) return json({ error: "لا يمكن حذف هذا الجهاز" }, 400);
+      const used = (await env.DB.prepare("SELECT COUNT(*) n FROM events WHERE user_id=? AND kind='user_remove' AND ts>?").bind(u.id, now - 30 * DAY).first()).n;
+      if (used >= REMOVE_LIMIT) return json({ error: "وصلت إلى حد حذف الأجهزة (" + REMOVE_LIMIT + " كل 30 يومًا). تواصل مع المسؤول لتغيير جهازك." }, 429);
+      const tg = await env.DB.prepare("SELECT label,city,country FROM devices WHERE user_id=? AND did=?").bind(u.id, d).first();
       await env.DB.batch([env.DB.prepare("UPDATE devices SET removed=1 WHERE user_id=? AND did=?").bind(u.id, d), env.DB.prepare("DELETE FROM sessions WHERE user_id=? AND did=?").bind(u.id, d)]);
-      await ev(env, u, "revoke", "حذف المستخدم جهازًا من حسابه");
+      await ev(env, u, "user_remove", "حذف المستخدم جهازًا: " + (tg ? tg.label : "") + " (" + (used + 1) + " من " + REMOVE_LIMIT + ")");
+      ctx.waitUntil(alertOwner(env, (used + 1 >= REMOVE_LIMIT ? "⚠️ " : "") + "مشترك حذف جهازًا — " + u.email, [
+        "الحساب: " + u.email, "الجهاز المحذوف: " + (tg ? tg.label + " — " + [tg.city, tg.country].filter(Boolean).join("، ") : "—"),
+        "عمليات الحذف خلال 30 يومًا: " + (used + 1) + " من " + REMOVE_LIMIT,
+        used + 1 >= REMOVE_LIMIT ? "بلغ الحد، ولن يستطيع الحذف مجددًا حتى يتواصل معك. قد يكون هذا مؤشر مشاركة." : "", "الوقت: " + fmt(now)
+      ]));
       return json({ ok: true });
     }
     if (p === "/api/password" && m === "POST") {
@@ -242,8 +251,10 @@ async function api(req, env, ctx, url, p) {
         (SELECT MAX(last_seen) FROM devices d WHERE d.user_id=u.id) last_seen,
         (SELECT COUNT(*) FROM events e WHERE e.user_id=u.id AND e.kind IN('over_limit','concurrent','blocked') AND e.ts>?) flags
         FROM users u ORDER BY u.id DESC`).bind(now - DEVICE_WINDOW, now - 7 * DAY).all()).results;
+      const cg = (await env.DB.prepare("SELECT user_id,city,country FROM devices WHERE removed=0 AND last_seen>? AND (city IS NOT NULL OR country IS NOT NULL)").bind(now - 7 * DAY).all()).results, cs = {};
+      for (const c of cg) (cs[c.user_id] = cs[c.user_id] || new Set()).add((c.city || "") + "|" + (c.country || ""));
       return json({
-        now, users: rows.map(r => ({ ...r, expires_text: fmtD(r.expires_at), days_left: Math.ceil((r.expires_at - now) / DAY), last_text: r.last_seen ? fmt(r.last_seen) : "—", warned: r.warn_at > r.warn_ack })),
+        now, users: rows.map(r => ({ ...r, cities: cs[r.id] ? cs[r.id].size : 0, expires_text: fmtD(r.expires_at), days_left: Math.ceil((r.expires_at - now) / DAY), last_text: r.last_seen ? fmt(r.last_seen) : "—", warned: r.warn_at > r.warn_ack })),
         mailer: !!(env.RESEND_API_KEY && env.ALERT_EMAIL)
       });
     }
