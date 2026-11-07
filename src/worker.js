@@ -145,6 +145,17 @@ async function api(req, env, ctx, url, p) {
     if (!ex || ex.removed) {
       const c = await env.DB.prepare("SELECT COUNT(*) n FROM devices WHERE user_id=? AND removed=0 AND last_seen>? AND did<>?").bind(u.id, now - DEVICE_WINDOW, did).first();
       count = c.n + 1; isNew = true; over = count > u.max_devices;
+      if (over) {
+        const recent = await env.DB.prepare("SELECT id FROM events WHERE user_id=? AND kind='blocked' AND ts>?").bind(u.id, now - 60 * MIN).first();
+        await ev(env, u, "blocked", `${lb} — ${where(cf)} — مرفوض: الحد ${u.max_devices} أجهزة`);
+        await env.DB.prepare("UPDATE users SET warn_at=? WHERE id=?").bind(now, u.id).run();
+        if (!recent) ctx.waitUntil(alertOwner(env, "⛔ تم رفض جهاز جديد — " + u.email, [
+          "الحساب: " + u.email, "الجهاز المرفوض: " + lb, "الموقع التقريبي: " + where(cf),
+          "الأجهزة المسجلة: " + (count - 1) + " من " + u.max_devices, "الوقت: " + fmt(now),
+          "هذا مؤشر محتمل على مشاركة الحساب."
+        ]));
+        return json({ error: "وصل حسابك إلى الحد الأقصى (" + u.max_devices + " أجهزة). ادخل من أحد أجهزتك المسجلة ثم افتح «حسابي» واحذف جهازًا، وبعدها سجّل الدخول هنا. الاشتراك شخصي ولا تجوز مشاركته." }, 403);
+      }
       if (ex) await env.DB.prepare("UPDATE devices SET removed=0,label=?,country=?,city=?,iph=?,first_seen=?,last_seen=? WHERE user_id=? AND did=?").bind(lb, cf.country || null, cf.city || null, iph, now, now, u.id, did).run();
       else await env.DB.prepare("INSERT INTO devices(user_id,did,label,country,city,iph,first_seen,last_seen) VALUES(?,?,?,?,?,?,?,?)").bind(u.id, did, lb, cf.country || null, cf.city || null, iph, now, now).run();
     } else {
@@ -175,7 +186,7 @@ async function api(req, env, ctx, url, p) {
     return json({ ok: true }, 200, { "set-cookie": ckDel("sid") });
   }
 
-  if (p === "/api/me" || p === "/api/ack" || p === "/api/password") {
+  if (p === "/api/me" || p === "/api/ack" || p === "/api/password" || p === "/api/device") {
     const s = await getSession(req, env, ctx);
     if (!s.ok) return json({ error: s.why }, 401);
     const u = s.user, now = Date.now();
@@ -183,6 +194,13 @@ async function api(req, env, ctx, url, p) {
       const b = await body(req);
       if (b.kind === "welcome") await env.DB.prepare("UPDATE users SET welcome_ack=1 WHERE id=?").bind(u.id).run();
       else if (b.kind === "warn") await env.DB.prepare("UPDATE users SET warn_ack=? WHERE id=?").bind(u.warn_at, u.id).run();
+      return json({ ok: true });
+    }
+    if (p === "/api/device" && m === "POST") {
+      const b = await body(req), d = String(b.did || "");
+      if (!/^[0-9a-f]{32}$/.test(d) || d === u.did) return json({ error: "لا يمكن حذف هذا الجهاز" }, 400);
+      await env.DB.batch([env.DB.prepare("UPDATE devices SET removed=1 WHERE user_id=? AND did=?").bind(u.id, d), env.DB.prepare("DELETE FROM sessions WHERE user_id=? AND did=?").bind(u.id, d)]);
+      await ev(env, u, "revoke", "حذف المستخدم جهازًا من حسابه");
       return json({ ok: true });
     }
     if (p === "/api/password" && m === "POST") {
@@ -201,7 +219,7 @@ async function api(req, env, ctx, url, p) {
     return json({
       email: u.email, expires_at: u.expires_at, expires_text: fmtD(u.expires_at), days_left: Math.max(0, Math.ceil((u.expires_at - now) / DAY)),
       max_devices: u.max_devices, notice,
-      devices: dv.map(d => ({ label: d.label, where: [d.city, d.country].filter(Boolean).join("، ") || "—", last: fmt(d.last_seen), current: d.did === u.did }))
+      devices: dv.map(d => ({ did: d.did, label: d.label, where: [d.city, d.country].filter(Boolean).join("، ") || "—", last: fmt(d.last_seen), current: d.did === u.did }))
     });
   }
 
@@ -222,7 +240,7 @@ async function api(req, env, ctx, url, p) {
       const rows = (await env.DB.prepare(`SELECT u.id,u.email,u.name,u.note,u.expires_at,u.active,u.max_devices,u.warn_at,u.warn_ack,
         (SELECT COUNT(*) FROM devices d WHERE d.user_id=u.id AND d.removed=0 AND d.last_seen>?) devs,
         (SELECT MAX(last_seen) FROM devices d WHERE d.user_id=u.id) last_seen,
-        (SELECT COUNT(*) FROM events e WHERE e.user_id=u.id AND e.kind IN('over_limit','concurrent') AND e.ts>?) flags
+        (SELECT COUNT(*) FROM events e WHERE e.user_id=u.id AND e.kind IN('over_limit','concurrent','blocked') AND e.ts>?) flags
         FROM users u ORDER BY u.id DESC`).bind(now - DEVICE_WINDOW, now - 7 * DAY).all()).results;
       return json({
         now, users: rows.map(r => ({ ...r, expires_text: fmtD(r.expires_at), days_left: Math.ceil((r.expires_at - now) / DAY), last_text: r.last_seen ? fmt(r.last_seen) : "—", warned: r.warn_at > r.warn_ack })),
@@ -298,7 +316,7 @@ function note(cls,text,kind){var n=document.createElement("div");n.className="ga
 if(kind){var b=document.createElement("button");b.type="button";b.textContent="فهمت";b.onclick=function(){fetch("/api/ack",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({kind:kind})});n.remove()};n.appendChild(b)}
 document.body.appendChild(n)}
 if(m.notice==="warn")note("w","تنبيه: لاحظنا استخدام حسابك من أكثر من "+m.max_devices+" أجهزة. الاشتراك شخصي ولا تجوز مشاركته، وتكرار ذلك قد يؤدي إلى إيقاف الحساب.","warn");
-else if(m.notice==="welcome")note("i","مرحبًا بك. الاشتراك شخصي ولا تجوز مشاركته، ويُسمح بتسجيل الدخول من "+m.max_devices+" أجهزة كحد أقصى. سنُنبّهك إن تجاوز حسابك هذا الحد.","welcome");
+else if(m.notice==="welcome")note("i","مرحبًا بك. الاشتراك شخصي ولا تجوز مشاركته، ويُسمح بتسجيل الدخول من "+m.max_devices+" أجهزة كحد أقصى، ولن يُسمح بدخول جهاز إضافي إلا بعد حذف أحد أجهزتك من «حسابي».","welcome");
 else if(m.days_left<=3)note("i","ينتهي اشتراكك خلال "+m.days_left+" أيام ("+m.expires_text+"). تواصل مع المسؤول للتجديد.",null);
 }).catch(function(){});
 })();`;
