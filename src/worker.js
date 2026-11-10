@@ -53,15 +53,20 @@ const fmtD = ts => new Date(ts).toLocaleDateString("ar-SA", { timeZone: "Asia/Ri
 const where = (cf) => [cf && cf.city, cf && cf.country].filter(Boolean).join("، ") || "غير معروف";
 const tempPass = () => { const c = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s = ""; const r = crypto.getRandomValues(new Uint8Array(10)); r.forEach(x => s += c[x % c.length]); return s; };
 
+async function sendMail(env, subject, text) {
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + env.RESEND_API_KEY, "content-type": "application/json" },
+    body: JSON.stringify({ from: "Site Alerts <onboarding@resend.dev>", to: [env.ALERT_EMAIL], subject, text })
+  });
+  return { status: r.status, body: (await r.text()).slice(0, 300) };
+}
 async function alertOwner(env, subject, lines) {
   if (!env.RESEND_API_KEY || !env.ALERT_EMAIL) return;
   try {
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: "Bearer " + env.RESEND_API_KEY, "content-type": "application/json" },
-      body: JSON.stringify({ from: "تنبيهات الموقع <onboarding@resend.dev>", to: [env.ALERT_EMAIL], subject, text: lines.join("\n") })
-    });
-  } catch (e) { }
+    const r = await sendMail(env, subject, lines.join("\n"));
+    if (r.status >= 300) await ev(env, null, "mail_error", "فشل إرسال الإيميل (" + r.status + "): " + r.body);
+  } catch (e) { try { await ev(env, null, "mail_error", "فشل إرسال الإيميل: " + String(e).slice(0, 200)); } catch (_) { } }
 }
 const ev = (env, user, kind, detail) => env.DB.prepare("INSERT INTO events(ts,user_id,email,kind,detail) VALUES(?,?,?,?,?)").bind(Date.now(), user ? user.id : null, user ? user.email : "", kind, detail || "").run();
 
@@ -258,6 +263,11 @@ async function api(req, env, ctx, url, p) {
         mailer: !!(env.RESEND_API_KEY && env.ALERT_EMAIL)
       });
     }
+    if (p === "/api/admin/testmail" && m === "POST") {
+      if (!env.RESEND_API_KEY || !env.ALERT_EMAIL) return json({ error: "التنبيهات غير مفعّلة" }, 400);
+      try { const r = await sendMail(env, "اختبار التنبيهات", "إذا وصلتك هذه الرسالة فالتنبيهات تعمل.\n" + fmt(now)); return json({ ok: r.status < 300, status: r.status, detail: r.body }); }
+      catch (e) { return json({ ok: false, detail: String(e).slice(0, 200) }); }
+    }
     if (p === "/api/admin/events" && m === "GET") {
       const rows = (await env.DB.prepare("SELECT ts,email,kind,detail FROM events ORDER BY id DESC LIMIT 150").all()).results;
       return json({ events: rows.map(r => ({ ...r, text: fmt(r.ts) })) });
@@ -359,7 +369,7 @@ export default {
       const isFile = /\.[a-z0-9]+$/i.test(p) && !/\.html$/i.test(p);
       const name = p.replace(/\.html$/i, "");
       const target = isFile ? p : (name === "/" ? "/index" : name) + ".html";
-      const open = !isFile && (name === "/login" || name === "/admin" || name === "/terms");
+      const open = !isFile && (name === "/login" || name === "/admin" || name === "/terms" || name === "/subscribe");
       if (open) return page(await env.ASSETS.fetch(new Request(new URL(target, url), req)), false);
 
       const s = await getSession(req, env, ctx);
