@@ -55,7 +55,7 @@ button.r{background:var(--err)}
       <div><label>البريد الإلكتروني</label><input id="ae" type="email" dir="ltr" required></div>
       <div><label>الاسم (اختياري)</label><input id="an"></div>
       <div><label>مدة الاشتراك (أيام)</label><input id="ad" type="number" min="1" value="30"></div>
-      <div><label>عدد الأجهزة</label><input id="am" type="number" min="1" max="10" value="3"></div>
+      <div><label>عدد الأجهزة</label><input id="am" type="number" min="1" max="10" value="2"></div>
       <div><label>كلمة مرور (اتركها فارغة لتُولَّد)</label><input id="ap2" dir="ltr"></div>
       <div><button type="submit" style="width:100%">إضافة</button></div>
     </form>
@@ -84,18 +84,19 @@ function load(){
    var fl=(u.flags?'<span class="tag w">'+u.flags+' تنبيه/7 أيام</span> ':'')+(u.devs>u.max_devices?'<span class="tag x">تجاوز الأجهزة</span>':'')+(u.cities>1?' <span class="tag x">أجهزة في '+u.cities+' مدن/دول خلال 7 أيام</span>':'');
    return '<div class="u" data-id="'+u.id+'"><div class="h"><span class="em">'+esc(u.email)+'</span><span>'+st+' '+fl+'</span></div>'+
    '<div class="meta">'+(u.name?esc(u.name)+' — ':'')+'ينتهي: '+esc(u.expires_text)+' ('+u.days_left+' يوم) — الأجهزة: '+u.devs+' من '+u.max_devices+' — آخر دخول: '+esc(u.last_text)+'</div>'+
-   '<div class="acts"><button data-a="extend" data-d="30">+30 يوم</button><button data-a="extend" data-d="180">+6 أشهر</button><button class="g" data-a="devices">الأجهزة</button><button class="g" data-a="reset">كلمة مرور جديدة</button><button class="g" data-a="revoke">إزالة كل الأجهزة</button>'+
+   '<div class="acts"><button data-a="extend" data-d="30">+30 يوم</button><button data-a="extend" data-d="180">+6 أشهر</button><button class="g" data-a="devices">الأجهزة</button><button class="g" data-a="maxdev" data-m="'+u.max_devices+'">عدد الأجهزة المسموح</button><button class="g" data-a="reset">كلمة مرور جديدة</button><button class="g" data-a="revoke">إزالة كل الأجهزة</button>'+
    (u.active?'<button class="g" data-a="suspend">إيقاف</button>':'<button data-a="activate">تفعيل</button>')+'<button class="r" data-a="delete">حذف</button></div><div class="dvs"></div><div class="pwo"></div></div>'}).join("")||'<div class="meta">لا يوجد مشتركون بعد.</div>'});
  call("/api/admin/events").then(function(x){if(!x.ok)return;$("events").innerHTML=x.j.events.map(function(e){var k=KIND[e.kind]||[e.kind,"m"];return '<div class="ev"><span class="tag '+k[1]+'">'+esc(k[0])+'</span> <b dir="ltr">'+esc(e.email)+'</b> — '+esc(e.detail)+' <small>'+esc(e.text)+'</small></div>'}).join("")||'<div class="meta">لا أحداث.</div>'});
 }
 $("af").onsubmit=function(e){e.preventDefault();
  call("/api/admin/user","POST",{email:$("ae").value,name:$("an").value,days:+$("ad").value,max_devices:+$("am").value,password:$("ap2").value}).then(function(x){
   if(x.ok){$("am2").textContent="تمت الإضافة. أرسل البيانات التالية للمشترك (لن تظهر كلمة المرور مرة أخرى):";$("am2").style.color="var(--green)";
-   $("apw").innerHTML='<div class="pw">البريد: <b>'+esc(x.j.email)+'</b><br>كلمة المرور: <b>'+esc(x.j.password)+'</b></div>';$("af").reset();$("ad").value=30;$("am").value=3;load()}
+   $("apw").innerHTML='<div class="pw">البريد: <b>'+esc(x.j.email)+'</b><br>كلمة المرور: <b>'+esc(x.j.password)+'</b></div>';$("af").reset();$("ad").value=30;$("am").value=2;load()}
   else{$("am2").style.color="var(--err)";$("am2").textContent=x.j.error||"خطأ";$("apw").innerHTML=""}})};
 $("users").onclick=function(e){
  var b=e.target.closest("button");if(!b)return;var box=b.closest(".u"),id=box.dataset.id,a=b.dataset.a;
  if(a==="devices"){call("/api/admin/user/"+id+"/devices").then(function(x){box.querySelector(".dvs").innerHTML=x.j.devices.map(function(d){return '<div class="dv"><span><b>'+esc(d.label)+'</b> — '+esc(d.where)+'<br><small>أول دخول: '+esc(d.first)+' — آخر استخدام: '+esc(d.last)+'</small></span><button class="g" data-a="rmdev" data-dev="'+d.id+'">إزالة</button></div>'}).join("")||'<div class="meta">لا أجهزة.</div>'});return}
+ if(a==="maxdev"){var n=prompt("عدد الأجهزة المسموح لهذا المشترك (من 1 إلى 10):",b.dataset.m);if(n===null)return;n=parseInt(n,10);if(!(n>=1&&n<=10)){alert("أدخل رقمًا من 1 إلى 10");return}call("/api/admin/user/"+id+"/note","POST",{max_devices:n}).then(function(){load()});return}
  if(a==="rmdev"){call("/api/admin/user/"+id+"/device","POST",{device:+b.dataset.dev}).then(function(){load()});return}
  if(a==="delete"&&!confirm("حذف المشترك نهائيًا؟"))return;
  if((a==="revoke"||a==="suspend")&&!confirm("تأكيد؟"))return;

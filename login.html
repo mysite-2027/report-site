@@ -41,7 +41,8 @@ button:disabled{opacity:.6}
     <button id="go" type="submit">دخول</button>
     <div class="msg" id="msg" role="alert"></div>
   </form>
-  <div class="note"><b>الاشتراك شخصي.</b> يُسمح بالدخول من 3 أجهزة كحد أقصى، والجهاز الرابع يُرفض حتى تحذف أحد أجهزتك من «حسابي». مشاركة الحساب غير مسموحة وقد تؤدي إلى إيقافه.</div>
+  <div class="note"><b>الاشتراك شخصي.</b> يُسمح بالدخول من جهازين كحد أقصى (أو حسب باقتك)، والجهاز الإضافي يُرفض حتى تحذف أحد أجهزتك من «حسابي». مشاركة الحساب غير مسموحة وقد تؤدي إلى إيقافه.</div>
+  <div class="contact"><a href="/subscribe">لا تملك حسابًا؟ اشترك الآن</a></div>
   <div class="contact" id="contact" hidden>للاشتراك أو الاستفسار: <a id="clink" href="#" target="_blank" rel="noopener"></a></div>
 </div>
 <script>
@@ -49,7 +50,7 @@ button:disabled{opacity:.6}
 var CONTACT_TEXT="muyassir.reports@gmail.com", CONTACT_URL="mailto:muyassir.reports@gmail.com";
 var q=new URLSearchParams(location.search),m=document.getElementById("msg");
 if(CONTACT_TEXT&&CONTACT_URL){document.getElementById("contact").hidden=false;var a=document.getElementById("clink");a.textContent=CONTACT_TEXT;a.href=CONTACT_URL}
-var why={expired:"انتهى اشتراكك. تواصل مع المسؤول للتجديد.",suspended:"الحساب موقوف. تواصل مع المسؤول.",removed:"تم إنهاء هذه الجلسة. سجّل الدخول من جديد."}[q.get("r")];
+var why={expired:"انتهى اشتراكك. لتجديده افتح صفحة «اشترك الآن» أدناه.",suspended:"الحساب موقوف. تواصل مع المسؤول.",removed:"تم إنهاء هذه الجلسة. سجّل الدخول من جديد."}[q.get("r")];
 if(why){m.textContent=why}
 document.getElementById("f").onsubmit=function(e){
  e.preventDefault();var b=document.getElementById("go");b.disabled=true;m.className="msg info";m.textContent="جارٍ التحقق…";
