@@ -3,7 +3,8 @@
 // اختياري للتنبيهات بالإيميل: RESEND_API_KEY و ALERT_EMAIL.
 
 const DAY = 864e5, MIN = 6e4;
-const REMOVE_LIMIT = 2;
+const REMOVE_LIMIT = 1;
+const DV = n => n === 1 ? "جهاز واحد" : n === 2 ? "جهازين" : n + " أجهزة";
 const SESSION_DAYS = 30, DEVICE_WINDOW = 30 * DAY;
 const enc = new TextEncoder();
 
@@ -160,7 +161,7 @@ async function api(req, env, ctx, url, p) {
           "الأجهزة المسجلة: " + (count - 1) + " من " + u.max_devices, "الوقت: " + fmt(now),
           "هذا مؤشر محتمل على مشاركة الحساب."
         ]));
-        return json({ error: "وصل حسابك إلى الحد الأقصى (" + u.max_devices + " أجهزة). ادخل من أحد أجهزتك المسجلة ثم افتح «حسابي» واحذف جهازًا، وبعدها سجّل الدخول هنا. الاشتراك شخصي ولا تجوز مشاركته." }, 403);
+        return json({ error: "وصل حسابك إلى الحد الأقصى (" + DV(u.max_devices) + "). ادخل من أحد أجهزتك المسجلة ثم افتح «حسابي» واحذف جهازًا، وبعدها سجّل الدخول هنا. الاشتراك شخصي ولا تجوز مشاركته." }, 403);
       }
       if (ex) await env.DB.prepare("UPDATE devices SET removed=0,label=?,country=?,city=?,iph=?,first_seen=?,last_seen=? WHERE user_id=? AND did=?").bind(lb, cf.country || null, cf.city || null, iph, now, now, u.id, did).run();
       else await env.DB.prepare("INSERT INTO devices(user_id,did,label,country,city,iph,first_seen,last_seen) VALUES(?,?,?,?,?,?,?,?)").bind(u.id, did, lb, cf.country || null, cf.city || null, iph, now, now).run();
@@ -206,7 +207,7 @@ async function api(req, env, ctx, url, p) {
       const b = await body(req), d = String(b.did || "");
       if (!/^[0-9a-f]{32}$/.test(d) || d === u.did) return json({ error: "لا يمكن حذف هذا الجهاز" }, 400);
       const used = (await env.DB.prepare("SELECT COUNT(*) n FROM events WHERE user_id=? AND kind='user_remove' AND ts>?").bind(u.id, now - 30 * DAY).first()).n;
-      if (used >= REMOVE_LIMIT) return json({ error: "وصلت إلى حد حذف الأجهزة (" + REMOVE_LIMIT + " كل 30 يومًا). تواصل مع المسؤول لتغيير جهازك." }, 429);
+      if (used >= REMOVE_LIMIT) return json({ error: "وصلت إلى حد حذف الأجهزة (حذف جهاز واحد كل 30 يومًا). تواصل مع المسؤول لتغيير جهازك." }, 429);
       const tg = await env.DB.prepare("SELECT label,city,country FROM devices WHERE user_id=? AND did=?").bind(u.id, d).first();
       await env.DB.batch([env.DB.prepare("UPDATE devices SET removed=1 WHERE user_id=? AND did=?").bind(u.id, d), env.DB.prepare("DELETE FROM sessions WHERE user_id=? AND did=?").bind(u.id, d)]);
       await ev(env, u, "user_remove", "حذف المستخدم جهازًا: " + (tg ? tg.label : "") + " (" + (used + 1) + " من " + REMOVE_LIMIT + ")");
@@ -278,7 +279,7 @@ async function api(req, env, ctx, url, p) {
       const days = Math.max(1, Math.min(3660, +b.days || 30)), pw = String(b.password || "").trim() || tempPass(), salt = rand(16);
       try {
         await env.DB.prepare("INSERT INTO users(email,name,salt,hash,expires_at,max_devices,created_at,note) VALUES(?,?,?,?,?,?,?,?)")
-          .bind(email, String(b.name || "").trim(), salt, await pbkdf2(pw, salt), now + days * DAY, Math.max(1, Math.min(10, +b.max_devices || 3)), now, String(b.note || "").trim()).run();
+          .bind(email, String(b.name || "").trim(), salt, await pbkdf2(pw, salt), now + days * DAY, Math.max(1, Math.min(10, +b.max_devices || 2)), now, String(b.note || "").trim()).run();
       } catch (e) { return json({ error: "هذا البريد مسجّل مسبقًا" }, 409); }
       return json({ ok: true, email, password: pw });
     }
@@ -308,7 +309,7 @@ async function api(req, env, ctx, url, p) {
       } else if (act === "device") {
         await env.DB.batch([env.DB.prepare("UPDATE devices SET removed=1 WHERE user_id=? AND id=?").bind(id, +b.device), env.DB.prepare("DELETE FROM sessions WHERE user_id=? AND did=(SELECT did FROM devices WHERE id=?)").bind(id, +b.device)]);
       } else if (act === "note") {
-        await env.DB.prepare("UPDATE users SET note=?,max_devices=? WHERE id=?").bind(String(b.note || ""), Math.max(1, Math.min(10, +b.max_devices || u.max_devices)), id).run();
+        await env.DB.prepare("UPDATE users SET note=?,max_devices=? WHERE id=?").bind(b.note === undefined ? (u.note || "") : String(b.note), Math.max(1, Math.min(10, +b.max_devices || u.max_devices)), id).run();
       }
       return json({ ok: true });
     }
@@ -324,6 +325,7 @@ async function api(req, env, ctx, url, p) {
 
 /* ---------- سكربت الشريط الصغير والتنبيهات داخل الصفحات ---------- */
 const ACCT_JS = `(function(){
+function DVf(n){return n===1?"جهاز واحد":n===2?"جهازين":n+" أجهزة"}
 var s=document.createElement("style");
 s.textContent=".gate-bar,.gate-note{font-family:Tajawal,Tahoma,Arial,sans-serif;direction:rtl}.gate-bar{position:fixed;left:12px;bottom:12px;z-index:9998;background:#17445a;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;display:flex;gap:12px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.25)}.gate-bar a,.gate-bar button{color:#fff;background:none;border:0;font:inherit;cursor:pointer;text-decoration:none;padding:0}.gate-bar a:hover,.gate-bar button:hover{text-decoration:underline}.gate-note{position:fixed;top:0;left:0;right:0;z-index:9999;padding:12px 16px;font-size:14px;line-height:1.7;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center}.gate-note.w{background:#b42318;color:#fff}.gate-note.i{background:#fff4d6;color:#4a3500;border-bottom:2px solid #e0b100}.gate-note button{background:#fff;color:#17445a;border:0;border-radius:8px;padding:6px 16px;font:inherit;font-weight:700;cursor:pointer}@media print{.gate-bar,.gate-note{display:none!important}}";
 document.head.appendChild(s);
@@ -336,8 +338,8 @@ document.getElementById("gateOut").onclick=function(){fetch("/api/logout",{metho
 function note(cls,text,kind){var n=document.createElement("div");n.className="gate-note "+cls;n.setAttribute("data-html2canvas-ignore","true");var t=document.createElement("span");t.textContent=text;n.appendChild(t);
 if(kind){var b=document.createElement("button");b.type="button";b.textContent="فهمت";b.onclick=function(){fetch("/api/ack",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({kind:kind})});n.remove()};n.appendChild(b)}
 document.body.appendChild(n)}
-if(m.notice==="warn")note("w","تنبيه: لاحظنا استخدام حسابك من أكثر من "+m.max_devices+" أجهزة. الاشتراك شخصي ولا تجوز مشاركته، وتكرار ذلك قد يؤدي إلى إيقاف الحساب.","warn");
-else if(m.notice==="welcome")note("i","مرحبًا بك. الاشتراك شخصي ولا تجوز مشاركته، ويُسمح بتسجيل الدخول من "+m.max_devices+" أجهزة كحد أقصى، ولن يُسمح بدخول جهاز إضافي إلا بعد حذف أحد أجهزتك من «حسابي».","welcome");
+if(m.notice==="warn")note("w","تنبيه: لاحظنا استخدام حسابك من أكثر من "+DVf(m.max_devices)+". الاشتراك شخصي ولا تجوز مشاركته، وتكرار ذلك قد يؤدي إلى إيقاف الحساب.","warn");
+else if(m.notice==="welcome")note("i","مرحبًا بك. الاشتراك شخصي ولا تجوز مشاركته، ويُسمح بتسجيل الدخول من "+DVf(m.max_devices)+" كحد أقصى، ولن يُسمح بدخول جهاز إضافي إلا بعد حذف أحد أجهزتك من «حسابي».","welcome");
 else if(m.days_left<=3)note("i","ينتهي اشتراكك خلال "+m.days_left+" أيام ("+m.expires_text+"). تواصل مع المسؤول للتجديد.",null);
 }).catch(function(){});
 })();`;
