@@ -11,7 +11,8 @@
     "not_found_handling": "none"
   },
   "vars": {
-    "ALERT_EMAIL": "muyassir.reports@gmail.com"
+    "ALERT_EMAIL": "muyassir.reports@gmail.com",
+    "MAIL_FROM": "Muyassir <noreply@muyassir.org>"
   },
   "d1_databases": [
     {
