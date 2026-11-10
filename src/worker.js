@@ -58,7 +58,7 @@ async function sendMail(env, subject, text) {
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: "Bearer " + env.RESEND_API_KEY, "content-type": "application/json" },
-    body: JSON.stringify({ from: "Site Alerts <onboarding@resend.dev>", to: [env.ALERT_EMAIL], subject, text })
+    body: JSON.stringify({ from: env.MAIL_FROM || "Site Alerts <onboarding@resend.dev>", to: [env.ALERT_EMAIL], subject, text })
   });
   return { status: r.status, body: (await r.text()).slice(0, 300) };
 }
