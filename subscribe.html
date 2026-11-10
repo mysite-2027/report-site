@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>الاشتراك | مُيَسِّر التقارير المدرسية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6f8;--surface:#fff;--text:#16242f;--muted:#5b6b78;--border:#d5dde3;--navy:#17445a;--green:#00682f;--blue:#2c7db5;--lg:#3fac72;--err:#b42318}
+@media (prefers-color-scheme:dark){:root{--bg:#10181f;--surface:#18232c;--text:#e8eef2;--muted:#9fb0bc;--border:#2c3b47;--green:#52c1b4;--err:#ff8a80}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Tajawal","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.9}
+.wrap{max-width:720px;margin:auto;padding:0 18px 30px}
+.hero{background:var(--navy);color:#fff;border-radius:22px;padding:26px 22px;text-align:center;position:relative;overflow:hidden;margin-top:18px}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:linear-gradient(90deg,var(--blue),var(--lg))}
+.hero h1{margin:0 0 6px;font-size:clamp(1.4rem,4vw,1.9rem);line-height:1.4}
+.hero p{margin:0;opacity:.92}
+.card{background:var(--surface);border:2px solid var(--navy);border-radius:18px;padding:6px 20px 18px;margin-top:16px}
+h2{color:var(--green);font-size:1.15rem;margin:16px 0 6px}
+ul,ol{margin:6px 0;padding-inline-start:22px}li{margin:4px 0}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media(max-width:520px){.plans{grid-template-columns:1fr}}
+.plan{position:relative;display:block;border:2px solid var(--border);border-radius:14px;padding:12px 14px;cursor:pointer;text-align:center}
+.plan input{position:absolute;opacity:0;pointer-events:none}
+.plan b{display:block;font-size:1.05rem}
+.plan .pr{font-size:1.7rem;font-weight:800;color:var(--green);line-height:1.4}
+.plan small{color:var(--muted)}
+.plan:has(input:checked){border-color:var(--green);box-shadow:0 0 0 3px rgba(0,104,47,.15)}
+.plan .tag{position:absolute;top:-11px;left:12px;background:var(--lg);color:#fff;font-size:.78rem;font-weight:700;border-radius:99px;padding:0 10px}
+.row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:9px 0;border-bottom:1px solid var(--border)}
+.row:last-of-type{border:0}.row span{color:var(--muted)}
+button,.btn{display:inline-block;padding:10px 18px;border:0;border-radius:10px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+button:disabled{opacity:.55;cursor:default}
+.btn.g,button.g{background:none;color:var(--text);border:1.5px solid var(--border)}
+.cp{padding:2px 12px;font-size:.85rem;margin-right:8px}
+.act{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.note{color:var(--muted);font-size:.9rem;margin-top:10px}
+label{display:block;font-weight:700;margin:12px 0 4px;font-size:.95rem}
+input[type=text],input[type=email],input[type=password]{width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}
+input:focus{outline:2px solid var(--blue);border-color:var(--blue)}
+.inl{display:flex;gap:8px}.inl input{flex:1}.inl button{white-space:nowrap}
+.msg{min-height:1.4em;margin-top:10px;font-weight:700;color:var(--err)}
+.msg.ok{color:var(--green)}
+.done{background:rgba(63,172,114,.12);border:2px solid var(--lg);border-radius:14px;padding:14px 16px;margin-top:12px}
+.hint{color:var(--muted);font-size:.88rem;font-weight:400}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.tab{padding:14px 10px;border-radius:14px;border:2px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-weight:800;font-size:1.02rem;text-align:center;cursor:pointer}
+.tab small{display:block;font-weight:500;color:var(--muted);font-size:.85rem}
+.tab.on{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,104,47,.15)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero"><h1>اشترك في مُيَسِّر التقارير المدرسية</h1><p>نماذج مدرسية جاهزة للطباعة وحفظ PDF</p></header>
+
+<p style="text-align:center;margin:0 0 14px"><a href="/demo" style="display:inline-block;background:#17445a;color:#fff;border-radius:10px;padding:11px 22px;font-weight:700;text-decoration:none">شاهد جميع النماذج وجرّبها — بدون تسجيل</a></p>
+<div class="tabs" id="tabs" hidden>
+  <button type="button" class="tab" id="tabTrial">جرّب مجانًا<small>3 أيام بدون دفع</small></button>
+  <button type="button" class="tab" id="tabSub">اشترك الآن<small>شهر أو 6 أشهر</small></button>
+</div>
+
+<section class="card">
+<h2>ماذا تحصل عليه؟</h2>
+<ul>
+<li>جميع نماذج الموقع، مع تحديثات الأدوات الجديدة طوال مدة اشتراكك.</li>
+<li>تعبئة سريعة وحفظ بصيغة PDF وطباعة بتنسيق جاهز.</li>
+<li>تتم معالجة بياناتك داخل متصفحك، ولا نحتفظ بأسماء الطلاب ولا بدرجاتهم.</li>
+</ul>
+<div id="plansWrap"><h2 style="margin-top:14px">اختر الباقة</h2>
+<div class="plans" id="plans"></div></div>
+<p class="note" id="trialInfo" hidden>التجربة المجانية: <b>3 أيام</b> بكامل النماذج، ويُحفظ ما تنتجه <b>بعلامة مائية «نسخة تجريبية»</b>، على <b>جهاز واحد</b>، ومرة واحدة لكل بريد. بعدها تستطيع الاشتراك إن أعجبتك. لا نطلب منك أي بيانات دفع.</p>
+</section>
+
+<section class="card" id="payCard">
+<h2>الخطوة 1: حوّل مبلغ الاشتراك</h2>
+<div id="payRows">
+<div class="row" id="rBank"><span>البنك</span><b id="bank"></b></div>
+<div class="row" id="rName"><span>اسم صاحب الحساب</span><b id="aname"></b></div>
+<div class="row" id="rIban"><span>رقم الآيبان</span><b><span id="iban" dir="ltr"></span><button class="cp g" id="cp" type="button">نسخ</button></b></div>
+</div>
+<p id="payNone" hidden>تواصل معنا عبر واتساب لنرسل لك بيانات التحويل.</p>
+<div class="act"><a class="btn g" id="wa" hidden target="_blank" rel="noopener">تواصل عبر واتساب</a></div>
+</section>
+
+<section class="card" id="reqCard">
+<h2 id="reqTitle">الخطوة 2: أرسل طلب الاشتراك</h2>
+<div id="doneBox" class="done" hidden></div>
+<form id="f" autocomplete="on" novalidate>
+  <div id="whoRenew" class="note" hidden></div>
+  <div id="pubFields">
+    <label for="nm">الاسم</label>
+    <input id="nm" type="text" autocomplete="name" maxlength="60">
+    <label for="em">البريد الإلكتروني <span class="hint">(سيصلك عليه رمز تحقق وتصلك رسالة التفعيل)</span></label>
+    <div class="inl"><input id="em" type="email" inputmode="email" autocomplete="username" dir="ltr"><button type="button" id="sendCode" class="g">إرسال الرمز</button></div>
+    <label for="cd">رمز التحقق <span class="hint">(6 أرقام وصلتك على بريدك)</span></label>
+    <input id="cd" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" dir="ltr">
+    <label for="pw">كلمة المرور التي تريدها <span class="hint">(8 أحرف على الأقل، وتبقى عندك أنت)</span></label>
+    <input id="pw" type="password" autocomplete="new-password" dir="ltr">
+    <p class="note" id="renewNote">إن كان لديك حساب وتريد التجديد، اكتب بريدك واطلب الرمز، ولا تحتاج إلى كلمة مرور جديدة.</p>
+  </div>
+  <div id="refWrap"><label for="rf">بيانات التحويل <span class="hint">(اختياري: اسم المحوّل أو آخر 4 أرقام من الحوالة)</span></label>
+  <input id="rf" type="text" maxlength="80"></div>
+  <div class="act"><button type="submit" id="go">إرسال الطلب</button></div>
+  <div class="msg" id="msg" role="alert"></div>
+</form>
+<p class="note" id="subNote">لا يُفعَّل الحساب إلا بعد أن نتأكد من وصول التحويل، ويصلك إيميل عند التفعيل <span id="eta"></span>.</p>
+</section>
+
+<section class="card" id="step3">
+<h2>الخطوة 3: ادخل إلى حسابك</h2>
+<p>بعد وصول رسالة التفعيل، سجّل الدخول بالبريد وكلمة المرور التي اخترتها.</p>
+<div class="act"><a class="btn g" href="/login">لدي حساب، تسجيل الدخول</a></div>
+</section>
+
+<section class="card">
+<h2>قواعد مهمة</h2>
+<ul>
+<li>الاشتراك <b>شخصي</b> لصاحب البريد، ولا تجوز مشاركته.</li>
+<li>يُسمح بالدخول من <b>جهازين</b> كحد أقصى (أو حسب باقتك)، والجهاز الإضافي يُرفض حتى تحذف أحد أجهزتك من «حسابي».</li>
+<li>عند تكرار المخالفة يُوقَف الحساب دون استرداد المبلغ.</li>
+<li>الدفع غير مسترد بعد تفعيل الحساب، إلا في حال عطل من جهتنا يمنع استخدام الموقع.</li>
+</ul>
+<p class="note">بالاشتراك فإنك توافق على <a href="/terms" style="color:var(--green);font-weight:700">شروط الاستخدام وسياسة الخصوصية</a>.</p>
+</section>
+</div>
+<script>
+// ===== عدّل هذه القيم فقط، واترك الفارغ لإخفائه =====
+var PLANS=[
+  {id:"m1",name:"شهر واحد",price:"19 ريالًا",note:"30 يومًا"},
+  {id:"m6",name:"6 أشهر",price:"89 ريالًا",note:"180 يومًا",tag:"الأوفر"}
+];
+var BANK_NAME="";                    // اسم البنك
+var ACCOUNT_NAME="";                 // اسم صاحب الحساب
+var IBAN="";                         // رقم الآيبان
+var WHATSAPP="966557402432";         // رقم واتساب بصيغة دولية بدون +
+var ETA_TEXT="(عادة خلال ساعات)";    // مدة التفعيل بعد التحقق
+// ====================================================
+var $=function(i){return document.getElementById(i)};
+var session=false,mode="trial";
+$("eta").textContent=ETA_TEXT;
+$("plans").innerHTML=PLANS.map(function(p,i){return '<label class="plan">'+(p.tag?'<span class="tag">'+p.tag+'</span>':'')+'<input type="radio" name="plan" value="'+p.id+'"'+(i===0?' checked':'')+'><b>'+p.name+'</b><span class="pr">'+p.price+'</span><small>'+p.note+'</small></label>'}).join("");
+function show(v,r,t){if(v){$(t).textContent=v}else{$(r).hidden=true}}
+show(BANK_NAME,"rBank","bank");show(ACCOUNT_NAME,"rName","aname");show(IBAN,"rIban","iban");
+if(!BANK_NAME&&!ACCOUNT_NAME&&!IBAN){$("payRows").hidden=true;$("payNone").hidden=false}
+$("cp").onclick=function(){var b=this;(navigator.clipboard?navigator.clipboard.writeText(IBAN):Promise.reject()).then(function(){b.textContent="تم النسخ"},function(){b.textContent="انسخه يدويًا"});setTimeout(function(){b.textContent="نسخ"},1800)};
+if(WHATSAPP){var w=$("wa");w.hidden=false;w.href="https://wa.me/"+WHATSAPP.replace(/\D/g,"")+"?text="+encodeURIComponent("السلام عليكم، أرغب بالاشتراك في مُيَسِّر التقارير المدرسية.")}
+function setMode(m){
+ if(session)m="sub";mode=m;var t=m==="trial";
+ $("tabTrial").className="tab"+(t?" on":"");$("tabSub").className="tab"+(t?"":" on");
+ $("plansWrap").hidden=t;$("trialInfo").hidden=!t;$("payCard").hidden=t;$("refWrap").hidden=t;$("step3").hidden=t;$("subNote").hidden=t;$("renewNote").hidden=t;
+ $("reqTitle").textContent=t?"ابدأ تجربتك المجانية":(session?"الخطوة 2: أرسل طلب التجديد":"الخطوة 2: أرسل طلب الاشتراك");
+ $("go").textContent=t?"ابدأ التجربة المجانية":(session?"إرسال طلب التجديد":"إرسال الطلب");
+ $("pw").setAttribute("autocomplete","new-password");msg("")}
+$("tabTrial").onclick=function(){setMode("trial")};$("tabSub").onclick=function(){setMode("sub")};
+function plan(){var r=document.querySelector('input[name=plan]:checked');return r?r.value:"m1"}
+function msg(t,ok){var m=$("msg");m.textContent=t||"";m.className="msg"+(ok?" ok":"")}
+function post(u,d){return fetch(u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(d)}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})})}
+// وضع التجديد لمن سجّل دخوله
+fetch("/api/me",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(m){
+ if(!m)return;session=true;$("pubFields").hidden=true;
+ $("whoRenew").hidden=false;$("whoRenew").textContent="تجديد اشتراك الحساب: "+m.email+" (ينتهي في "+m.expires_text+")";
+ $("tabs").hidden=true;setMode("sub")}).catch(function(){});
+setMode("sub");
+var cool=0;
+$("sendCode").onclick=function(){
+ var em=$("em").value.trim();if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(em)){msg("اكتب بريدًا صحيحًا أولًا");return}
+ var b=this;b.disabled=true;msg("جارٍ إرسال الرمز…",true);
+ post("/api/signup/code",{email:em}).then(function(x){
+  if(x.ok){msg("أرسلنا الرمز إلى بريدك. افحص صندوق الوارد أو الرسائل غير المرغوبة.",true);cool=60;var t=setInterval(function(){cool--;b.textContent=cool>0?("إعادة الإرسال ("+cool+")"):"إعادة إرسال الرمز";if(cool<=0){clearInterval(t);b.disabled=false}},1000)}
+  else{msg(x.j.error||"تعذّر الإرسال");b.disabled=false}}).catch(function(){msg("تعذّر الاتصال. حاول مرة أخرى.");b.disabled=false})};
+$("f").onsubmit=function(e){
+ e.preventDefault();var go=$("go");
+ var d={plan:plan(),ref:$("rf").value.trim()};
+ if(!session){
+  d.name=$("nm").value.trim();d.email=$("em").value.trim();d.code=$("cd").value.trim();d.password=$("pw").value;
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(d.email)){msg("اكتب بريدًا صحيحًا");return}
+  if(!/^\d{6}$/.test(d.code)){msg("اكتب رمز التحقق المكوّن من 6 أرقام");return}
+ }
+ if(mode==="trial"&&(d.name.length<2||d.password.length<8)){msg("اكتب اسمك وكلمة مرور من 8 أحرف على الأقل");return}
+ go.disabled=true;msg("جارٍ الإرسال…",true);
+ if(mode==="trial"){post("/api/trial",{name:d.name,email:d.email,code:d.code,password:d.password}).then(function(x){
+  if(!x.ok){msg(x.j.error||"تعذّر بدء التجربة");go.disabled=false;return}
+  msg("تم تفعيل تجربتك. جارٍ تسجيل دخولك…",true);
+  post("/api/login",{email:d.email,password:d.password}).then(function(y){if(y.ok)location.href="/";else location.href="/login"})}).catch(function(){msg("تعذّر الاتصال. حاول مرة أخرى.");go.disabled=false});return}
+ post(session?"/api/renew":"/api/signup",d).then(function(x){
+  if(x.ok){$("f").hidden=true;var b=$("doneBox");b.hidden=false;b.innerHTML="<b>استلمنا طلبك.</b><br>سنتحقق من وصول التحويل ونرسل لك إيميلًا عند التفعيل. "+(session?"":"بعدها تدخل ببريدك وكلمة المرور التي اخترتها.")}
+  else{msg(x.j.error||"تعذّر إرسال الطلب");go.disabled=false}}).catch(function(){msg("تعذّر الاتصال. حاول مرة أخرى.");go.disabled=false})};
+</script>
+</body>
+</html>

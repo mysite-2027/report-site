@@ -49,6 +49,7 @@ button.r{background:var(--err)}
 </div>
 <div id="app" hidden>
   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h1>لوحة المسؤول</h1><button class="g" id="lo">خروج</button></div>
+  <div class="card" id="rqCard"><h2>طلبات الاشتراك <span id="rqCnt" class="meta"></span></h2><div id="rqs"></div></div>
   <div class="card">
     <h2>إضافة مشترك</h2>
     <form id="af" class="grid">
@@ -73,8 +74,13 @@ function show(on){$("login").hidden=on;$("app").hidden=!on;if(on)load()}
 call("/api/admin/users").then(function(x){show(x.ok)});
 $("lf").onsubmit=function(e){e.preventDefault();call("/api/admin/login","POST",{password:$("ap").value}).then(function(x){if(x.ok)show(true);else $("lm").textContent=x.j.error||"خطأ"})};
 $("lo").onclick=function(){call("/api/admin/logout","POST").then(function(){show(false)})};
-var KIND={new_device:["جهاز جديد","m"],over_limit:["تجاوز الأجهزة","w"],blocked:["جهاز مرفوض","w"],user_remove:["حذف جهاز (مستخدم)","w"],mail_error:["فشل الإيميل","x"],concurrent:["استخدام متزامن","w"],extend:["تمديد","m"],suspend:["إيقاف","x"],revoke:["إزالة الأجهزة","m"]};
-function load(){
+var KIND={new_device:["جهاز جديد","m"],over_limit:["تجاوز الأجهزة","w"],blocked:["جهاز مرفوض","w"],trial_start:["بدء تجربة","m"],signup_request:["طلب اشتراك","w"],renew_request:["طلب تجديد","w"],signup_approved:["قبول طلب","m"],signup_rejected:["رفض طلب","x"],password_reset_request:["طلب استعادة","m"],password_reset:["تغيير كلمة المرور","m"],reminder:["تذكير تجديد","m"],user_remove:["حذف جهاز (مستخدم)","w"],mail_error:["فشل الإيميل","x"],concurrent:["استخدام متزامن","w"],extend:["تمديد","m"],suspend:["إيقاف","x"],revoke:["إزالة الأجهزة","m"]};
+function loadReq(){call("/api/admin/requests").then(function(x){if(!x.ok)return;var r=x.j.requests;$("rqCnt").textContent="("+r.length+")";
+ $("rqs").innerHTML=r.map(function(q){return '<div class="u" data-q="'+q.id+'" data-days="'+q.days+'"><div class="meta"><b dir="ltr">'+esc(q.email)+'</b> — '+(q.kind==="renew"?'<span class="tag w">تجديد</span>':'<span class="tag">اشتراك جديد</span>')+' '+(q.name?esc(q.name)+' — ':'')+esc(q.plan_name)+' — مرجع التحويل: '+esc(q.ref||"—")+' <small>'+esc(q.text)+'</small></div><div class="acts"><button data-qa="approve">قبول</button><button class="r" data-qa="reject">رفض</button></div></div>'}).join("")||'<div class="meta">لا توجد طلبات معلّقة.</div>'})}
+$("rqs").onclick=function(e){var b=e.target.closest("button");if(!b||!b.dataset.qa)return;var box=b.closest("[data-q]"),id=box.dataset.q;
+ if(b.dataset.qa==="approve"){if(!confirm("هل تأكدت من وصول المبلغ؟ سيُفعَّل الحساب فورًا."))return;call("/api/admin/request/"+id+"/approve","POST",{days:+box.dataset.days}).then(function(x){if(!x.ok)alert(x.j.error||"خطأ");loadReq();load()})}
+ else{var r=prompt("سبب الرفض (اختياري، يصل للمشترك بالإيميل):","");if(r===null)return;call("/api/admin/request/"+id+"/reject","POST",{reason:r}).then(function(){loadReq();load()})}};
+function load(){loadReq();
  call("/api/admin/users").then(function(x){if(!x.ok)return;var us=x.j.users;$("cnt").textContent="("+us.length+")";
   $("mail").textContent=x.j.mailer?"تنبيهات الإيميل: مفعّلة":"تنبيهات الإيميل: غير مفعّلة (تظهر الأحداث هنا فقط)";
   $("tm").innerHTML=x.j.mailer?'<button id="tmb" type="button" style="margin:6px 0">إرسال إيميل اختبار</button> <span id="tmr"></span>':"";
