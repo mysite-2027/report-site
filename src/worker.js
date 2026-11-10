@@ -4,6 +4,10 @@
 
 const DAY = 864e5, MIN = 6e4;
 const REMOVE_LIMIT = 1;
+const TRIAL_DAYS = 3, TRIAL_NOTE = "تجربة";
+const PLAN_DAYS = { m1: 30, m6: 180 };
+const PLAN_NAME = { m1: "شهر واحد", m6: "6 أشهر" };
+const okEmail = e => e.length <= 120 && /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(e);
 const DV = n => n === 1 ? "جهاز واحد" : n === 2 ? "جهازين" : n + " أجهزة";
 const SESSION_DAYS = 30, DEVICE_WINDOW = 30 * DAY;
 const enc = new TextEncoder();
@@ -13,7 +17,12 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS sessions(id TEXT PRIMARY KEY,user_id INTEGER NOT NULL,did TEXT NOT NULL,created_at INTEGER,last_seen INTEGER)`,
   `CREATE TABLE IF NOT EXISTS devices(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL,did TEXT NOT NULL,label TEXT,country TEXT,city TEXT,iph TEXT,first_seen INTEGER,last_seen INTEGER,removed INTEGER DEFAULT 0,UNIQUE(user_id,did))`,
   `CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY AUTOINCREMENT,ts INTEGER,user_id INTEGER,email TEXT,kind TEXT,detail TEXT)`,
-  `CREATE TABLE IF NOT EXISTS attempts(k TEXT,ts INTEGER)`
+  `CREATE TABLE IF NOT EXISTS attempts(k TEXT,ts INTEGER)`,
+  `CREATE TABLE IF NOT EXISTS requests(id INTEGER PRIMARY KEY AUTOINCREMENT,kind TEXT,user_id INTEGER,email TEXT NOT NULL,name TEXT DEFAULT '',salt TEXT,hash TEXT,plan TEXT,ref TEXT DEFAULT '',status TEXT DEFAULT 'pending',created_at INTEGER,decided_at INTEGER)`,
+  `CREATE TABLE IF NOT EXISTS codes(email TEXT PRIMARY KEY,h TEXT,exp INTEGER,tries INTEGER DEFAULT 0)`,
+  `CREATE TABLE IF NOT EXISTS resets(h TEXT PRIMARY KEY,user_id INTEGER,exp INTEGER)`,
+  `CREATE TABLE IF NOT EXISTS trials(email TEXT PRIMARY KEY,ts INTEGER,iph TEXT)`,
+  `CREATE TABLE IF NOT EXISTS reminders(user_id INTEGER,expires_at INTEGER,PRIMARY KEY(user_id,expires_at))`
 ];
 let ready = null;
 function init(env) {
@@ -54,14 +63,33 @@ const fmtD = ts => new Date(ts).toLocaleDateString("ar-SA", { timeZone: "Asia/Ri
 const where = (cf) => [cf && cf.city, cf && cf.country].filter(Boolean).join("، ") || "غير معروف";
 const tempPass = () => { const c = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s = ""; const r = crypto.getRandomValues(new Uint8Array(10)); r.forEach(x => s += c[x % c.length]); return s; };
 
-async function sendMail(env, subject, text) {
+async function sendMail(env, subject, text, to, html) {
+  const o = { from: env.MAIL_FROM || "Site Alerts <onboarding@resend.dev>", to: [to || env.ALERT_EMAIL], subject, text };
+  if (html) o.html = html;
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: "Bearer " + env.RESEND_API_KEY, "content-type": "application/json" },
-    body: JSON.stringify({ from: env.MAIL_FROM || "Site Alerts <onboarding@resend.dev>", to: [env.ALERT_EMAIL], subject, text })
+    body: JSON.stringify(o)
   });
   return { status: r.status, body: (await r.text()).slice(0, 300) };
 }
+const escH = x => String(x).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function mailHtml(lines, link) {
+  return '<div dir="rtl" style="font-family:Tahoma,Arial,sans-serif;font-size:16px;line-height:1.9;color:#16242f;max-width:520px">' +
+    lines.map(l => '<p style="margin:0 0 10px">' + escH(l) + "</p>").join("") +
+    (link ? '<p><a href="' + escH(link.url) + '" style="display:inline-block;background:#00682f;color:#fff;padding:10px 22px;border-radius:8px;text-decoration:none;font-weight:700">' + escH(link.text) + "</a></p>" : "") +
+    '<p style="color:#5b6b78;font-size:13px;margin-top:18px">مُيَسِّر — نماذج وتقارير مدرسية</p></div>';
+}
+// إيميل إلى مشترك (يتطلب دومينًا موثّقًا في MAIL_FROM)
+async function mailUser(env, to, subject, lines, link) {
+  if (!env.RESEND_API_KEY || !env.MAIL_FROM) return { ok: false };
+  try {
+    const r = await sendMail(env, subject, lines.join("\n") + (link ? "\n" + link.url : ""), to, mailHtml(lines, link));
+    if (r.status >= 300) { await ev(env, null, "mail_error", "فشل إرسال إيميل إلى " + to + " (" + r.status + "): " + r.body); return { ok: false }; }
+    return { ok: true };
+  } catch (e) { try { await ev(env, null, "mail_error", "فشل إرسال إيميل إلى " + to + ": " + String(e).slice(0, 150)); } catch (_) { } return { ok: false }; }
+}
+const siteUrl = (env, url) => (env.SITE_URL || (url && url.origin) || "https://app.muyassir.org").replace(/\/+$/, "");
 async function alertOwner(env, subject, lines) {
   if (!env.RESEND_API_KEY || !env.ALERT_EMAIL) return;
   try {
@@ -133,6 +161,116 @@ async function api(req, env, ctx, url, p) {
   }
   const ip = req.headers.get("cf-connecting-ip") || "";
 
+  /* ----- طلبات الاشتراك الذاتية ----- */
+  if (p === "/api/signup/code" && m === "POST") {
+    const b = await body(req), email = String(b.email || "").trim().toLowerCase();
+    if (!okEmail(email)) return json({ error: "البريد غير صالح" }, 400);
+    if (!env.RESEND_API_KEY || !env.MAIL_FROM) return json({ error: "خدمة التحقق غير متاحة حاليًا. تواصل معنا عبر واتساب." }, 503);
+    if (await tooMany(env, "sc:" + email, 3, 60 * MIN) || await tooMany(env, "si:" + ip, 10, 60 * MIN)) return json({ error: "طلبات كثيرة. حاول بعد قليل." }, 429);
+    await fail(env, "sc:" + email); await fail(env, "si:" + ip);
+    const code = String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000));
+    await env.DB.prepare("INSERT OR REPLACE INTO codes(email,h,exp,tries) VALUES(?,?,?,0)").bind(email, await sha(code + "|" + email), Date.now() + 10 * MIN).run();
+    const r = await mailUser(env, email, "رمز التحقق من بريدك", ["رمز التحقق الخاص بك: " + code, "الرمز صالح لمدة 10 دقائق. إن لم تطلبه فتجاهل هذه الرسالة."]);
+    if (!r.ok) return json({ error: "تعذّر إرسال الرمز. تأكد من البريد وحاول مرة أخرى." }, 502);
+    return json({ ok: true });
+  }
+  if (p === "/api/signup" && m === "POST") {
+    const b = await body(req), now = Date.now(), email = String(b.email || "").trim().toLowerCase(),
+      name = String(b.name || "").trim().slice(0, 60), pw = String(b.password || ""), plan = PLAN_DAYS[b.plan] ? b.plan : null,
+      ref = String(b.ref || "").trim().slice(0, 80), code = String(b.code || "").trim();
+    if (!okEmail(email) || !plan) return json({ error: "أكمل الحقول بشكل صحيح" }, 400);
+    if (await tooMany(env, "ss:" + ip, 8, 60 * MIN)) return json({ error: "طلبات كثيرة. حاول بعد قليل." }, 429);
+    const c = await env.DB.prepare("SELECT * FROM codes WHERE email=?").bind(email).first();
+    if (!c || c.exp < now || c.tries >= 5) return json({ error: "رمز التحقق منتهٍ أو غير موجود. اطلب رمزًا جديدًا." }, 400);
+    if (!same(await sha(code + "|" + email), c.h)) {
+      await env.DB.prepare("UPDATE codes SET tries=tries+1 WHERE email=?").bind(email).run(); await fail(env, "ss:" + ip);
+      return json({ error: "رمز التحقق غير صحيح" }, 400);
+    }
+    const ex = await env.DB.prepare("SELECT * FROM users WHERE email=?").bind(email).first();
+    if (!ex && (name.length < 2 || pw.length < 8 || pw.length > 100)) return json({ error: "اكتب اسمك، وكلمة مرور من 8 أحرف على الأقل" }, 400);
+    await env.DB.prepare("DELETE FROM codes WHERE email=?").bind(email).run();
+    await fail(env, "ss:" + ip);
+    if (ex) {
+      // بريد لديه حساب: يُعامل الطلب كتجديد (تحقّق ملكية البريد بالرمز)
+      const old = await env.DB.prepare("SELECT id FROM requests WHERE user_id=? AND kind='renew' AND status='pending'").bind(ex.id).first();
+      if (old) await env.DB.prepare("UPDATE requests SET plan=?,ref=?,created_at=? WHERE id=?").bind(plan, ref, now, old.id).run();
+      else await env.DB.prepare("INSERT INTO requests(kind,user_id,email,name,plan,ref,created_at) VALUES('renew',?,?,?,?,?,?)").bind(ex.id, ex.email, ex.name || "", plan, ref, now).run();
+      await ev(env, ex, "renew_request", PLAN_NAME[plan] + (ref ? " — مرجع: " + ref : ""));
+    } else {
+      const salt = rand(16), hash = await pbkdf2(pw, salt);
+      const old = await env.DB.prepare("SELECT id FROM requests WHERE email=? AND kind='new' AND status='pending'").bind(email).first();
+      if (old) await env.DB.prepare("UPDATE requests SET name=?,salt=?,hash=?,plan=?,ref=?,created_at=? WHERE id=?").bind(name, salt, hash, plan, ref, now, old.id).run();
+      else await env.DB.prepare("INSERT INTO requests(kind,email,name,salt,hash,plan,ref,created_at) VALUES('new',?,?,?,?,?,?,?)").bind(email, name, salt, hash, plan, ref, now).run();
+      await ev(env, { id: null, email }, "signup_request", name + " — " + PLAN_NAME[plan] + (ref ? " — مرجع: " + ref : ""));
+    }
+    ctx.waitUntil(alertOwner(env, (ex ? "طلب تجديد اشتراك — " : "طلب اشتراك جديد — ") + email, [
+      "البريد: " + email + " (تم التحقق منه)", ex ? "" : "الاسم: " + name, "الباقة: " + PLAN_NAME[plan], "مرجع التحويل: " + (ref || "—"),
+      "افتح لوحة المسؤول للقبول بعد التأكد من وصول المبلغ.", "الوقت: " + fmt(now)
+    ]));
+    return json({ ok: true });
+  }
+
+  if (p === "/api/trial" && m === "POST") {
+    return json({ error: "التجربة المجانية غير متاحة. يمكنك تجربة النماذج بعلامة مائية من صفحة المعرض." }, 404);
+    const b = await body(req), now = Date.now(), email = String(b.email || "").trim().toLowerCase(),
+      name = String(b.name || "").trim().slice(0, 60), pw = String(b.password || ""), code = String(b.code || "").trim();
+    if (!okEmail(email) || name.length < 2 || pw.length < 8 || pw.length > 100) return json({ error: "اكتب اسمك وبريدك، وكلمة مرور من 8 أحرف على الأقل" }, 400);
+    if (await tooMany(env, "ss:" + ip, 8, 60 * MIN)) return json({ error: "طلبات كثيرة. حاول بعد قليل." }, 429);
+    const c = await env.DB.prepare("SELECT * FROM codes WHERE email=?").bind(email).first();
+    if (!c || c.exp < now || c.tries >= 5) return json({ error: "رمز التحقق منتهٍ أو غير موجود. اطلب رمزًا جديدًا." }, 400);
+    if (!same(await sha(code + "|" + email), c.h)) {
+      await env.DB.prepare("UPDATE codes SET tries=tries+1 WHERE email=?").bind(email).run(); await fail(env, "ss:" + ip);
+      return json({ error: "رمز التحقق غير صحيح" }, 400);
+    }
+    if (await env.DB.prepare("SELECT id FROM users WHERE email=?").bind(email).first()) return json({ error: "هذا البريد لديه حساب بالفعل. سجّل الدخول، أو استعد كلمة المرور إن نسيتها." }, 409);
+    if (await env.DB.prepare("SELECT email FROM trials WHERE email=?").bind(email).first()) return json({ error: "استُخدمت التجربة المجانية لهذا البريد من قبل. يمكنك الاشتراك من الأعلى." }, 409);
+    const iph = (await sha(ip + "|trial")).slice(0, 16);
+    const used = await env.DB.prepare("SELECT COUNT(*) n FROM trials WHERE iph=? AND ts>?").bind(iph, now - 30 * DAY).first();
+    if (used.n >= 3) return json({ error: "تعذّر بدء تجربة جديدة من هذه الشبكة. يمكنك الاشتراك أو التواصل معنا." }, 429);
+    await env.DB.prepare("DELETE FROM codes WHERE email=?").bind(email).run();
+    await fail(env, "ss:" + ip);
+    const salt = rand(16);
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO trials(email,ts,iph) VALUES(?,?,?)").bind(email, now, iph),
+      env.DB.prepare("INSERT INTO users(email,name,salt,hash,expires_at,max_devices,created_at,note) VALUES(?,?,?,?,?,?,?,?)").bind(email, name, salt, await pbkdf2(pw, salt), now + TRIAL_DAYS * DAY, 1, now, TRIAL_NOTE)
+    ]);
+    await ev(env, { id: null, email }, "trial_start", name + " — تجربة مجانية " + TRIAL_DAYS + " أيام");
+    return json({ ok: true });
+  }
+
+  /* ----- استعادة كلمة المرور ----- */
+  if (p === "/api/forgot" && m === "POST") {
+    const b = await body(req), email = String(b.email || "").trim().toLowerCase();
+    if (!okEmail(email)) return json({ ok: true });
+    if (await tooMany(env, "fp:" + email, 3, 60 * MIN) || await tooMany(env, "fi:" + ip, 10, 60 * MIN)) return json({ error: "طلبات كثيرة. حاول بعد قليل." }, 429);
+    await fail(env, "fp:" + email); await fail(env, "fi:" + ip);
+    const u = await env.DB.prepare("SELECT * FROM users WHERE email=?").bind(email).first();
+    if (u && env.RESEND_API_KEY && env.MAIL_FROM) {
+      const tok = rand(32);
+      await env.DB.prepare("INSERT INTO resets(h,user_id,exp) VALUES(?,?,?)").bind(await sha(tok), u.id, Date.now() + 60 * MIN).run();
+      await ev(env, u, "password_reset_request", "طُلب رابط استعادة كلمة المرور");
+      ctx.waitUntil(mailUser(env, email, "استعادة كلمة المرور", ["وصلنا طلب لتعيين كلمة مرور جديدة لحسابك.", "الرابط صالح لمدة ساعة ويُستخدم مرة واحدة. إن لم تطلبه فتجاهل هذه الرسالة."], { url: siteUrl(env, url) + "/reset?t=" + tok, text: "تعيين كلمة مرور جديدة" }));
+    }
+    return json({ ok: true });
+  }
+  if (p === "/api/reset" && m === "POST") {
+    const b = await body(req), tok = String(b.token || ""), pw = String(b.password || "");
+    if (await tooMany(env, "ri:" + ip, 10, 60 * MIN)) return json({ error: "محاولات كثيرة. حاول لاحقًا." }, 429);
+    if (pw.length < 8 || pw.length > 100) return json({ error: "كلمة المرور 8 أحرف على الأقل" }, 400);
+    const r = /^[0-9a-f]{64}$/.test(tok) ? await env.DB.prepare("SELECT * FROM resets WHERE h=?").bind(await sha(tok)).first() : null;
+    if (!r || r.exp < Date.now()) { await fail(env, "ri:" + ip); return json({ error: "الرابط غير صالح أو انتهت صلاحيته. اطلب رابطًا جديدًا." }, 400); }
+    const u = await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(r.user_id).first();
+    if (!u) return json({ error: "الرابط غير صالح" }, 400);
+    const salt = rand(16);
+    await env.DB.batch([
+      env.DB.prepare("UPDATE users SET salt=?,hash=? WHERE id=?").bind(salt, await pbkdf2(pw, salt), u.id),
+      env.DB.prepare("DELETE FROM sessions WHERE user_id=?").bind(u.id),
+      env.DB.prepare("DELETE FROM resets WHERE user_id=?").bind(u.id)
+    ]);
+    await ev(env, u, "password_reset", "غُيّرت كلمة المرور عبر رابط الاستعادة");
+    return json({ ok: true });
+  }
+
   if (p === "/api/login" && m === "POST") {
     const b = await body(req), email = String(b.email || "").trim().toLowerCase(), pw = String(b.password || "");
     if (!email || !pw) return json({ error: "أدخل البريد وكلمة المرور" }, 400);
@@ -193,7 +331,7 @@ async function api(req, env, ctx, url, p) {
     return json({ ok: true }, 200, { "set-cookie": ckDel("sid") });
   }
 
-  if (p === "/api/me" || p === "/api/ack" || p === "/api/password" || p === "/api/device") {
+  if (p === "/api/me" || p === "/api/ack" || p === "/api/password" || p === "/api/device" || p === "/api/renew") {
     const s = await getSession(req, env, ctx);
     if (!s.ok) return json({ error: s.why }, 401);
     const u = s.user, now = Date.now();
@@ -201,6 +339,18 @@ async function api(req, env, ctx, url, p) {
       const b = await body(req);
       if (b.kind === "welcome") await env.DB.prepare("UPDATE users SET welcome_ack=1 WHERE id=?").bind(u.id).run();
       else if (b.kind === "warn") await env.DB.prepare("UPDATE users SET warn_ack=? WHERE id=?").bind(u.warn_at, u.id).run();
+      return json({ ok: true });
+    }
+    if (p === "/api/renew" && m === "POST") {
+      const b = await body(req), plan = PLAN_DAYS[b.plan] ? b.plan : null, ref = String(b.ref || "").trim().slice(0, 80);
+      if (!plan) return json({ error: "اختر الباقة" }, 400);
+      if (await tooMany(env, "rn:" + u.id, 5, 60 * MIN)) return json({ error: "طلبات كثيرة. حاول لاحقًا." }, 429);
+      await fail(env, "rn:" + u.id);
+      const old = await env.DB.prepare("SELECT id FROM requests WHERE user_id=? AND kind='renew' AND status='pending'").bind(u.id).first();
+      if (old) await env.DB.prepare("UPDATE requests SET plan=?,ref=?,created_at=? WHERE id=?").bind(plan, ref, now, old.id).run();
+      else await env.DB.prepare("INSERT INTO requests(kind,user_id,email,name,plan,ref,created_at) VALUES('renew',?,?,?,?,?,?)").bind(u.id, u.email, u.name || "", plan, ref, now).run();
+      await ev(env, u, "renew_request", PLAN_NAME[plan] + (ref ? " — مرجع: " + ref : ""));
+      ctx.waitUntil(alertOwner(env, "طلب تجديد اشتراك — " + u.email, ["المشترك: " + u.email, "الباقة: " + PLAN_NAME[plan], "مرجع التحويل: " + (ref || "—"), "افتح لوحة المسؤول للقبول بعد التأكد من وصول المبلغ.", "الوقت: " + fmt(now)]));
       return json({ ok: true });
     }
     if (p === "/api/device" && m === "POST") {
@@ -233,7 +383,7 @@ async function api(req, env, ctx, url, p) {
     const notice = u.warn_at > u.warn_ack ? "warn" : !u.welcome_ack ? "welcome" : null;
     return json({
       email: u.email, expires_at: u.expires_at, expires_text: fmtD(u.expires_at), days_left: Math.max(0, Math.ceil((u.expires_at - now) / DAY)),
-      max_devices: u.max_devices, notice,
+      max_devices: u.max_devices, notice, trial: u.note === TRIAL_NOTE,
       devices: dv.map(d => ({ did: d.did, label: d.label, where: [d.city, d.country].filter(Boolean).join("، ") || "—", last: fmt(d.last_seen), current: d.did === u.did }))
     });
   }
@@ -251,6 +401,42 @@ async function api(req, env, ctx, url, p) {
     if (!await adminOk(req, env)) return json({ error: "auth" }, 401);
     const now = Date.now();
     if (p === "/api/admin/logout" && m === "POST") return json({ ok: true }, 200, { "set-cookie": ckDel("adm") });
+    if (p === "/api/admin/requests" && m === "GET") {
+      const rows = (await env.DB.prepare("SELECT id,kind,email,name,plan,ref,created_at FROM requests WHERE status='pending' ORDER BY id ASC").all()).results;
+      return json({ requests: rows.map(r => ({ ...r, plan_name: PLAN_NAME[r.plan] || r.plan, days: PLAN_DAYS[r.plan] || 30, text: fmt(r.created_at) })) });
+    }
+    const rq = p.match(/^\/api\/admin\/request\/(\d+)\/(approve|reject)$/);
+    if (rq && m === "POST") {
+      const r = await env.DB.prepare("SELECT * FROM requests WHERE id=? AND status='pending'").bind(+rq[1]).first();
+      if (!r) return json({ error: "الطلب غير موجود أو تمت معالجته" }, 404);
+      const b = await body(req), site = siteUrl(env, new URL(req.url));
+      if (rq[2] === "reject") {
+        await env.DB.prepare("UPDATE requests SET status='rejected',decided_at=? WHERE id=?").bind(now, r.id).run();
+        await ev(env, { id: r.user_id || null, email: r.email }, "signup_rejected", "رُفض الطلب");
+        const reason = String(b.reason || "").trim().slice(0, 200);
+        await mailUser(env, r.email, "بخصوص طلب اشتراكك", ["لم نتمكن من تأكيد طلب اشتراكك." + (reason ? " السبب: " + reason : ""), "إن كنت قد حوّلت المبلغ فتواصل معنا عبر واتساب مع إيصال التحويل."]);
+        return json({ ok: true });
+      }
+      const days = Math.max(1, Math.min(3660, +b.days || PLAN_DAYS[r.plan] || 30));
+      if (r.kind === "renew") {
+        const u = await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(r.user_id).first();
+        if (!u) return json({ error: "الحساب غير موجود" }, 404);
+        const exp = Math.max(now, u.expires_at) + days * DAY;
+        await env.DB.prepare("UPDATE users SET expires_at=?,active=1,max_devices=CASE WHEN note=? AND max_devices<2 THEN 2 ELSE max_devices END,note=CASE WHEN note=? THEN '' ELSE note END WHERE id=?").bind(exp, TRIAL_NOTE, TRIAL_NOTE, u.id).run();
+        await env.DB.prepare("UPDATE requests SET status='approved',decided_at=? WHERE id=?").bind(now, r.id).run();
+        await ev(env, u, "signup_approved", "قُبل التجديد " + days + " يوم");
+        await mailUser(env, u.email, "تم تجديد اشتراكك", ["تم تجديد اشتراكك في مُيَسِّر حتى " + fmtD(exp) + "."], { url: site + "/", text: "فتح الموقع" });
+        return json({ ok: true });
+      }
+      const maxd = Math.max(1, Math.min(10, +b.max_devices || 2));
+      try {
+        await env.DB.prepare("INSERT INTO users(email,name,salt,hash,expires_at,max_devices,created_at) VALUES(?,?,?,?,?,?,?)").bind(r.email, r.name || "", r.salt, r.hash, now + days * DAY, maxd, now).run();
+      } catch (e) { return json({ error: "هذا البريد لديه حساب بالفعل" }, 409); }
+      await env.DB.prepare("UPDATE requests SET status='approved',decided_at=? WHERE id=?").bind(now, r.id).run();
+      await ev(env, { id: null, email: r.email }, "signup_approved", "قُبل الاشتراك " + days + " يوم");
+      await mailUser(env, r.email, "تم تفعيل اشتراكك", ["أهلًا " + (r.name || "") + "، تم تفعيل اشتراكك في مُيَسِّر لمدة " + days + " يومًا.", "سجّل الدخول بالبريد وكلمة المرور التي اخترتها عند التسجيل.", "ملاحظة: الاشتراك شخصي، ويُسمح بالدخول من " + DV(maxd) + "."], { url: site + "/login", text: "تسجيل الدخول" });
+      return json({ ok: true });
+    }
     if (p === "/api/admin/users" && m === "GET") {
       const rows = (await env.DB.prepare(`SELECT u.id,u.email,u.name,u.note,u.expires_at,u.active,u.max_devices,u.warn_at,u.warn_ack,
         (SELECT COUNT(*) FROM devices d WHERE d.user_id=u.id AND d.removed=0 AND d.last_seen>?) devs,
@@ -335,13 +521,26 @@ var bar=document.createElement("div");bar.className="gate-bar";bar.setAttribute(
 bar.innerHTML='<a href="/account">حسابي</a><button type="button" id="gateOut">خروج</button>';
 document.body.appendChild(bar);
 document.getElementById("gateOut").onclick=function(){fetch("/api/logout",{method:"POST",headers:{"content-type":"application/json"},body:"{}"}).then(function(){location.href="/login"})};
-function note(cls,text,kind){var n=document.createElement("div");n.className="gate-note "+cls;n.setAttribute("data-html2canvas-ignore","true");var t=document.createElement("span");t.textContent=text;n.appendChild(t);
+function note(cls,text,kind,link){var n=document.createElement("div");n.className="gate-note "+cls;n.setAttribute("data-html2canvas-ignore","true");var t=document.createElement("span");t.textContent=text;n.appendChild(t);
+if(link){var a=document.createElement("a");a.href=link;a.textContent="جدّد الآن";a.style.cssText="background:#fff;color:#17445a;border-radius:8px;padding:6px 16px;font-weight:700;text-decoration:none";n.appendChild(a)}
 if(kind){var b=document.createElement("button");b.type="button";b.textContent="فهمت";b.onclick=function(){fetch("/api/ack",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({kind:kind})});n.remove()};n.appendChild(b)}
 document.body.appendChild(n)}
+if(m.trial){var w=document.createElement("style");w.textContent=".sheet{position:relative!important}.sheet::after{content:'نسخة تجريبية — مُيَسِّر';position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;text-align:center;transform:rotate(-30deg);font:900 56px Tajawal,Tahoma,Arial,sans-serif;color:#17445a;opacity:.13;pointer-events:none;z-index:50;white-space:nowrap}.sheet.mini::after{font-size:34px}";document.head.appendChild(w);
+if(!m.notice)note("i","أنت على النسخة التجريبية: تُحفظ النماذج وتُطبع بعلامة مائية، وتنتهي التجربة خلال "+m.days_left+" أيام.",null,"/subscribe")}
 if(m.notice==="warn")note("w","تنبيه: لاحظنا استخدام حسابك من أكثر من "+DVf(m.max_devices)+". الاشتراك شخصي ولا تجوز مشاركته، وتكرار ذلك قد يؤدي إلى إيقاف الحساب.","warn");
 else if(m.notice==="welcome")note("i","مرحبًا بك. الاشتراك شخصي ولا تجوز مشاركته، ويُسمح بتسجيل الدخول من "+DVf(m.max_devices)+" كحد أقصى، ولن يُسمح بدخول جهاز إضافي إلا بعد حذف أحد أجهزتك من «حسابي».","welcome");
-else if(m.days_left<=3)note("i","ينتهي اشتراكك خلال "+m.days_left+" أيام ("+m.expires_text+"). تواصل مع المسؤول للتجديد.",null);
+else if(m.days_left<=3)note("i","ينتهي اشتراكك خلال "+m.days_left+" أيام ("+m.expires_text+").",null,"/subscribe");
 }).catch(function(){});
+})();`;
+
+
+const DEMO_JS = `(function(){
+var s=document.createElement("style");
+s.textContent=".sheet{position:relative!important}.sheet::after{content:'نسخة تجريبية — مُيَسِّر';position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;text-align:center;transform:rotate(-30deg);font:900 56px Tajawal,Tahoma,Arial,sans-serif;color:#17445a;opacity:.13;pointer-events:none;z-index:50;white-space:nowrap}.sheet.mini::after{font-size:34px}.demo-note{position:fixed;top:0;left:0;right:0;z-index:9999;background:#fff4d6;color:#4a3500;border-bottom:2px solid #e0b100;padding:10px 16px;font:14px/1.7 Tajawal,Tahoma,Arial,sans-serif;direction:rtl;text-align:center}.demo-note a{display:inline-block;margin:0 6px;background:#17445a;color:#fff;border-radius:8px;padding:4px 14px;font-weight:700;text-decoration:none}body{padding-top:48px}@media print{.demo-note{display:none!important}body{padding-top:0}}";
+document.head.appendChild(s);
+var n=document.createElement("div");n.className="demo-note";n.setAttribute("data-html2canvas-ignore","true");
+n.innerHTML='تجربة بدون تسجيل: افتح أي نموذج وعبّئه، وسيُحفظ بعلامة مائية. <a href="/subscribe">اشترك للنسخة الكاملة</a>';
+document.body.insertBefore(n,document.body.firstChild);
 })();`;
 
 /* ---------- المعالج الرئيسي ---------- */
@@ -357,7 +556,33 @@ function page(res, extra) {
   return r;
 }
 
+async function dailyJob(env) {
+  if (!env.DB) return;
+  await init(env);
+  const now = Date.now(), site = siteUrl(env, null);
+  const rows = (await env.DB.prepare("SELECT id,email,name,expires_at,note FROM users WHERE active=1 AND expires_at>? AND expires_at<=? AND (note IS NOT ? OR expires_at<=?)").bind(now, now + 3 * DAY, TRIAL_NOTE, now + DAY).all()).results;
+  for (const u of rows) {
+    const done = await env.DB.prepare("SELECT 1 x FROM reminders WHERE user_id=? AND expires_at=?").bind(u.id, u.expires_at).first();
+    if (done) continue;
+    const tr = u.note === TRIAL_NOTE;
+    const r = tr
+      ? await mailUser(env, u.email, "تجربتك المجانية تنتهي قريبًا", ["تنتهي تجربتك المجانية في مُيَسِّر بتاريخ " + fmtD(u.expires_at) + ".", "إن أعجبتك النماذج فاشترك لتستمر في استخدامها دون انقطاع."], { url: site + "/subscribe", text: "الاشتراك الآن" })
+      : await mailUser(env, u.email, "اشتراكك ينتهي قريبًا", ["ينتهي اشتراكك في مُيَسِّر بتاريخ " + fmtD(u.expires_at) + ".", "لتجديده افتح صفحة الاشتراك وأرسل طلب التجديد بعد التحويل."], { url: site + "/subscribe", text: "تجديد الاشتراك" });
+    if (r.ok) {
+      await env.DB.prepare("INSERT OR IGNORE INTO reminders(user_id,expires_at) VALUES(?,?)").bind(u.id, u.expires_at).run();
+      await ev(env, u, "reminder", "أُرسل تذكير بقرب انتهاء الاشتراك");
+    }
+  }
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM codes WHERE exp<?").bind(now - DAY),
+    env.DB.prepare("DELETE FROM resets WHERE exp<?").bind(now - DAY),
+    env.DB.prepare("DELETE FROM attempts WHERE ts<?").bind(now - DAY),
+    env.DB.prepare("DELETE FROM sessions WHERE last_seen<?").bind(now - SESSION_DAYS * DAY)
+  ]);
+}
+
 export default {
+  async scheduled(event, env, ctx) { ctx.waitUntil(dailyJob(env)); },
   async fetch(req, env, ctx) {
     try {
       if (!env.DB || !env.ADMIN_PASSWORD)
@@ -366,12 +591,27 @@ export default {
       const url = new URL(req.url);
       let p = url.pathname.replace(/\/+$/, "") || "/";
       if (p.startsWith("/api/")) return await api(req, env, ctx, url, p);
+      if (p === "/_demo.js") return new Response(DEMO_JS, { headers: { "content-type": "application/javascript; charset=utf-8", ...NOSTORE } });
+      const DEMO_FORMS = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes"];
+      const dm = p === "/demo" ? "index" : (/^\/demo\/[a-z]+$/.test(p) ? p.slice(6) : null);
+      if (dm && (dm === "index" || DEMO_FORMS.includes(dm))) {
+        const dr = await env.ASSETS.fetch(new Request(new URL("/" + dm + ".html", url), req));
+        const dh = new Headers(dr.headers); dh.set("cache-control", "no-store");
+        return new HTMLRewriter()
+          .on("body", { element(e) { e.append('<script src="/_demo.js" defer></script>', { html: true }); } })
+          .on("a", { element(e) {
+            const h = e.getAttribute("href") || "", n = h.replace(/\.html$/, "");
+            if (n === "index") e.setAttribute("href", "/demo");
+            else if (DEMO_FORMS.includes(n)) e.setAttribute("href", "/demo/" + n);
+          } })
+          .transform(new Response(dr.body, { status: dr.status, headers: dh }));
+      }
       if (p === "/_acct.js") return new Response(ACCT_JS, { headers: { "content-type": "application/javascript; charset=utf-8", ...NOSTORE } });
 
       const isFile = /\.[a-z0-9]+$/i.test(p) && !/\.html$/i.test(p);
       const name = p.replace(/\.html$/i, "");
       const target = isFile ? p : (name === "/" ? "/index" : name) + ".html";
-      const open = !isFile && (name === "/login" || name === "/admin" || name === "/terms" || name === "/subscribe");
+      const open = !isFile && (name === "/login" || name === "/admin" || name === "/terms" || name === "/subscribe" || name === "/forgot" || name === "/reset");
       if (open) return page(await env.ASSETS.fetch(new Request(new URL(target, url), req)), false);
 
       const s = await getSession(req, env, ctx);
