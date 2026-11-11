@@ -539,7 +539,7 @@ else if(m.days_left<=3)note("i","ينتهي اشتراكك خلال "+m.days_lef
 const DEMO_PRE = `(function(){
 var T="نسخة تجريبية — مُيَسِّر",L=[T,T,T,T,T,T,T,T].join("      "),NL=String.fromCharCode(92)+"A ",C=[];for(var i=0;i<24;i++)C.push(L);
 var WM=".sheet:not(.mini){position:relative!important}.sheet{overflow:hidden!important}.sheet::after{content:'"+C.join(NL)+"';white-space:pre;position:absolute;left:-40%;right:-40%;top:-40%;bottom:-40%;transform:rotate(-30deg);font:800 24px/80px Tajawal,Tahoma,Arial,sans-serif;color:#17445a;opacity:.2;pointer-events:none;z-index:50;text-align:center;direction:rtl;overflow:hidden}";
-var WM_STRONG=WM.replace("opacity:.2;","opacity:.3;");
+var WM_STRONG=WM.replace("opacity:.2;","opacity:.3;"),WM_LIGHT=WM.replace("opacity:.2;","opacity:.07;").replace("/80px","/150px");
 `;
 const DEMO_CSS = ".demo-note{position:fixed;top:0;left:0;right:0;z-index:9999;background:#fff4d6;color:#4a3500;border-bottom:2px solid #e0b100;padding:10px 16px;font:14px/1.7 Tajawal,Tahoma,Arial,sans-serif;direction:rtl;text-align:center}.demo-note a{display:inline-block;margin:0 6px;background:#17445a;color:#fff;border-radius:8px;padding:4px 14px;font-weight:700;text-decoration:none}body{padding-top:48px}@media print{.demo-note{display:none!important}body{padding-top:0}}";
 const DEMO_BODY = `var s=document.createElement("style");
@@ -555,7 +555,7 @@ function demoJs(f) {
   const msg = gallery ? "اضغط أي نموذج لمعاينته. وجرّب «تحليل الدرجات» مباشرة مجانًا وبدون تسجيل."
     : preview ? "معاينة جاهزة ببيانات تجريبية، ويمكن بعد الاشتراك تغيير الصيغة بين مؤنث ومذكر. جرّب «تحليل الدرجات» مباشرة مجانًا."
     : "تجربة مباشرة: اضغط «بيانات تجريبية» أو اكتب درجاتك، وسيُحفظ التقرير بعلامة مائية.";
-  return DEMO_PRE + "var MSG=" + JSON.stringify(msg) + ",DEMO_CSS=" + JSON.stringify(DEMO_CSS) + ",WMX=" + (f === DEMO_OPEN ? "WM_STRONG" : "WM") + ";" + DEMO_BODY + (preview ? previewJs(f) : "") + (gallery ? GALLERY_JS : "") + "})();";
+  return DEMO_PRE + "var MSG=" + JSON.stringify(msg) + ",DEMO_CSS=" + JSON.stringify(DEMO_CSS) + ",WMX=" + (f === DEMO_OPEN ? "WM_STRONG" : "WM_LIGHT") + ";" + DEMO_BODY + (preview ? previewJs(f) : "") + (gallery ? GALLERY_JS : "") + "})();";
 }
 
 
@@ -591,9 +591,9 @@ function previewJs(form) {
   const d = Object.assign({}, COMMON_P, PREVIEW_DATA[form] || {});
   const keep = form === "certificate";
   const css = keep
-    ? HEADCSS + ".panel>:not(.keepfs){display:none!important}.sheet.mini::after{font-size:110px!important;line-height:300px!important;opacity:.45!important}@media print{body{display:none!important}}"
+    ? HEADCSS + ".panel>:not(.keepfs){display:none!important}.sheet.mini::after{font-size:110px!important;line-height:300px!important;opacity:.3!important}@media print{body{display:none!important}}"
     : HEADCSS + ".panel{pointer-events:none;user-select:none;opacity:.9}.panel #pdf,.panel #print,.panel #reset{display:none!important}@media(max-width:900px){.stage{order:-1}}@media print{body{display:none!important}}";
-  return "var D=" + JSON.stringify(d) + ";" + PREVIEW_CORE + (keep ? "var kf=$('themes');kf=kf&&kf.closest('fieldset');if(kf)kf.className+=' keepfs';" : "var lk=document.querySelectorAll('.panel input,.panel select,.panel textarea,.panel button');for(var z=0;z<lk.length;z++){lk[z].disabled=true}") + "var KEEP=" + keep + ",HEADTXT=" + JSON.stringify(keep ? "🔒 أدوات التحكم — اختر الآن شكل الشهادة ولونها<span>وبعد الاشتراك تكتب الأسماء وتحفظ شهادات كثيرة دفعة واحدة بالشكل الذي اخترته.</span>" : "🔒 أدوات التحكم — تفتح لك بعد الاشتراك<span>تعبّئ كل خانة بنفسك، وتغيّر الصيغة بين مؤنث ومذكر، وترفع شعارك وختمك، وتختار ما يناسبك، فيتغير التقرير أمامك مباشرة.</span>") + ";" + HEAD_JS + "var st=document.createElement('style');st.textContent=WM_STRONG+" + JSON.stringify(css) + ";document.head.appendChild(st);";
+  return "var D=" + JSON.stringify(d) + ";" + PREVIEW_CORE + (keep ? "var kf=$('themes');kf=kf&&kf.closest('fieldset');if(kf)kf.className+=' keepfs';" : "var lk=document.querySelectorAll('.panel input,.panel select,.panel textarea,.panel button');for(var z=0;z<lk.length;z++){lk[z].disabled=true}") + "var KEEP=" + keep + ",HEADTXT=" + JSON.stringify(keep ? "🔒 أدوات التحكم — اختر الآن شكل الشهادة ولونها<span>وبعد الاشتراك تكتب الأسماء وتحفظ شهادات كثيرة دفعة واحدة بالشكل الذي اخترته.</span>" : "🔒 أدوات التحكم — تفتح لك بعد الاشتراك<span>تعبّئ كل خانة بنفسك، وتغيّر الصيغة بين مؤنث ومذكر، وترفع شعارك وختمك، وتختار ما يناسبك، فيتغير التقرير أمامك مباشرة.</span>") + ";" + HEAD_JS + "var st=document.createElement('style');st.textContent=WM_LIGHT+" + JSON.stringify(css) + ";document.head.appendChild(st);";
 }
 
 /* ---------- المعالج الرئيسي ---------- */
