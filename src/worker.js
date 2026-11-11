@@ -553,7 +553,7 @@ const GALLERY_JS = `var cs=document.querySelectorAll("a[href^='/demo/']");for(va
 function demoJs(f) {
   const preview = !!PREVIEW_DATA[f], gallery = !f;
   const msg = gallery ? "اضغط أي نموذج لمعاينته. وجرّب «تحليل الدرجات» مباشرة مجانًا وبدون تسجيل."
-    : preview ? "معاينة جاهزة ببيانات تجريبية. جرّب «تحليل الدرجات» مباشرة مجانًا، أو اشترك لتعبئة هذا النموذج."
+    : preview ? "معاينة جاهزة ببيانات تجريبية، ويمكن بعد الاشتراك تغيير الصيغة بين مؤنث ومذكر. جرّب «تحليل الدرجات» مباشرة مجانًا."
     : "تجربة مباشرة: اضغط «بيانات تجريبية» أو اكتب درجاتك، وسيُحفظ التقرير بعلامة مائية.";
   return DEMO_PRE + "var MSG=" + JSON.stringify(msg) + ",DEMO_CSS=" + JSON.stringify(DEMO_CSS) + ",WMX=" + (f === DEMO_OPEN ? "WM_STRONG" : "WM") + ";" + DEMO_BODY + (preview ? previewJs(f) : "") + (gallery ? GALLERY_JS : "") + "})();";
 }
@@ -561,16 +561,16 @@ function demoJs(f) {
 
 const DEMO_OPEN = "analysis";
 const DEMO_FORMS_ALL = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes"];
-const COMMON_P = { dept: "الإدارة العامة للتعليم بمنطقة الرياض", school: "مدرسة الأمل المتوسطة", principal: "سعد القحطاني" };
+const COMMON_P = { dept: "الإدارة العامة للتعليم بمنطقة الرياض", school: "مدرسة الأمل المتوسطة", principal: "نور فهد" };
 const PREVIEW_DATA = {
-  report: { pname: "برنامج المهارات الرقمية", executor: "نورة العتيبي", place: "المختبر الرقمي", target: "طالبات الصف الثاني المتوسط", count: "28", pdate: "الأحد 17-3-1448 هـ", goal: "رفع كفاءة الطالبات في استخدام الأدوات الرقمية في التعلم", goals: "التعريف بأدوات العرض التقديمي\nالتدريب على إعداد عروض تفاعلية\nتعزيز العمل الجماعي والإبداع", teacher: "نورة العتيبي" },
-  remedial: { subj: "الرياضيات", teacher: "هند الشمري", cls: "ثاني متوسط", sect: "2/ب", pdate: "الفصل الأول 1448 هـ" },
-  enrichment: { subj: "العلوم", teacher: "هند الشمري", cls: "ثاني متوسط", sect: "2/ب", pdate: "الفصل الأول 1448 هـ" },
-  certificate: { teacher: "سارة الدوسري", rname: "لجين العمري", rreason: "التفوق الدراسي والمشاركة الفاعلة", rdate: "1448/02/10 هـ" },
-  visit: { visitor: "منى الزهراني", visited: "هدى القرني", subj: "المهارات الرقمية", cls: "ثاني متوسط", vdate: "1447/11/20 هـ", lesson: "أدوات العرض التقديمي", pos: "تنوّع في استراتيجيات التدريس وضبط جيد للصف", rec: "تفعيل التعلم التعاوني بصورة أكبر" },
-  plc: { year: "1448 هـ", term: "الأول", num: "الجلسة الأولى", vdate: "الأحد 1448/3/27", topic: "توظيف الذكاء الاصطناعي في التدريس", tool: "عصف ذهني", place: "غرفة المعلمات", nextd: "الأحد 1448/4/4", target: "معلمات بتخصصات مختلفة", goals: "تبادل الخبرات في توظيف التقنية\nاقتراح أنشطة صفية مبتكرة", res: "عرض تجربتين ناجحتين\nمناقشة التحديات وطرق معالجتها", recs: "تعميم التجربتين على بقية المعلمات\nعقد ورشة تطبيقية الأسبوع القادم", names: "نورة العتيبي\nهند الشمري\nسارة الدوسري\nأمل الغامدي", coord: "منى الزهراني" },
-  waiting: { tname: "أمل الغامدي", vdate: "الأحد 1448/3/27", period: "الثالثة", cls: "ثاني متوسط / 2", cnt: "26", subj: "العلوم", topic: "مراجعة وحدة الطاقة", goals: "تثبيت مفاهيم الوحدة\nتنمية مهارات الحوار", notes: "تفاعل الطالبات إيجابي وانضباط جيد" },
-  attendance: { prog: "ورشة الذكاء الاصطناعي في التعليم", tname: "أمل الغامدي", vdate: "الأحد 1448/3/27", vtime: "الثالثة", place: "قاعة الاجتماعات", cls: "المعلمات", names: "نورة العتيبي\nهند الشمري\nسارة الدوسري\nمنى الزهراني\nهدى القرني\nأمل الغامدي", blank: "0" },
+  report: { pname: "أدوات الذكاء الاصطناعي", executor: "نورة خالد", place: "المختبر الرقمي", target: "طالبات الصف الثاني المتوسط", count: "28", pdate: "الأحد 17-3-1448 هـ", goal: "تعريف الطالبات بأدوات الذكاء الاصطناعي وكيفية توظيفها في التعلم بصورة آمنة ومسؤولة", goals: "التعريف بأبرز أدوات الذكاء الاصطناعي التعليمية\nالتدريب على صياغة الأوامر والاستفادة من نتائجها\nتعزيز الاستخدام المسؤول والآمن للأدوات", teacher: "نورة خالد", principal: "نور فهد" },
+  remedial: { subj: "الرياضيات", teacher: "نورة خالد", cls: "ثاني متوسط", sect: "2/ب", pdate: "الفصل الأول 1448 هـ" },
+  enrichment: { subj: "العلوم", teacher: "نورة خالد", cls: "ثاني متوسط", sect: "2/ب", pdate: "الفصل الأول 1448 هـ" },
+  certificate: { teacher: "نورة خالد", rname: "لجين العمري", rreason: "التفوق الدراسي والمشاركة الفاعلة", rdate: "1448/02/10 هـ" },
+  visit: { visitor: "منى الزهراني", visited: "نورة خالد", subj: "المهارات الرقمية", cls: "ثاني متوسط", vdate: "1447/11/20 هـ", lesson: "أدوات العرض التقديمي", pos: "تنوّع في استراتيجيات التدريس وضبط جيد للصف", rec: "تفعيل التعلم التعاوني بصورة أكبر" },
+  plc: { year: "1448 هـ", term: "الأول", num: "الجلسة الأولى", vdate: "الأحد 1448/3/27", topic: "توظيف الذكاء الاصطناعي في التدريس", tool: "عصف ذهني", place: "غرفة المعلمات", nextd: "الأحد 1448/4/4", target: "معلمات بتخصصات مختلفة", goals: "تبادل الخبرات في توظيف التقنية\nاقتراح أنشطة صفية مبتكرة", res: "عرض تجربتين ناجحتين\nمناقشة التحديات وطرق معالجتها", recs: "تعميم التجربتين على بقية المعلمات\nعقد ورشة تطبيقية الأسبوع القادم", names: "نورة خالد\nهند الشمري\nسارة الدوسري\nأمل الغامدي", coord: "منى الزهراني" },
+  waiting: { tname: "نورة خالد", vdate: "الأحد 1448/3/27", period: "الثالثة", cls: "ثاني متوسط / 2", cnt: "26", subj: "العلوم", topic: "مراجعة وحدة الطاقة", goals: "تثبيت مفاهيم الوحدة\nتنمية مهارات الحوار", notes: "تفاعل الطالبات إيجابي وانضباط جيد" },
+  attendance: { prog: "ورشة الذكاء الاصطناعي في التعليم", tname: "نورة خالد", vdate: "الأحد 1448/3/27", vtime: "الثالثة", place: "قاعة الاجتماعات", cls: "المعلمات", names: "نورة خالد\nهند الشمري\nسارة الدوسري\nمنى الزهراني\nهدى القرني\nأمل الغامدي", blank: "0" },
   minutes: { year: "1447 / 1448 هـ", kind: "اجتماع لجنة التميز", num: "الأول", vdate: "1448/3/27 هـ", vtime: "من 8:00 إلى 9:00", place: "غرفة الاجتماعات", intro: "مناقشة خطة التميز للفصل الدراسي", opn: "فإنه في يوم الأحد 1448/3/27 هـ اجتمعت اللجنة لمناقشة ما يلي", disc: "مراجعة مؤشرات الأداء\nتوزيع المهام على الأعضاء", dec: "اعتماد الخطة المقترحة\nرفع تقرير المتابعة نهاية الشهر" }
 };
 const PREVIEW_CORE = `
@@ -578,7 +578,7 @@ function $(i){return document.getElementById(i)}
 function fire(el){el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}))}
 for(var k in D){var el=$(k);if(el){el.value=D[k];fire(el)}}
 var cb=document.querySelectorAll(".panel input[type=checkbox]");for(var i=0;i<cb.length;i++){if(i%3!==2&&i<14&&!cb[i].checked)cb[i].click()}
-var NAMES=["نورة العتيبي","هند الشمري","سارة الدوسري","أمل الغامدي","منى الزهراني","هدى القرني"];
+var NAMES=["نورة خالد","هند الشمري","سارة الدوسري","أمل الغامدي","منى الزهراني","هدى القرني"];
 var ni=0;var ins=document.querySelectorAll(".panel input[type=text],.panel input:not([type])");
 for(var j=0;j<ins.length;j++){var x=ins[j];if(!x.id&&!x.value&&/الاسم/.test(x.placeholder||"")){x.value=NAMES[ni++%NAMES.length];fire(x)}}
 var sl=document.querySelectorAll(".panel select");for(var q=0;q<sl.length;q++){if(!sl[q].id&&sl[q].options.length>1){sl[q].selectedIndex=1;fire(sl[q])}}
