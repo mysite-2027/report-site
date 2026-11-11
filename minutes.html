@@ -175,7 +175,7 @@ var at='<div class="sec"><h3>توقيع '+(f?"عضوات ":"أعضاء ")+(v("ki
 var kd=v("kind"),dy=v("vday"),dt=v("vdate"),nu=v("num"),dsc=v("disc"),
 op="فإنه"+(dy?" في يوم "+dy:"")+(dt?(dy?" الموافق ":" بتاريخ ")+dt:"")+" تم عقد الاجتماع"+(nu?" "+nu:"")+(kd?" الخاص ب"+kd:"")+(dsc?" وتم مناقشة الأعمال التالية:":"."),
 op=v("opn")||op,
-opening='<div class="sec"><p style="font-weight:700">'+esc(v("intro")||"").replace(/\n/g,"<br>")+'</p><p style="font-weight:700">'+esc(op).replace(/\n/g,"<br>")+"</p>"+(dsc?numl($("disc").value):"")+"</div>",
+opening='<div class="sec"><p style="font-weight:700;text-align:center">'+esc(v("intro")||"").replace(/\n/g,"<br>")+'</p><p style="font-weight:700;text-align:center">'+esc(op).replace(/\n/g,"<br>")+"</p>"+(dsc?numl($("disc").value):"")+"</div>",
 decs=v("dec")?'<div class="sec"><p style="font-weight:700">وفي ختام الاجتماع تم الوصول إلى النتائج والتوصيات الآتية:</p>'+numl($("dec").value)+"</div>":"";
 var L=logo;
 $("sheet").innerHTML=
