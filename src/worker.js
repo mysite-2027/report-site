@@ -511,6 +511,8 @@ async function api(req, env, ctx, url, p) {
 
 /* ---------- سكربت الشريط الصغير والتنبيهات داخل الصفحات ---------- */
 const ACCT_JS = `(function(){
+var T="نسخة تجريبية — مُيَسِّر",L=[T,T,T,T,T,T,T,T].join("      "),NL=String.fromCharCode(92)+"A ",C=[];for(var i=0;i<24;i++)C.push(L);
+var WM=".sheet:not(.mini){position:relative!important}.sheet{overflow:hidden!important}.sheet::after{content:'"+C.join(NL)+"';white-space:pre;position:absolute;left:-40%;right:-40%;top:-40%;bottom:-40%;transform:rotate(-30deg);font:800 24px/80px Tajawal,Tahoma,Arial,sans-serif;color:#17445a;opacity:.2;pointer-events:none;z-index:50;text-align:center;direction:rtl;overflow:hidden}";
 function DVf(n){return n===1?"جهاز واحد":n===2?"جهازين":n+" أجهزة"}
 var s=document.createElement("style");
 s.textContent=".gate-bar,.gate-note{font-family:Tajawal,Tahoma,Arial,sans-serif;direction:rtl}.gate-bar{position:fixed;left:12px;bottom:12px;z-index:9998;background:#17445a;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;display:flex;gap:12px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.25)}.gate-bar a,.gate-bar button{color:#fff;background:none;border:0;font:inherit;cursor:pointer;text-decoration:none;padding:0}.gate-bar a:hover,.gate-bar button:hover{text-decoration:underline}.gate-note{position:fixed;top:0;left:0;right:0;z-index:9999;padding:12px 16px;font-size:14px;line-height:1.7;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center}.gate-note.w{background:#b42318;color:#fff}.gate-note.i{background:#fff4d6;color:#4a3500;border-bottom:2px solid #e0b100}.gate-note button{background:#fff;color:#17445a;border:0;border-radius:8px;padding:6px 16px;font:inherit;font-weight:700;cursor:pointer}@media print{.gate-bar,.gate-note{display:none!important}}";
@@ -525,7 +527,7 @@ function note(cls,text,kind,link){var n=document.createElement("div");n.classNam
 if(link){var a=document.createElement("a");a.href=link;a.textContent="جدّد الآن";a.style.cssText="background:#fff;color:#17445a;border-radius:8px;padding:6px 16px;font-weight:700;text-decoration:none";n.appendChild(a)}
 if(kind){var b=document.createElement("button");b.type="button";b.textContent="فهمت";b.onclick=function(){fetch("/api/ack",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({kind:kind})});n.remove()};n.appendChild(b)}
 document.body.appendChild(n)}
-if(m.trial){var w=document.createElement("style");w.textContent=".sheet{position:relative!important}.sheet::after{content:'نسخة تجريبية — مُيَسِّر';position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;text-align:center;transform:rotate(-30deg);font:900 56px Tajawal,Tahoma,Arial,sans-serif;color:#17445a;opacity:.13;pointer-events:none;z-index:50;white-space:nowrap}.sheet.mini::after{font-size:34px}";document.head.appendChild(w);
+if(m.trial){var w=document.createElement("style");w.textContent=WM;document.head.appendChild(w);
 if(!m.notice)note("i","أنت على النسخة التجريبية: تُحفظ النماذج وتُطبع بعلامة مائية، وتنتهي التجربة خلال "+m.days_left+" أيام.",null,"/subscribe")}
 if(m.notice==="warn")note("w","تنبيه: لاحظنا استخدام حسابك من أكثر من "+DVf(m.max_devices)+". الاشتراك شخصي ولا تجوز مشاركته، وتكرار ذلك قد يؤدي إلى إيقاف الحساب.","warn");
 else if(m.notice==="welcome")note("i","مرحبًا بك. الاشتراك شخصي ولا تجوز مشاركته، ويُسمح بتسجيل الدخول من "+DVf(m.max_devices)+" كحد أقصى، ولن يُسمح بدخول جهاز إضافي إلا بعد حذف أحد أجهزتك من «حسابي».","welcome");
@@ -534,14 +536,57 @@ else if(m.days_left<=3)note("i","ينتهي اشتراكك خلال "+m.days_lef
 })();`;
 
 
-const DEMO_JS = `(function(){
-var s=document.createElement("style");
-s.textContent=".sheet{position:relative!important}.sheet::after{content:'نسخة تجريبية — مُيَسِّر';position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;text-align:center;transform:rotate(-30deg);font:900 56px Tajawal,Tahoma,Arial,sans-serif;color:#17445a;opacity:.13;pointer-events:none;z-index:50;white-space:nowrap}.sheet.mini::after{font-size:34px}.demo-note{position:fixed;top:0;left:0;right:0;z-index:9999;background:#fff4d6;color:#4a3500;border-bottom:2px solid #e0b100;padding:10px 16px;font:14px/1.7 Tajawal,Tahoma,Arial,sans-serif;direction:rtl;text-align:center}.demo-note a{display:inline-block;margin:0 6px;background:#17445a;color:#fff;border-radius:8px;padding:4px 14px;font-weight:700;text-decoration:none}body{padding-top:48px}@media print{.demo-note{display:none!important}body{padding-top:0}}";
+const DEMO_PRE = `(function(){
+var T="نسخة تجريبية — مُيَسِّر",L=[T,T,T,T,T,T,T,T].join("      "),NL=String.fromCharCode(92)+"A ",C=[];for(var i=0;i<24;i++)C.push(L);
+var WM=".sheet:not(.mini){position:relative!important}.sheet{overflow:hidden!important}.sheet::after{content:'"+C.join(NL)+"';white-space:pre;position:absolute;left:-40%;right:-40%;top:-40%;bottom:-40%;transform:rotate(-30deg);font:800 24px/80px Tajawal,Tahoma,Arial,sans-serif;color:#17445a;opacity:.2;pointer-events:none;z-index:50;text-align:center;direction:rtl;overflow:hidden}";
+var WM_STRONG=WM.replace("opacity:.2;","opacity:.3;");
+`;
+const DEMO_CSS = ".demo-note{position:fixed;top:0;left:0;right:0;z-index:9999;background:#fff4d6;color:#4a3500;border-bottom:2px solid #e0b100;padding:10px 16px;font:14px/1.7 Tajawal,Tahoma,Arial,sans-serif;direction:rtl;text-align:center}.demo-note a{display:inline-block;margin:0 6px;background:#17445a;color:#fff;border-radius:8px;padding:4px 14px;font-weight:700;text-decoration:none}body{padding-top:48px}@media print{.demo-note{display:none!important}body{padding-top:0}}";
+const DEMO_BODY = `var s=document.createElement("style");
+s.textContent=WMX+DEMO_CSS;
 document.head.appendChild(s);
 var n=document.createElement("div");n.className="demo-note";n.setAttribute("data-html2canvas-ignore","true");
-n.innerHTML='تجربة بدون تسجيل: افتح أي نموذج وعبّئه، وسيُحفظ بعلامة مائية. <a href="/subscribe">اشترك للنسخة الكاملة</a>';
+n.innerHTML=MSG+' <a href="/subscribe">اشترك للنسخة الكاملة</a>';
 document.body.insertBefore(n,document.body.firstChild);
-})();`;
+`;
+const GALLERY_JS = `var cs=document.querySelectorAll("a[href^='/demo/']");for(var g=0;g<cs.length;g++){var live=/\\/demo\\/analysis$/.test(cs[g].getAttribute("href"));var bd=document.createElement("span");bd.textContent=live?"تجربة مباشرة":"معاينة";bd.style.cssText="display:inline-block;margin:4px;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700;background:"+(live?"#17445a":"#e8eef2")+";color:"+(live?"#fff":"#17445a");cs[g].appendChild(bd)}`;
+function demoJs(f) {
+  const preview = !!PREVIEW_DATA[f], gallery = !f;
+  const msg = gallery ? "اضغط أي نموذج لمعاينته. وجرّب «تحليل الدرجات» مباشرة مجانًا وبدون تسجيل."
+    : preview ? "معاينة جاهزة ببيانات تجريبية. جرّب «تحليل الدرجات» مباشرة مجانًا، أو اشترك لتعبئة هذا النموذج."
+    : "تجربة مباشرة: اضغط «بيانات تجريبية» أو اكتب درجاتك، وسيُحفظ التقرير بعلامة مائية.";
+  return DEMO_PRE + "var MSG=" + JSON.stringify(msg) + ",DEMO_CSS=" + JSON.stringify(DEMO_CSS) + ",WMX=" + (f === DEMO_OPEN ? "WM_STRONG" : "WM") + ";" + DEMO_BODY + (preview ? previewJs(f) : "") + (gallery ? GALLERY_JS : "") + "})();";
+}
+
+
+const DEMO_OPEN = "analysis";
+const DEMO_FORMS_ALL = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes"];
+const COMMON_P = { dept: "الإدارة العامة للتعليم بمنطقة الرياض", school: "مدرسة الأمل المتوسطة", principal: "سعد القحطاني" };
+const PREVIEW_DATA = {
+  report: { pname: "برنامج المهارات الرقمية", executor: "نورة العتيبي", place: "المختبر الرقمي", target: "طالبات الصف الثاني المتوسط", count: "28", pdate: "الأحد 17-3-1448 هـ", goal: "رفع كفاءة الطالبات في استخدام الأدوات الرقمية في التعلم", goals: "التعريف بأدوات العرض التقديمي\nالتدريب على إعداد عروض تفاعلية\nتعزيز العمل الجماعي والإبداع", teacher: "نورة العتيبي" },
+  remedial: { subj: "الرياضيات", teacher: "هند الشمري", cls: "ثاني متوسط", sect: "2/ب", pdate: "الفصل الأول 1448 هـ" },
+  enrichment: { subj: "العلوم", teacher: "هند الشمري", cls: "ثاني متوسط", sect: "2/ب", pdate: "الفصل الأول 1448 هـ" },
+  certificate: { teacher: "سارة الدوسري", rname: "لجين العمري", rreason: "التفوق الدراسي والمشاركة الفاعلة", rdate: "1448/02/10 هـ" },
+  visit: { visitor: "منى الزهراني", visited: "هدى القرني", subj: "المهارات الرقمية", cls: "ثاني متوسط", vdate: "1447/11/20 هـ", lesson: "أدوات العرض التقديمي", pos: "تنوّع في استراتيجيات التدريس وضبط جيد للصف", rec: "تفعيل التعلم التعاوني بصورة أكبر" },
+  plc: { year: "1448 هـ", term: "الأول", num: "الجلسة الأولى", vdate: "الأحد 1448/3/27", topic: "توظيف الذكاء الاصطناعي في التدريس", tool: "عصف ذهني", place: "غرفة المعلمات", nextd: "الأحد 1448/4/4", target: "معلمات بتخصصات مختلفة", goals: "تبادل الخبرات في توظيف التقنية\nاقتراح أنشطة صفية مبتكرة", res: "عرض تجربتين ناجحتين\nمناقشة التحديات وطرق معالجتها", recs: "تعميم التجربتين على بقية المعلمات\nعقد ورشة تطبيقية الأسبوع القادم", names: "نورة العتيبي\nهند الشمري\nسارة الدوسري\nأمل الغامدي", coord: "منى الزهراني" },
+  waiting: { tname: "أمل الغامدي", vdate: "الأحد 1448/3/27", period: "الثالثة", cls: "ثاني متوسط / 2", cnt: "26", subj: "العلوم", topic: "مراجعة وحدة الطاقة", goals: "تثبيت مفاهيم الوحدة\nتنمية مهارات الحوار", notes: "تفاعل الطالبات إيجابي وانضباط جيد" },
+  attendance: { prog: "ورشة الذكاء الاصطناعي في التعليم", tname: "أمل الغامدي", vdate: "الأحد 1448/3/27", vtime: "الثالثة", place: "قاعة الاجتماعات", cls: "المعلمات", names: "نورة العتيبي\nهند الشمري\nسارة الدوسري\nمنى الزهراني\nهدى القرني\nأمل الغامدي", blank: "0" },
+  minutes: { year: "1447 / 1448 هـ", kind: "اجتماع لجنة التميز", num: "الأول", vdate: "1448/3/27 هـ", vtime: "من 8:00 إلى 9:00", place: "غرفة الاجتماعات", intro: "مناقشة خطة التميز للفصل الدراسي", opn: "فإنه في يوم الأحد 1448/3/27 هـ اجتمعت اللجنة لمناقشة ما يلي", disc: "مراجعة مؤشرات الأداء\nتوزيع المهام على الأعضاء", dec: "اعتماد الخطة المقترحة\nرفع تقرير المتابعة نهاية الشهر" }
+};
+const PREVIEW_CORE = `
+function $(i){return document.getElementById(i)}
+function fire(el){el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}))}
+for(var k in D){var el=$(k);if(el){el.value=D[k];fire(el)}}
+var cb=document.querySelectorAll(".panel input[type=checkbox]");for(var i=0;i<cb.length;i++){if(i%3!==2&&i<14&&!cb[i].checked)cb[i].click()}
+var NAMES=["نورة العتيبي","هند الشمري","سارة الدوسري","أمل الغامدي","منى الزهراني","هدى القرني"];
+var ni=0;var ins=document.querySelectorAll(".panel input[type=text],.panel input:not([type])");
+for(var j=0;j<ins.length;j++){var x=ins[j];if(!x.id&&!x.value&&/الاسم/.test(x.placeholder||"")){x.value=NAMES[ni++%NAMES.length];fire(x)}}
+var sl=document.querySelectorAll(".panel select");for(var q=0;q<sl.length;q++){if(!sl[q].id&&sl[q].options.length>1){sl[q].selectedIndex=1;fire(sl[q])}}
+`;
+function previewJs(form) {
+  const d = Object.assign({}, COMMON_P, PREVIEW_DATA[form] || {});
+  return "var D=" + JSON.stringify(d) + ";" + PREVIEW_CORE + "var st=document.createElement('style');st.textContent=WM_STRONG+'.panel{display:none!important}.app{display:block!important}.stage{max-width:900px;margin:0 auto!important}@media print{body{display:none!important}}';document.head.appendChild(st);";
+}
 
 /* ---------- المعالج الرئيسي ---------- */
 const NOSTORE = { "cache-control": "no-store" };
@@ -591,14 +636,14 @@ export default {
       const url = new URL(req.url);
       let p = url.pathname.replace(/\/+$/, "") || "/";
       if (p.startsWith("/api/")) return await api(req, env, ctx, url, p);
-      if (p === "/_demo.js") return new Response(DEMO_JS, { headers: { "content-type": "application/javascript; charset=utf-8", ...NOSTORE } });
+      if (p === "/_demo.js") return new Response(demoJs(DEMO_FORMS_ALL.includes(url.searchParams.get("f") || "") ? url.searchParams.get("f") : ""), { headers: { "content-type": "application/javascript; charset=utf-8", ...NOSTORE } });
       const DEMO_FORMS = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes"];
       const dm = p === "/demo" ? "index" : (/^\/demo\/[a-z]+$/.test(p) ? p.slice(6) : null);
       if (dm && (dm === "index" || DEMO_FORMS.includes(dm))) {
         const dr = await env.ASSETS.fetch(new Request(new URL("/" + dm + ".html", url), req));
         const dh = new Headers(dr.headers); dh.set("cache-control", "no-store");
         return new HTMLRewriter()
-          .on("body", { element(e) { e.append('<script src="/_demo.js" defer></script>', { html: true }); } })
+          .on("body", { element(e) { e.append('<script src="/_demo.js?f=' + (dm === "index" ? "" : dm) + '" defer></script>', { html: true }); } })
           .on("a", { element(e) {
             const h = e.getAttribute("href") || "", n = h.replace(/\.html$/, "");
             if (n === "index") e.setAttribute("href", "/demo");
