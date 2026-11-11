@@ -584,13 +584,16 @@ var ni=0;var ins=document.querySelectorAll(".panel input[type=text],.panel input
 for(var j=0;j<ins.length;j++){var x=ins[j];if(!x.id&&!x.value&&/الاسم/.test(x.placeholder||"")){x.value=NAMES[ni++%NAMES.length];fire(x)}}
 var sl=document.querySelectorAll(".panel select");for(var q=0;q<sl.length;q++){if(!sl[q].id&&!sl[q].dataset.k&&sl[q].options.length>1){sl[q].selectedIndex=1;fire(sl[q])}}
 `;
+
+const HEAD_JS = `var pn=document.querySelector(".panel");if(pn){var hd=document.createElement("div");hd.className="pv-head keepfs";hd.innerHTML=HEADTXT;pn.insertBefore(hd,pn.firstChild)}var sg=document.querySelector(".stage");if(sg&&!KEEP){var cp=document.createElement("div");cp.className="pv-cap";cp.textContent="هكذا يخرج تقريرك بعد تعبئته";sg.insertBefore(cp,sg.firstChild)}`;
+const HEADCSS = ".pv-head{background:#17445a;color:#fff;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-weight:700;font-size:15px;line-height:1.7;text-align:right}.pv-head span{display:block;font-weight:400;font-size:13px;opacity:.92}.pv-cap{text-align:center;font-weight:700;color:#17445a;margin:0 0 10px;font-size:15px}.keepfs{opacity:1}";
 function previewJs(form) {
   const d = Object.assign({}, COMMON_P, PREVIEW_DATA[form] || {});
   const keep = form === "certificate";
   const css = keep
-    ? ".panel>:not(.keepfs){display:none!important}.sheet.mini::after{font-size:110px!important;line-height:300px!important;opacity:.45!important}@media print{body{display:none!important}}"
-    : ".panel{pointer-events:none;user-select:none;opacity:.9}.panel #pdf,.panel #print,.panel #reset{display:none!important}.panel::before{content:'لوحة التعبئة (للمشتركين فقط)';display:block;background:#17445a;color:#fff;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-weight:700;text-align:center}@media(max-width:900px){.stage{order:-1}}@media print{body{display:none!important}}";
-  return "var D=" + JSON.stringify(d) + ";" + PREVIEW_CORE + (keep ? "var kf=$('themes');kf=kf&&kf.closest('fieldset');if(kf)kf.className+=' keepfs';" : "var lk=document.querySelectorAll('.panel input,.panel select,.panel textarea,.panel button');for(var z=0;z<lk.length;z++){lk[z].disabled=true}") + "var st=document.createElement('style');st.textContent=WM_STRONG+" + JSON.stringify(css) + ";document.head.appendChild(st);";
+    ? HEADCSS + ".panel>:not(.keepfs){display:none!important}.sheet.mini::after{font-size:110px!important;line-height:300px!important;opacity:.45!important}@media print{body{display:none!important}}"
+    : HEADCSS + ".panel{pointer-events:none;user-select:none;opacity:.9}.panel #pdf,.panel #print,.panel #reset{display:none!important}@media(max-width:900px){.stage{order:-1}}@media print{body{display:none!important}}";
+  return "var D=" + JSON.stringify(d) + ";" + PREVIEW_CORE + (keep ? "var kf=$('themes');kf=kf&&kf.closest('fieldset');if(kf)kf.className+=' keepfs';" : "var lk=document.querySelectorAll('.panel input,.panel select,.panel textarea,.panel button');for(var z=0;z<lk.length;z++){lk[z].disabled=true}") + "var KEEP=" + keep + ",HEADTXT=" + JSON.stringify(keep ? "🔒 أدوات التحكم — اختر الآن شكل الشهادة ولونها<span>وبعد الاشتراك تكتب الأسماء وتحفظ شهادات كثيرة دفعة واحدة بالشكل الذي اخترته.</span>" : "🔒 أدوات التحكم — تفتح لك بعد الاشتراك<span>تعبّئ كل خانة بنفسك، وتغيّر الصيغة بين مؤنث ومذكر، وترفع شعارك وختمك، وتختار ما يناسبك، فيتغير التقرير أمامك مباشرة.</span>") + ";" + HEAD_JS + "var st=document.createElement('style');st.textContent=WM_STRONG+" + JSON.stringify(css) + ";document.head.appendChild(st);";
 }
 
 /* ---------- المعالج الرئيسي ---------- */
