@@ -120,7 +120,7 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 <div id="arows"></div><button type="button" id="addA" style="margin-top:8px">+ إضافة صف</button>
 <p class="hint" id="cnt"></p></fieldset>
 <fieldset><legend>التوقيعات</legend>
-<label>اسم مديرة / مدير المدرسة</label><input id="principal">
+<label>اسم مديرة / مدير المدرسة <small style="color:var(--g2);font-weight:400">— يُؤخذ تلقائيًا من اسم المدير في جدول الأعضاء إن وُجد، ويمكنك تعديله أو كتابته بنفسك</small></label><input id="principal">
 <label>صورة الختم (اختياري)</label><input type="file" id="stampIn" accept="image/*"><button type="button" class="del" id="stampDel" style="width:100%">إزالة الختم</button>
 <p class="hint">يُحفظ الختم والشعار في متصفحك ويظهران أيضًا في بقية النماذج.</p></fieldset>
 <button class="main" id="pdf" type="button">حفظ PDF</button>
@@ -168,8 +168,9 @@ var IT=[["اللجنة / الفريق","kind",1,1],["رقم الاجتماع","n
 IT.forEach(function(x,i){if(x[2]){col=0;return}if(col===0&&(i===IT.length-1||IT[i+1][2]))x[2]=1;else col=1-col});
 var info=function(x){return '<div'+(x[2]?' class="w"':"")+"><b>"+x[0]+":</b>"+esc(x[4]!==undefined?x[4]:(v(x[1])||"—"))+"</div>"};
 var sec=function(h,id){return v(id)?'<div class="sec ctr"><h3>'+h+"</h3>"+numl($(id).value)+"</div>":""};
-var rowsN=Math.max(isT?AR.length:4,n),tr="",i;
-for(i=0;i<rowsN;i++){var p=i<n?[nm[i].n.trim(),nm[i].j.trim(),nm[i].r.trim()]:[];if(i<n&&!p[2])p[2]=DR(i);if(i<n&&!p[1])p[1]=DJ(i);if(i<n)p[1]=GJ(p[1]);tr+="<tr><td>"+(i<n?i+1:"")+'</td><td class="nm">'+esc(p[0]||"")+"</td><td>"+esc(p[1]||"")+"</td><td>"+esc(p[2]||"")+"</td><td></td></tr>"}
+var rowsN=Math.max(isT?AR.length:4,n),tr="",i,MG="";
+for(i=0;i<rowsN;i++){var p=i<n?[nm[i].n.trim(),nm[i].j.trim(),nm[i].r.trim()]:[];if(i<n&&!p[2])p[2]=DR(i);if(i<n&&!p[1])p[1]=DJ(i);if(i<n)p[1]=GJ(p[1]);if(i<n&&!MG&&p[0]&&/^\s*(ال)?مدير(ة|ه)?(\s+(ال)?مدرسة)?\s*$/.test(p[1]))MG=p[0];tr+="<tr><td>"+(i<n?i+1:"")+'</td><td class="nm">'+esc(p[0]||"")+"</td><td>"+esc(p[1]||"")+"</td><td>"+esc(p[2]||"")+"</td><td></td></tr>"}
+if(MG&&!window.PMAN){var pe=$("principal");if(pe.value!==MG)pe.value=MG}
 var at='<div class="sec"><h3>توقيع '+(f?"عضوات ":"أعضاء ")+(v("kind")||"اللجنة")+'</h3><table class="t at"><tr><th style="width:5%">م</th><th style="width:24%">الاسم</th><th style="width:33%">الوظيفة</th><th style="width:16%">الصفة</th><th style="width:22%">التوقيع</th></tr>'+tr+"</table></div>";
 var kd=v("kind"),dy=v("vday"),dt=v("vdate"),nu=v("num"),dsc=v("disc"),
 op="فإنه"+(dy?" في يوم "+dy:"")+(dt?(dy?" الموافق ":" بتاريخ ")+dt:"")+" تم عقد الاجتماع"+(nu?" "+nu:"")+(kd?" الخاص ب"+kd:"")+(dsc?" وتم مناقشة الأعمال التالية:":"."),
@@ -185,6 +186,7 @@ $("sheet").innerHTML=
 '<div class="sig3" style="grid-template-columns:1fr 1fr"><div><b>الختم</b><div class="st">'+(stamp?'<img alt="" src="'+stamp+'">':"")+"</div></div><div><b>"+(f?"مديرة المدرسة":"مدير المدرسة")+'</b>'+esc(v("principal"))+'<div class="sg"></div></div></div>'+
 '<div class="band"></div>'
 }
+$("principal").addEventListener("input",function(){window.PMAN=1});
 IDS.forEach(function(i){$(i).addEventListener("input",function(){if(SAVED.indexOf(i)>-1){SET[i]=$(i).value;sto("rpt_settings",JSON.stringify(SET))}render()})});
 $("arows").addEventListener("input",function(e){var d=e.target.closest(".arow");if(d&&e.target.dataset.k){AR[+d.dataset.i][e.target.dataset.k]=e.target.value;render()}});
 $("arows").addEventListener("click",function(e){var i=e.target.dataset.del;if(i!=null){AR.splice(+i,1);if(!AR.length)AR.push({n:"",j:"",r:""});drawA();render()}});
