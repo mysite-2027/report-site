@@ -561,31 +561,36 @@ function demoJs(f) {
 
 const DEMO_OPEN = "analysis";
 const DEMO_FORMS_ALL = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes"];
-const COMMON_P = { dept: "الإدارة العامة للتعليم بمنطقة الرياض", school: "مدرسة الأمل المتوسطة", principal: "نور فهد" };
+const COMMON_P = { dept: "إدارة تعليم الأحساء", school: "مدرسة الأمل المتوسطة", principal: "نور فهد" };
 const PREVIEW_DATA = {
   report: { pname: "أدوات الذكاء الاصطناعي", executor: "نورة خالد", place: "المختبر الرقمي", target: "طالبات الصف الثاني المتوسط", count: "28", pdate: "الأحد 17-3-1448 هـ", goal: "تعريف الطالبات بأدوات الذكاء الاصطناعي وكيفية توظيفها في التعلم بصورة آمنة ومسؤولة", goals: "التعريف بأبرز أدوات الذكاء الاصطناعي التعليمية\nالتدريب على صياغة الأوامر والاستفادة من نتائجها\nتعزيز الاستخدام المسؤول والآمن للأدوات", teacher: "نورة خالد", principal: "نور فهد" },
-  remedial: { subj: "الرياضيات", teacher: "نورة خالد", cls: "ثاني متوسط", sect: "2/ب", pdate: "الفصل الأول 1448 هـ" },
-  enrichment: { subj: "العلوم", teacher: "نورة خالد", cls: "ثاني متوسط", sect: "2/ب", pdate: "الفصل الأول 1448 هـ" },
+  remedial: { _rows: [{ n: "علياء محمد", s: "جدول الضرب", r: "تحسن عالٍ" }, { n: "الجازي محمد", s: "الكسور العشرية", r: "تحسن متوسط" }, { n: "أسماء فيصل", s: "حل المعادلات البسيطة", r: "تحسن عالٍ" }, { n: "رغداء نايف", s: "القسمة المطولة", r: "لم يظهر أي تحسن ويحتاج إلى استمرار" }], subj: "الرياضيات", teacher: "نورة خالد", cls: "ثاني متوسط", sect: "2/ب", pdate: "الفصل الأول 1448 هـ" },
+  enrichment: { _rows: [{ n: "علياء محمد" }, { n: "الجازي محمد" }, { n: "أسماء فيصل" }, { n: "رغداء نايف" }], subj: "الرياضيات", teacher: "نورة خالد", cls: "ثاني متوسط", sect: "2/ب", pdate: "الفصل الأول 1448 هـ" },
   certificate: { teacher: "نورة خالد", rname: "لجين العمري", rreason: "التفوق الدراسي والمشاركة الفاعلة", rdate: "1448/02/10 هـ" },
-  visit: { visitor: "منى الزهراني", visited: "نورة خالد", subj: "المهارات الرقمية", cls: "ثاني متوسط", vdate: "1447/11/20 هـ", lesson: "أدوات العرض التقديمي", pos: "تنوّع في استراتيجيات التدريس وضبط جيد للصف", rec: "تفعيل التعلم التعاوني بصورة أكبر" },
-  plc: { year: "1448 هـ", term: "الأول", num: "الجلسة الأولى", vdate: "الأحد 1448/3/27", topic: "توظيف الذكاء الاصطناعي في التدريس", tool: "عصف ذهني", place: "غرفة المعلمات", nextd: "الأحد 1448/4/4", target: "معلمات بتخصصات مختلفة", goals: "تبادل الخبرات في توظيف التقنية\nاقتراح أنشطة صفية مبتكرة", res: "عرض تجربتين ناجحتين\nمناقشة التحديات وطرق معالجتها", recs: "تعميم التجربتين على بقية المعلمات\nعقد ورشة تطبيقية الأسبوع القادم", names: "نورة خالد\nهند الشمري\nسارة الدوسري\nأمل الغامدي", coord: "منى الزهراني" },
-  waiting: { tname: "نورة خالد", vdate: "الأحد 1448/3/27", period: "الثالثة", cls: "ثاني متوسط / 2", cnt: "26", subj: "العلوم", topic: "مراجعة وحدة الطاقة", goals: "تثبيت مفاهيم الوحدة\nتنمية مهارات الحوار", notes: "تفاعل الطالبات إيجابي وانضباط جيد" },
-  attendance: { prog: "ورشة الذكاء الاصطناعي في التعليم", tname: "نورة خالد", vdate: "الأحد 1448/3/27", vtime: "الثالثة", place: "قاعة الاجتماعات", cls: "المعلمات", names: "نورة خالد\nهند الشمري\nسارة الدوسري\nمنى الزهراني\nهدى القرني\nأمل الغامدي", blank: "0" },
-  minutes: { year: "1447 / 1448 هـ", kind: "اجتماع لجنة التميز", num: "الأول", vdate: "1448/3/27 هـ", vtime: "من 8:00 إلى 9:00", place: "غرفة الاجتماعات", intro: "مناقشة خطة التميز للفصل الدراسي", opn: "فإنه في يوم الأحد 1448/3/27 هـ اجتمعت اللجنة لمناقشة ما يلي", disc: "مراجعة مؤشرات الأداء\nتوزيع المهام على الأعضاء", dec: "اعتماد الخطة المقترحة\nرفع تقرير المتابعة نهاية الشهر" }
+  visit: { _rows: [{ r: "0" }, { r: "0" }, { r: "1" }, { r: "1", n: "تنوّع في الأسئلة وإشراك معظم الطالبات" }, { r: "0" }, { r: "2" }, { r: "1" }, { r: "0" }, { r: "1" }], dept: "إدارة تعليم جدة", school: "مدرسة الشروق الثانوية", visitor: "منى الزهراني", visited: "نورة خالد", subj: "الرياضيات", cls: "ثاني ثانوي", vdate: "1448/3/20 هـ", lesson: "المعادلات التربيعية", pos: "تنوّع في استراتيجيات التدريس وضبط جيد للصف", rec: "تفعيل التعلم التعاوني بصورة أكبر" },
+  plc: { dept: "إدارة تعليم حائل", year: "1448 هـ", term: "الأول", num: "الجلسة الأولى", vdate: "الأحد 1448/3/27", topic: "استراتيجيات تدريس الرياضيات", tool: "عصف ذهني", place: "غرفة المعلمات", nextd: "الأحد 1448/4/4", target: "معلمات بتخصصات مختلفة", goals: "تبادل الخبرات في تدريس الرياضيات\nاقتراح أنشطة صفية مبتكرة", res: "عرض تجربتين ناجحتين في تدريس الكسور\nمناقشة التحديات وطرق معالجتها", recs: "تعميم التجربتين على بقية المعلمات\nعقد ورشة تطبيقية الأسبوع القادم", names: "نورة خالد\nهند الشمري\nسارة الدوسري\nأمل الغامدي", coord: "منى الزهراني" },
+  waiting: { _checks: [1, 2, 4, 5], tname: "نورة خالد", vdate: "الأحد 1448/3/27", period: "الثالثة", cls: "ثاني متوسط / 2", cnt: "26", subj: "الرياضيات", topic: "مراجعة وحدة الكسور", goals: "تثبيت مفاهيم الوحدة\nتنمية مهارات الحوار", notes: "تفاعل الطالبات إيجابي وانضباط جيد" },
+  attendance: { dept: "إدارة تعليم الباحة", prog: "حصة إثرائية في الرياضيات", tname: "نورة خالد", vdate: "الأحد 1448/3/27", vtime: "الثالثة", place: "قاعة الاجتماعات", cls: "ثالث أول", names: "علياء محمد\nالجازي محمد\nأسماء فيصل\nرغداء نايف\nلمى سعد\nريماس خالد\nجوري عبدالله\nشهد ناصر\nملاك فهد\nلجين العمري\nهتون صالح\nغدير علي\nسلمى راشد\nدانة سلطان\nتالا ماجد", blank: "0" },
+  minutes: { dept: "إدارة تعليم مكة المكرمة", year: "1447 / 1448 هـ", kind: "لجنة التميز", _names: ["نور فهد", "نورة خالد", "هند الشمري", "سارة الدوسري", "منى الزهراني", "هدى القرني", "أمل الغامدي", "لمى العتيبي"], num: "الأول", vdate: "1448/3/27 هـ", vtime: "من 8:00 إلى 9:00", place: "غرفة الاجتماعات", intro: "مناقشة خطة التميز للفصل الدراسي", disc: "مراجعة مؤشرات الأداء\nتوزيع المهام على الأعضاء", dec: "اعتماد الخطة المقترحة\nرفع تقرير المتابعة نهاية الشهر" }
 };
 const PREVIEW_CORE = `
 function $(i){return document.getElementById(i)}
 function fire(el){el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}))}
 for(var k in D){var el=$(k);if(el){el.value=D[k];fire(el)}}
-var cb=document.querySelectorAll(".panel input[type=checkbox]");for(var i=0;i<cb.length;i++){if(i%3!==2&&i<14&&!cb[i].checked)cb[i].click()}
-var NAMES=["نورة خالد","هند الشمري","سارة الدوسري","أمل الغامدي","منى الزهراني","هدى القرني"];
+var R=D._rows;if(R){var ar=$("addRow");while(document.querySelectorAll("#rows .row").length<R.length)ar.click();var rw=document.querySelectorAll("#rows .row");for(var ri=0;ri<R.length;ri++){for(var rk in R[ri]){var re=rw[ri].querySelector("[data-k="+rk+"]");if(re){re.value=R[ri][rk];fire(re)}}}}
+var cb=document.querySelectorAll(".panel input[type=checkbox]");for(var i=0;i<cb.length;i++){var want=D._checks?D._checks.indexOf(i)>-1:(i%3!==2&&i<14);if(want&&!cb[i].checked)cb[i].click()}
+var NAMES=D._names||["نورة خالد","هند الشمري","سارة الدوسري","أمل الغامدي","منى الزهراني","هدى القرني"];
 var ni=0;var ins=document.querySelectorAll(".panel input[type=text],.panel input:not([type])");
 for(var j=0;j<ins.length;j++){var x=ins[j];if(!x.id&&!x.value&&/الاسم/.test(x.placeholder||"")){x.value=NAMES[ni++%NAMES.length];fire(x)}}
-var sl=document.querySelectorAll(".panel select");for(var q=0;q<sl.length;q++){if(!sl[q].id&&sl[q].options.length>1){sl[q].selectedIndex=1;fire(sl[q])}}
+var sl=document.querySelectorAll(".panel select");for(var q=0;q<sl.length;q++){if(!sl[q].id&&!sl[q].dataset.k&&sl[q].options.length>1){sl[q].selectedIndex=1;fire(sl[q])}}
 `;
 function previewJs(form) {
   const d = Object.assign({}, COMMON_P, PREVIEW_DATA[form] || {});
-  return "var D=" + JSON.stringify(d) + ";" + PREVIEW_CORE + "var st=document.createElement('style');st.textContent=WM_STRONG+'.panel{display:none!important}.app{display:block!important}.stage{max-width:900px;margin:0 auto!important}@media print{body{display:none!important}}';document.head.appendChild(st);";
+  const keep = form === "certificate";
+  const css = keep
+    ? ".panel>:not(.keepfs){display:none!important}.sheet.mini::after{font-size:110px!important;line-height:300px!important;opacity:.45!important}@media print{body{display:none!important}}"
+    : ".panel{pointer-events:none;user-select:none;opacity:.9}.panel #pdf,.panel #print,.panel #reset{display:none!important}.panel::before{content:'لوحة التعبئة (للمشتركين فقط)';display:block;background:#17445a;color:#fff;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-weight:700;text-align:center}@media(max-width:900px){.stage{order:-1}}@media print{body{display:none!important}}";
+  return "var D=" + JSON.stringify(d) + ";" + PREVIEW_CORE + (keep ? "var kf=$('themes');kf=kf&&kf.closest('fieldset');if(kf)kf.className+=' keepfs';" : "var lk=document.querySelectorAll('.panel input,.panel select,.panel textarea,.panel button');for(var z=0;z<lk.length;z++){lk[z].disabled=true}") + "var st=document.createElement('style');st.textContent=WM_STRONG+" + JSON.stringify(css) + ";document.head.appendChild(st);";
 }
 
 /* ---------- المعالج الرئيسي ---------- */
