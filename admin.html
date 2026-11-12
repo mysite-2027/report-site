@@ -31,6 +31,10 @@ button.r{background:var(--err)}
 .tag{border-radius:99px;padding:1px 10px;font-size:.8rem;color:#fff;background:var(--green)}
 .tag.x{background:var(--err)}.tag.w{background:var(--warn)}.tag.m{background:var(--muted)}
 .meta{color:var(--muted);font-size:.9rem;margin:4px 0}
+.cpb{padding:2px 10px;font-size:.8rem}
+.rqref{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;margin:6px 0;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.rqref span{color:var(--muted);font-size:.85rem}
+.rqref b{font-size:1.05rem;color:var(--text)}
 .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .acts button{padding:5px 10px;font-size:.85rem}
 .ev{font-size:.9rem;border-top:1px solid var(--border);padding:6px 0}
@@ -91,14 +95,15 @@ $("lf").onsubmit=function(e){e.preventDefault();call("/api/admin/login","POST",{
 $("lo").onclick=function(){call("/api/admin/logout","POST").then(function(){show(false)})};
 var KIND={new_device:["جهاز جديد","m"],over_limit:["تجاوز الأجهزة","w"],blocked:["جهاز مرفوض","w"],trial_start:["بدء تجربة","m"],signup_request:["طلب اشتراك","w"],renew_request:["طلب تجديد","w"],signup_approved:["قبول طلب","m"],signup_rejected:["رفض طلب","x"],password_reset_request:["طلب استعادة","m"],password_reset:["تغيير كلمة المرور","m"],reminder:["تذكير تجديد","m"],user_remove:["حذف جهاز (مستخدم)","w"],mail_error:["فشل الإيميل","x"],concurrent:["استخدام متزامن","w"],extend:["تمديد","m"],suspend:["إيقاف","x"],revoke:["إزالة الأجهزة","m"]};
 function loadReq(){call("/api/admin/requests").then(function(x){if(!x.ok)return;var r=x.j.requests;$("rqCnt").textContent="("+r.length+")";
- $("rqs").innerHTML=r.map(function(q){return '<div class="u" data-q="'+q.id+'" data-days="'+q.days+'"><div class="meta"><b dir="ltr">'+esc(q.email)+'</b> — '+(q.kind==="renew"?'<span class="tag w">تجديد</span>':'<span class="tag">اشتراك جديد</span>')+' '+(q.name?esc(q.name)+' — ':'')+esc(q.plan_name)+' — مرجع التحويل: '+esc(q.ref||"—")+' <small>'+esc(q.text)+'</small></div><div class="acts"><button data-qa="approve">قبول</button><button class="r" data-qa="reject">رفض</button></div></div>'}).join("")||'<div class="meta">لا توجد طلبات معلّقة.</div>'})}
-$("rqs").onclick=function(e){var b=e.target.closest("button");if(!b||!b.dataset.qa)return;var box=b.closest("[data-q]"),id=box.dataset.q;
+ $("rqs").innerHTML=r.map(function(q){return '<div class="u" data-q="'+q.id+'" data-days="'+q.days+'"><div class="meta"><b dir="ltr">'+esc(q.email)+'</b> <button class="g cpb" data-cp="'+esc(q.email)+'" type="button">نسخ</button> '+(q.kind==="renew"?'<span class="tag w">تجديد</span>':'<span class="tag">اشتراك جديد</span>')+' '+(q.name?esc(q.name)+' — ':'')+esc(q.plan_name)+' <small>'+esc(q.text)+'</small></div><div class="rqref"><span>مرجع التحويل</span><b>'+esc(q.ref||"—")+'</b></div><div class="acts"><button data-qa="approve">قبول</button><button class="r" data-qa="reject">رفض</button></div></div>'}).join("")||'<div class="meta">لا توجد طلبات معلّقة.</div>'})}
+$("rqs").onclick=function(e){var b=e.target.closest("button");if(b&&b.dataset.cp){var t=b.dataset.cp;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent="تم"},function(){b.textContent="!"});setTimeout(function(){b.textContent="نسخ"},1500);return}if(!b||!b.dataset.qa)return;var box=b.closest("[data-q]"),id=box.dataset.q;
  if(b.dataset.qa==="approve"){if(!confirm("هل تأكدت من وصول المبلغ؟ سيُفعَّل الحساب فورًا."))return;call("/api/admin/request/"+id+"/approve","POST",{days:+box.dataset.days}).then(function(x){if(!x.ok)alert(x.j.error||"خطأ");loadReq();load()})}
  else{var r=prompt("سبب الرفض (اختياري، يصل للمشترك بالإيميل):","");if(r===null)return;call("/api/admin/request/"+id+"/reject","POST",{reason:r}).then(function(){loadReq();load()})}};
 function load(){loadReq();
  call("/api/admin/users").then(function(x){if(!x.ok)return;var us=x.j.users;$("cnt").textContent="("+us.length+")";
   $("mail").textContent=x.j.mailer?"تنبيهات الإيميل: مفعّلة":"تنبيهات الإيميل: غير مفعّلة (تظهر الأحداث هنا فقط)";
-  $("tm").innerHTML=x.j.mailer?'<button id="tmb" type="button" style="margin:6px 0">إرسال إيميل اختبار</button> <span id="tmr"></span>':"";
+  $("tm").innerHTML=x.j.mailer?'<button id="tmb" type="button" style="margin:6px 0">إرسال إيميل اختبار</button> <span id="tmr"></span> <button id="bkb" type="button" style="margin:6px 0">أرسل نسخة احتياطية الآن</button> <span id="bkr"></span>':"";
+  if(x.j.mailer)$("bkb").onclick=function(){$("bkr").textContent="…";call("/api/admin/backup","POST").then(function(y){$("bkr").textContent=y.j.ok?"أُرسلت النسخة ("+y.j.users+" مشترك). افحص بريدك.":"فشل: "+(y.j.detail||y.j.error||"")})};
   if(x.j.mailer)$("tmb").onclick=function(){$("tmr").textContent="…";call("/api/admin/testmail","POST").then(function(y){$("tmr").textContent=y.j.ok?"أُرسل الإيميل. افحص بريدك (وSpam).":"فشل: "+(y.j.detail||y.j.error||"")})};
   $("users").innerHTML=us.map(function(u){
    var st=!u.active?'<span class="tag x">موقوف</span>':u.days_left<0?'<span class="tag x">منتهي</span>':u.days_left<=3?'<span class="tag w">ينتهي قريبًا</span>':'<span class="tag">فعّال</span>';
