@@ -7,6 +7,7 @@ const REMOVE_LIMIT = 1;
 const TRIAL_DAYS = 3, TRIAL_NOTE = "تجربة";
 const PLAN_DAYS = { m1: 30, m6: 180 };
 const PLAN_NAME = { m1: "شهر واحد", m6: "6 أشهر" };
+const TERMS_OK = " — وافق على الشروط (نسخة 12 نوفمبر 2026)";
 const okEmail = e => e.length <= 120 && /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(e);
 const DV = n => n === 1 ? "جهاز واحد" : n === 2 ? "جهازين" : n + " أجهزة";
 const SESSION_DAYS = 30, DEVICE_WINDOW = 30 * DAY;
@@ -179,6 +180,7 @@ async function api(req, env, ctx, url, p) {
       name = String(b.name || "").trim().slice(0, 60), pw = String(b.password || ""), plan = PLAN_DAYS[b.plan] ? b.plan : null,
       ref = String(b.ref || "").trim().slice(0, 80), code = String(b.code || "").trim();
     if (!okEmail(email) || !plan) return json({ error: "أكمل الحقول بشكل صحيح" }, 400);
+    if (b.agree !== true) return json({ error: "يجب الموافقة على الشروط للمتابعة" }, 400);
     if (await tooMany(env, "ss:" + ip, 8, 60 * MIN)) return json({ error: "طلبات كثيرة. حاول بعد قليل." }, 429);
     const c = await env.DB.prepare("SELECT * FROM codes WHERE email=?").bind(email).first();
     if (!c || c.exp < now || c.tries >= 5) return json({ error: "رمز التحقق منتهٍ أو غير موجود. اطلب رمزًا جديدًا." }, 400);
@@ -195,13 +197,13 @@ async function api(req, env, ctx, url, p) {
       const old = await env.DB.prepare("SELECT id FROM requests WHERE user_id=? AND kind='renew' AND status='pending'").bind(ex.id).first();
       if (old) await env.DB.prepare("UPDATE requests SET plan=?,ref=?,created_at=? WHERE id=?").bind(plan, ref, now, old.id).run();
       else await env.DB.prepare("INSERT INTO requests(kind,user_id,email,name,plan,ref,created_at) VALUES('renew',?,?,?,?,?,?)").bind(ex.id, ex.email, ex.name || "", plan, ref, now).run();
-      await ev(env, ex, "renew_request", PLAN_NAME[plan] + (ref ? " — مرجع: " + ref : ""));
+      await ev(env, ex, "renew_request", PLAN_NAME[plan] + (ref ? " — مرجع: " + ref : "") + TERMS_OK);
     } else {
       const salt = rand(16), hash = await pbkdf2(pw, salt);
       const old = await env.DB.prepare("SELECT id FROM requests WHERE email=? AND kind='new' AND status='pending'").bind(email).first();
       if (old) await env.DB.prepare("UPDATE requests SET name=?,salt=?,hash=?,plan=?,ref=?,created_at=? WHERE id=?").bind(name, salt, hash, plan, ref, now, old.id).run();
       else await env.DB.prepare("INSERT INTO requests(kind,email,name,salt,hash,plan,ref,created_at) VALUES('new',?,?,?,?,?,?,?)").bind(email, name, salt, hash, plan, ref, now).run();
-      await ev(env, { id: null, email }, "signup_request", name + " — " + PLAN_NAME[plan] + (ref ? " — مرجع: " + ref : ""));
+      await ev(env, { id: null, email }, "signup_request", name + " — " + PLAN_NAME[plan] + (ref ? " — مرجع: " + ref : "") + TERMS_OK);
     }
     ctx.waitUntil(alertOwner(env, (ex ? "طلب تجديد اشتراك — " : "طلب اشتراك جديد — ") + email, [
       "البريد: " + email + " (تم التحقق منه)", ex ? "" : "الاسم: " + name, "الباقة: " + PLAN_NAME[plan], "مرجع التحويل: " + (ref || "—"),
@@ -344,12 +346,13 @@ async function api(req, env, ctx, url, p) {
     if (p === "/api/renew" && m === "POST") {
       const b = await body(req), plan = PLAN_DAYS[b.plan] ? b.plan : null, ref = String(b.ref || "").trim().slice(0, 80);
       if (!plan) return json({ error: "اختر الباقة" }, 400);
+      if (b.agree !== true) return json({ error: "يجب الموافقة على الشروط للمتابعة" }, 400);
       if (await tooMany(env, "rn:" + u.id, 5, 60 * MIN)) return json({ error: "طلبات كثيرة. حاول لاحقًا." }, 429);
       await fail(env, "rn:" + u.id);
       const old = await env.DB.prepare("SELECT id FROM requests WHERE user_id=? AND kind='renew' AND status='pending'").bind(u.id).first();
       if (old) await env.DB.prepare("UPDATE requests SET plan=?,ref=?,created_at=? WHERE id=?").bind(plan, ref, now, old.id).run();
       else await env.DB.prepare("INSERT INTO requests(kind,user_id,email,name,plan,ref,created_at) VALUES('renew',?,?,?,?,?,?)").bind(u.id, u.email, u.name || "", plan, ref, now).run();
-      await ev(env, u, "renew_request", PLAN_NAME[plan] + (ref ? " — مرجع: " + ref : ""));
+      await ev(env, u, "renew_request", PLAN_NAME[plan] + (ref ? " — مرجع: " + ref : "") + TERMS_OK);
       ctx.waitUntil(alertOwner(env, "طلب تجديد اشتراك — " + u.email, ["المشترك: " + u.email, "الباقة: " + PLAN_NAME[plan], "مرجع التحويل: " + (ref || "—"), "افتح لوحة المسؤول للقبول بعد التأكد من وصول المبلغ.", "الوقت: " + fmt(now)]));
       return json({ ok: true });
     }
