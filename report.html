@@ -56,6 +56,10 @@ table.imp td{border:1px solid var(--l);padding:4px 6px;text-align:center;vertica
 .ev{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ev div{border:1.5px solid var(--p);border-radius:10px;height:34mm;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff;color:#9aa8b2}
 .ev img{width:100%;height:100%;object-fit:contain;display:block}
+.sheet.al-r .info div{justify-content:flex-start;text-align:right}
+.sheet.al-r .sec p,.sheet.al-r table.imp td{text-align:right}
+.sheet.al-r .ev div{justify-content:flex-start}
+.sheet.al-r .ev img{object-position:right center}
 .sig{margin-top:auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;padding-top:10px}
 .sig b{display:block;color:var(--g1)}
 .sig .st{height:26mm;display:flex;align-items:center;justify-content:center}
@@ -81,6 +85,7 @@ body{background:#fff}
 <label>اسم المدرسة</label><input id="school">
 <div class="two"><div><label>الصيغة</label><select id="gender"><option value="f">مؤنث (معلمات، طالبات)</option><option value="m">مذكر (معلمون، طلاب)</option></select></div>
 </div>
+<div class="two"><div><label>لون الإطارات والأشرطة</label><select id="clr"><option value="n">كحلي (الافتراضي)</option><option value="g">أخضر</option><option value="t">تيل</option><option value="b">أزرق</option><option value="k">رمادي داكن</option></select></div><div><label>محاذاة النصوص</label><select id="aln"><option value="c">وسط (الافتراضي)</option><option value="r">يمين</option></select></div></div>
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، انقر على الصورة بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
 <label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logo" accept="image/*">
@@ -113,7 +118,8 @@ body{background:#fff}
 <script>
 var $=function(i){return document.getElementById(i)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
-var KEEP=["dept","school","gender","teacher","principal"];
+var KEEP=["dept","school","gender","teacher","principal","clr","aln"];
+var CLR={n:"#17445a",g:"#00682f",t:"#008080",b:"#2c7db5",k:"#374151"};
 var FIELDS=KEEP.concat(["pname","executor","place","target","count","pdate","goal","goals"]);
 var rows=[{c:"",s:"تحقق",n:"",m:""}],imgs=[null,null,null,null],logo=null,stamp=null;
 function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
@@ -129,6 +135,7 @@ if(x1>x0&&y1>y0){var pd=Math.round(Math.max(c.width,c.height)*.02),c2=document.c
 cb(c.toDataURL(type,.82))};im.src=src};
 sv?r.readAsText(file):r.readAsDataURL(file)}
 function render(){
+var sh=$("sheet");sh.style.setProperty("--p",CLR[$("clr").value]||CLR.n);sh.classList.toggle("al-r",$("aln").value==="r");
 var L=logo,f=$("gender").value==="f",v=function(i){return $(i).value.trim()};
 var T={ex:f?"المنفّذة":"المنفّذ",ta:f?"المستهدفات":"المستهدفون",ben:f?"المستفيدات":"المستفيدين",role:f?"مديرة المدرسة":"مدير المدرسة",who:f?"المعلمة":"المعلم"};
 var info=[["البرنامج","pname"]];
