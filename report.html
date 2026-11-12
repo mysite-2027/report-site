@@ -45,11 +45,13 @@ button.del{border-color:var(--border);color:var(--muted);padding:3px 10px;margin
 .info b{color:var(--g2);white-space:nowrap}
 .info .w{grid-column:1/-1}
 .sec{border:2px solid var(--p);border-radius:18px;padding:8px 14px;break-inside:avoid}
-.sec h3{margin:0 0 4px;color:var(--g1);font-size:1.05em}
-.g{display:flex;gap:6px;margin:1px 0}.g b{color:var(--g1)}
+.sec h3{margin:0 0 4px;color:var(--g1);font-size:1.05em;text-align:center}
+.sheet.al-r .sec h3{text-align:right}
+.g{display:flex;gap:6px;margin:1px 0;justify-content:center}.g b{color:var(--g1)}
+.sheet.al-r .g{justify-content:flex-start}
 .sec p{margin:0;text-align:center}
 table.imp{width:100%;border-collapse:collapse;font-size:.92em;table-layout:fixed}
-table.imp th:nth-child(1){width:17%}table.imp th:nth-child(2){width:13%}table.imp th:nth-child(3){width:22%}table.imp th:nth-child(4){width:48%}
+table.imp th:nth-child(1){width:30%}table.imp th:nth-child(2){width:12%}table.imp th:nth-child(3){width:20%}table.imp th:nth-child(4){width:38%}
 table.imp td{overflow-wrap:anywhere}
 table.imp th{background:var(--p);color:#fff;padding:4px 6px;border:1px solid var(--p)}
 table.imp td{border:1px solid var(--l);padding:4px 6px;text-align:center;vertical-align:top}
@@ -85,7 +87,7 @@ body{background:#fff}
 <label>اسم المدرسة</label><input id="school">
 <div class="two"><div><label>الصيغة</label><select id="gender"><option value="f">مؤنث (معلمات، طالبات)</option><option value="m">مذكر (معلمون، طلاب)</option></select></div>
 </div>
-<div class="two"><div><label>لون الإطارات والأشرطة</label><select id="clr"><option value="n">كحلي (الافتراضي)</option><option value="g">أخضر</option><option value="t">تيل</option><option value="b">أزرق</option><option value="k">رمادي داكن</option></select></div><div><label>محاذاة النصوص</label><select id="aln"><option value="c">وسط (الافتراضي)</option><option value="r">يمين</option></select></div></div>
+<div class="two"><div><label>لون الإطارات والأشرطة</label><select id="clr"><option value="n">كحلي (الافتراضي)</option><option value="g">أخضر</option><option value="t">أخضر مزرق</option><option value="b">أزرق</option><option value="k">رمادي داكن</option></select></div><div><label>محاذاة النصوص</label><select id="aln"><option value="c">وسط (الافتراضي)</option><option value="r">يمين</option></select></div></div>
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، انقر على الصورة بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
 <label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logo" accept="image/*">
@@ -148,7 +150,7 @@ $("sheet").innerHTML=
 '<div class="info"><div class="w"><b>اسم '+T.ex+':</b>'+esc(v("executor")||"—")+"</div><div><b>مكان التنفيذ:</b>"+esc(v("place")||"—")+"</div><div><b>"+T.ta+':</b>'+esc(v("target")||"—")+"</div><div><b>عدد "+T.ben+":</b>"+esc(v("count")||"—")+"</div><div><b>تاريخ التنفيذ:</b>"+esc(v("pdate")||"—")+"</div></div>"+
 '<div class="sec"><h3>الهدف العام</h3><p>'+esc(v("goal")||"—")+"</p></div>"+
 '<div class="sec"><h3>الأهداف التفصيلية</h3>'+(goals.length?goals.map(function(g,i){return '<div class="g"><b>'+(i+1)+'-</b><span>'+esc(g)+"</span></div>"}).join(""):"<p>—</p>")+"</div>"+
-(tr?'<div class="sec"><h3 style="text-align:center">أداة قياس أثر البرنامج:</h3><p style="margin-bottom:6px">تهدف هذه الأداة إلى قياس أثر برنامج من خلال المعايير المحددة للبرنامج.</p><table class="imp"><tr><th>المعيار</th><th>حالة التحقق</th><th>ملاحظات</th><th>طريقة قياس الأثر</th></tr>'+tr+"</table></div>":"")+
+(tr?'<div class="sec"><h3>أداة قياس أثر البرنامج:</h3><p style="margin-bottom:6px">تهدف هذه الأداة إلى قياس أثر برنامج من خلال المعايير المحددة للبرنامج.</p><table class="imp"><tr><th>المعيار</th><th>حالة التحقق</th><th>ملاحظات</th><th>طريقة قياس الأثر</th></tr>'+tr+"</table></div>":"")+
 '<div class="sec"><h3>الشواهد</h3><div class="ev">'+ev+"</div></div>"+
 '<div class="sig"><div><b>'+T.ex+"</b>"+esc(v("teacher")||"")+'</div><div><b>الختم</b><div class="st">'+(stamp?'<img alt="" src="'+stamp+'">':"")+'</div></div><div><b>'+T.role+"</b>"+esc(v("principal")||"")+'</div></div><div class="band"></div>'
 }
