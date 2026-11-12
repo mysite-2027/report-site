@@ -64,9 +64,10 @@ const fmtD = ts => new Date(ts).toLocaleDateString("ar-SA", { timeZone: "Asia/Ri
 const where = (cf) => [cf && cf.city, cf && cf.country].filter(Boolean).join("، ") || "غير معروف";
 const tempPass = () => { const c = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s = ""; const r = crypto.getRandomValues(new Uint8Array(10)); r.forEach(x => s += c[x % c.length]); return s; };
 
-async function sendMail(env, subject, text, to, html) {
+async function sendMail(env, subject, text, to, html, attachments) {
   const o = { from: env.MAIL_FROM || "Site Alerts <onboarding@resend.dev>", to: [to || env.ALERT_EMAIL], subject, text };
   if (html) o.html = html;
+  if (attachments) o.attachments = attachments;
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: "Bearer " + env.RESEND_API_KEY, "content-type": "application/json" },
@@ -458,6 +459,10 @@ async function api(req, env, ctx, url, p) {
       try { const r = await sendMail(env, "اختبار التنبيهات", "إذا وصلتك هذه الرسالة فالتنبيهات تعمل.\n" + fmt(now)); return json({ ok: r.status < 300, status: r.status, detail: r.body }); }
       catch (e) { return json({ ok: false, detail: String(e).slice(0, 200) }); }
     }
+    if (p === "/api/admin/backup" && m === "POST") {
+      const r = await backupJob(env);
+      return json(r, r.ok ? 200 : 400);
+    }
     if (p === "/api/admin/events" && m === "GET") {
       const lim = Math.min(1000, Math.max(50, +new URL(req.url).searchParams.get("limit") || 150));
       const rows = (await env.DB.prepare("SELECT ts,email,kind,detail FROM events ORDER BY id DESC LIMIT ?").bind(lim).all()).results;
@@ -620,6 +625,27 @@ function page(res, extra) {
   return r;
 }
 
+// نسخة احتياطية أسبوعية تُرسل إلى بريد المالك (بدون كلمات المرور المشفرة)
+async function backupJob(env) {
+  if (!env.DB || !env.RESEND_API_KEY || !env.ALERT_EMAIL) return { ok: false, detail: "التنبيهات غير مفعّلة" };
+  await init(env);
+  const q = async sql => (await env.DB.prepare(sql).all()).results;
+  const data = {
+    created: new Date().toISOString(),
+    note: "نسخة احتياطية بدون كلمات المرور المشفرة. عند الاسترجاع يعيد المشتركون تعيين كلمات مرورهم.",
+    users: await q("SELECT id,email,name,expires_at,active,max_devices,created_at,note FROM users"),
+    requests: await q("SELECT id,kind,user_id,email,name,plan,ref,status,created_at,decided_at FROM requests"),
+    events: await q("SELECT id,ts,user_id,email,kind,detail FROM events")
+  };
+  const bytes = enc.encode(JSON.stringify(data));
+  let bin = ""; for (let i = 0; i < bytes.length; i += 8192) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+  const day = new Date(Date.now() + 3 * 3600 * 1000).toISOString().slice(0, 10);
+  try {
+    const r = await sendMail(env, "نسخة احتياطية — مُيَسِّر " + day, "مرفق نسخة احتياطية من المشتركين والطلبات وسجل الأحداث (" + data.users.length + " مشترك). احفظها في مكان آمن.", undefined, undefined, [{ filename: "muyassir-backup-" + day + ".json", content: btoa(bin) }]);
+    if (r.status >= 300) { await ev(env, null, "mail_error", "فشل إرسال النسخة الاحتياطية (" + r.status + "): " + r.body); return { ok: false, detail: r.body }; }
+    return { ok: true, users: data.users.length };
+  } catch (e) { return { ok: false, detail: String(e).slice(0, 200) }; }
+}
 async function dailyJob(env) {
   if (!env.DB) return;
   await init(env);
@@ -643,6 +669,7 @@ async function dailyJob(env) {
     env.DB.prepare("DELETE FROM attempts WHERE ts<?").bind(now - DAY),
     env.DB.prepare("DELETE FROM sessions WHERE last_seen<?").bind(now - SESSION_DAYS * DAY)
   ]);
+  if (new Date(now + 3 * 3600 * 1000).getUTCDay() === 5) await backupJob(env);
 }
 
 export default {
