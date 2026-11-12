@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>نسيت كلمة المرور | مُيَسِّر التقارير المدرسية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6f8;--surface:#fff;--text:#16242f;--muted:#5b6b78;--border:#d5dde3;--navy:#17445a;--green:#00682f;--blue:#2c7db5;--lg:#3fac72;--err:#b42318}
+@media (prefers-color-scheme:dark){:root{--bg:#10181f;--surface:#18232c;--text:#e8eef2;--muted:#9fb0bc;--border:#2c3b47;--green:#52c1b4;--err:#ff8a80}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px;background:var(--bg);color:var(--text);font-family:"Tajawal","Segoe UI",Tahoma,Arial,sans-serif;line-height:1.7}
+.box{width:100%;max-width:420px;background:var(--surface);border:2px solid var(--navy);border-radius:20px;overflow:hidden}
+.top{background:var(--navy);color:#fff;text-align:center;padding:22px 18px;position:relative}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:linear-gradient(90deg,var(--blue),var(--lg))}
+.top b{font-size:1.25rem;display:block}.top span{opacity:.9;font-size:.95rem}
+form,.p{padding:22px}
+label{display:block;font-weight:700;margin:12px 0 4px;font-size:.95rem}
+input{width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}
+button{width:100%;margin-top:18px;padding:12px;border:0;border-radius:10px;background:var(--green);color:#fff;font:inherit;font-weight:800;font-size:1.05rem;cursor:pointer}
+button:disabled{opacity:.6}
+.msg{min-height:1.4em;margin-top:12px;color:var(--err);font-weight:700;font-size:.95rem}.msg.ok{color:var(--green)}
+.back{text-align:center;margin:0 22px 20px}.back a{color:var(--green);font-weight:700}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="top"><b>نسيت كلمة المرور</b><span>سنرسل لك رابطًا لتعيين كلمة جديدة</span></div>
+  <form id="f">
+    <label for="em">البريد الإلكتروني لحسابك</label>
+    <input id="em" type="email" inputmode="email" autocomplete="username" required dir="ltr">
+    <button id="go" type="submit">إرسال الرابط</button>
+    <div class="msg" id="msg" role="alert"></div>
+  </form>
+  <div class="back"><a href="/login">العودة لتسجيل الدخول</a></div>
+</div>
+<script>
+var $=function(i){return document.getElementById(i)};
+$("f").onsubmit=function(e){e.preventDefault();var b=$("go"),m=$("msg");b.disabled=true;m.className="msg ok";m.textContent="جارٍ الإرسال…";
+ fetch("/api/forgot",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email:$("em").value})})
+ .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})})
+ .then(function(x){if(x.ok){m.textContent="إن كان هذا البريد مسجّلًا لدينا فقد أرسلنا إليه رابطًا صالحًا لمدة ساعة. افحص الوارد والرسائل غير المرغوبة."}else{m.className="msg";m.textContent=x.j.error||"تعذّر الإرسال";b.disabled=false}})
+ .catch(function(){m.className="msg";m.textContent="تعذّر الاتصال. حاول مرة أخرى.";b.disabled=false})};
+</script>
+</body>
+</html>
