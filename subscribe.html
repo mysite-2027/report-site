@@ -103,8 +103,10 @@ input:focus{outline:2px solid var(--blue);border-color:var(--blue)}
     <input id="pw" type="password" autocomplete="new-password" dir="ltr">
     <p class="note" id="renewNote">إن كان لديك حساب وتريد التجديد، اكتب بريدك واطلب الرمز، ولا تحتاج إلى كلمة مرور جديدة.</p>
   </div>
-  <div id="refWrap"><label for="rf">بيانات التحويل <span class="hint">(اختياري: اسم المحوّل أو آخر 4 أرقام من الحوالة)</span></label>
-  <input id="rf" type="text" maxlength="80"></div>
+  <div id="refWrap"><label for="rf">اسم المحوّل <span class="hint">(كما يظهر في تطبيق بنكك)</span></label>
+  <input id="rf" type="text" maxlength="50" autocomplete="off">
+  <label for="rf4">آخر 4 أرقام من رقم الحوالة <span class="hint">(من إشعار التحويل)</span></label>
+  <input id="rf4" type="text" inputmode="numeric" maxlength="4" autocomplete="off" dir="ltr"></div>
   <label class="agree"><input type="checkbox" id="ag"><span>قرأتُ <a href="/terms" target="_blank" rel="noopener">الشروط وسياسة الخصوصية</a> وأوافق عليها، وأعلم أن الاشتراك خدمة رقمية لا تُسترد قيمته بعد التفعيل.</span></label>
   <div class="act"><button type="submit" id="go">إرسال الطلب</button></div>
   <div class="msg" id="msg" role="alert"></div>
@@ -175,15 +177,17 @@ $("sendCode").onclick=function(){
   else{msg(x.j.error||"تعذّر الإرسال");b.disabled=false}}).catch(function(){msg("تعذّر الاتصال. حاول مرة أخرى.");b.disabled=false})};
 $("f").onsubmit=function(e){
  e.preventDefault();var go=$("go");
- var d={plan:plan(),ref:$("rf").value.trim()};
+ var d={plan:plan(),ref:""};var pn=$("rf").value.trim(),p4=$("rf4").value.trim();
  if(!session){
   d.name=$("nm").value.trim();d.email=$("em").value.trim();d.code=$("cd").value.trim();d.password=$("pw").value;
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(d.email)){msg("اكتب بريدًا صحيحًا");return}
   if(!/^\d{6}$/.test(d.code)){msg("اكتب رمز التحقق المكوّن من 6 أرقام");return}
  }
  if(mode==="trial"&&(d.name.length<2||d.password.length<8)){msg("اكتب اسمك وكلمة مرور من 8 أحرف على الأقل");return}
+ if(pn.length<2){msg("اكتب اسم المحوّل كما يظهر في تطبيق بنكك");return}
+ if(!/^\d{4}$/.test(p4)){msg("اكتب آخر 4 أرقام من رقم الحوالة");return}
  if(!$("ag").checked){msg("وافق على الشروط للمتابعة");return}
- d.agree=true;
+ d.ref="الاسم: "+pn+" — آخر 4 أرقام: "+p4;d.agree=true;
  go.disabled=true;msg("جارٍ الإرسال…",true);
  if(mode==="trial"){post("/api/trial",{name:d.name,email:d.email,code:d.code,password:d.password}).then(function(x){
   if(!x.ok){msg(x.j.error||"تعذّر بدء التجربة");go.disabled=false;return}
