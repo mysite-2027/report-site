@@ -111,6 +111,7 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 <p class="hint">لا يتضمن هذا الموقع أي شعار حكومي. افتح <a href="https://www.moe.gov.sa/assets/logos/moe-logo.png" target="_blank" rel="noopener">رابط الشعار</a> ثم: <b>من الكمبيوتر</b> انقر على الصورة بالزر الأيمن واختر «نسخ الصورة»، وارجع هنا واضغط Ctrl + V. أو <b>من الجوال أو الكمبيوتر</b> اختر «حفظ الصورة» ثم اضغط «Choose File» أعلاه واختر الصورة من جهازك. تأكد أن استخدامك للشعار مسموح في جهتك.</p>
 </fieldset>
 <fieldset><legend>محتوى المحضر</legend>
+<label>محاذاة المقدمة وجملة الافتتاح</label><select id="alg"><option value="c">في الوسط</option><option value="r">إلى اليمين</option></select>
 <label>المقدمة <small style="color:var(--g2);font-weight:400">— جاهزة ويمكنك تعديلها</small></label><textarea id="intro" style="min-height:60px"></textarea>
 <label>جملة الافتتاح <small style="color:var(--g2);font-weight:400">— تُكتب تلقائيًا من اليوم والتاريخ ورقم الاجتماع واللجنة؛ اكتب هنا فقط إن أردت تغييرها</small></label><textarea id="opn" style="min-height:50px" placeholder="فإنه في يوم ... الموافق ... تم عقد الاجتماع ..."></textarea>
 <label>الأعمال التي تمت مناقشتها <small style="color:var(--g2);font-weight:400">— اكتب كل عمل في سطر جديد وسيُرقَّم تلقائيًا (لا تكتب الأرقام)</small></label><textarea id="disc" placeholder="عمل في كل سطر، مثال:&#10;متابعة نتائج الطالبات&#10;مناقشة خطة الأسبوع القادم"></textarea>
@@ -135,7 +136,7 @@ var $=function(i){return document.getElementById(i)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 var SET={};try{SET=JSON.parse(sto("rpt_settings")||"{}")}catch(e){}
-var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["dept","school","principal","gv","intro","year","term"];
+var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["dept","school","principal","gv","alg","intro","year","term"];
 var imgs=[null,null,null,null];
 SAVED.forEach(function(k){if(SET[k])$(k).value=SET[k]});
 if(!$("dept").value)$("dept").value="الإدارة العامة للتعليم بمنطقة الرياض";
@@ -154,7 +155,7 @@ sv?r.readAsText(file):r.readAsDataURL(file)}
 
 var AR=[0,1,2,3,4,5].map(function(){return{n:"",j:"",r:""}});
 function drawA(){$("arows").innerHTML=AR.map(function(r,i){return '<div class="arow" data-i="'+i+'"><span class="an">'+(i+1)+'</span><input data-k="n" placeholder="الاسم" value="'+esc(r.n)+'"><input data-k="j" placeholder="الوظيفة" value="'+esc(r.j)+'"><input data-k="r" placeholder="الصفة" value="'+esc(r.r)+'"><button type="button" class="x" data-del="'+i+'" title="حذف">×</button></div>'}).join("")}
-var IDS=["dept","school","gv","intro","opn","year","term","kind","num","vday","vdate","vtime","place","disc","dec","principal"];
+var IDS=["dept","school","gv","alg","intro","opn","year","term","kind","num","vday","vdate","vtime","place","disc","dec","principal"];
 function lines(t){return String(t||"").split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean)}
 function numl(t){return '<ul class="lst">'+lines(t).map(function(x,i){return "<li>"+(i+1)+". "+esc(x)+"</li>"}).join("")+"</ul>"}
 function render(){
@@ -175,7 +176,7 @@ var at='<div class="sec"><h3>توقيع '+(f?"عضوات ":"أعضاء ")+(v("ki
 var kd=v("kind"),dy=v("vday"),dt=v("vdate"),nu=v("num"),dsc=v("disc"),
 op="فإنه"+(dy?" في يوم "+dy:"")+(dt?(dy?" الموافق ":" بتاريخ ")+dt:"")+" تم عقد الاجتماع"+(nu?" "+nu:"")+(kd?" الخاص ب"+kd:"")+(dsc?" وتم مناقشة الأعمال التالية:":"."),
 op=v("opn")||op,
-opening='<div class="sec"><p style="font-weight:700;text-align:center">'+esc(v("intro")||"").replace(/\n/g,"<br>")+'</p><p style="font-weight:700;text-align:center">'+esc(op).replace(/\n/g,"<br>")+"</p>"+(dsc?numl($("disc").value):"")+"</div>",
+opening='<div class="sec"><p style="font-weight:700;text-align:'+(v("alg")==="r"?"right":"center")+'">'+esc(v("intro")||"").replace(/\n/g,"<br>")+'</p><p style="font-weight:700;text-align:'+(v("alg")==="r"?"right":"center")+'">'+esc(op).replace(/\n/g,"<br>")+"</p>"+(dsc?numl($("disc").value):"")+"</div>",
 decs=v("dec")?'<div class="sec"><p style="font-weight:700">وفي ختام الاجتماع تم الوصول إلى النتائج والتوصيات الآتية:</p>'+numl($("dec").value)+"</div>":"";
 var L=logo;
 $("sheet").innerHTML=
