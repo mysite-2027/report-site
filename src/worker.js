@@ -488,7 +488,14 @@ async function api(req, env, ctx, url, p) {
         await env.DB.batch([env.DB.prepare("UPDATE users SET salt=?,hash=? WHERE id=?").bind(salt, await pbkdf2(pw, salt), id), env.DB.prepare("DELETE FROM sessions WHERE user_id=?").bind(id)]);
         return json({ ok: true, password: pw });
       } else if (act === "delete") {
-        await env.DB.batch(["sessions", "devices"].map(t => env.DB.prepare(`DELETE FROM ${t} WHERE user_id=?`).bind(id)).concat(env.DB.prepare("DELETE FROM users WHERE id=?").bind(id)));
+        // حذف الحساب: تُمسح بيانات الاستخدام، ويُحتفظ بالسجل المالي والإثباتي فقط (للنزاعات والأغراض النظامية)
+        const KEEP = "('signup_request','renew_request','signup_approved','extend','suspend','account_deleted')";
+        await env.DB.batch(["sessions", "devices", "resets"].map(t => env.DB.prepare(`DELETE FROM ${t} WHERE user_id=?`).bind(id)).concat(
+          env.DB.prepare(`DELETE FROM events WHERE (user_id=? OR email=?) AND kind NOT IN ${KEEP}`).bind(id, u.email),
+          env.DB.prepare("UPDATE requests SET salt=NULL,hash=NULL WHERE user_id=? OR email=?").bind(id, u.email),
+          env.DB.prepare("DELETE FROM codes WHERE email=?").bind(u.email),
+          env.DB.prepare("DELETE FROM users WHERE id=?").bind(id)));
+        await ev(env, u, "account_deleted", (u.name || "") + " — انتهاء الاشتراك: " + fmt(u.expires_at));
       } else if (act === "revoke") {
         await env.DB.batch([env.DB.prepare("UPDATE devices SET removed=1 WHERE user_id=?").bind(id), env.DB.prepare("DELETE FROM sessions WHERE user_id=?").bind(id), env.DB.prepare("UPDATE users SET warn_ack=warn_at WHERE id=?").bind(id)]);
         await ev(env, u, "revoke", "أُزيلت كل الأجهزة");
@@ -539,7 +546,7 @@ else if(m.days_left<=3)note("i","ينتهي اشتراكك خلال "+m.days_lef
 const DEMO_PRE = `(function(){
 var T="نسخة تجريبية — مُيَسِّر",L=[T,T,T,T,T,T,T,T].join("      "),NL=String.fromCharCode(92)+"A ",C=[];for(var i=0;i<24;i++)C.push(L);
 var WM=".sheet:not(.mini){position:relative!important}.sheet{overflow:hidden!important}.sheet::after{content:'"+C.join(NL)+"';white-space:pre;position:absolute;left:-40%;right:-40%;top:-40%;bottom:-40%;transform:rotate(-30deg);font:800 24px/80px Tajawal,Tahoma,Arial,sans-serif;color:#17445a;opacity:.2;pointer-events:none;z-index:50;text-align:center;direction:rtl;overflow:hidden}";
-var WM_STRONG=WM.replace("opacity:.2;","opacity:.3;"),WM_LIGHT=WM.replace("opacity:.2;","opacity:.07;").replace("/80px","/150px");
+var WM_STRONG=WM.replace("opacity:.2;","opacity:.32;text-shadow:0 0 3px #fff,0 0 3px #fff;")+WM.replace(/\.sheet:not\(\.mini\)\{[^}]*\}\.sheet\{[^}]*\}/,"").replace("::after","::before").replace("rotate(-30deg)","rotate(32deg)").replace("#17445a","#1e7d52").replace("opacity:.2;","opacity:.26;text-shadow:0 0 3px #fff;").replace("font:800 24px/80px","font:800 30px/110px"),WM_LIGHT=WM.replace("opacity:.2;","opacity:.07;").replace("/80px","/150px");
 `;
 const DEMO_CSS = ".demo-note{position:fixed;top:0;left:0;right:0;z-index:9999;background:#fff4d6;color:#4a3500;border-bottom:2px solid #e0b100;padding:10px 16px;font:14px/1.7 Tajawal,Tahoma,Arial,sans-serif;direction:rtl;text-align:center}.demo-note a{display:inline-block;margin:0 6px;background:#17445a;color:#fff;border-radius:8px;padding:4px 14px;font-weight:700;text-decoration:none}body{padding-top:48px}@media print{.demo-note{display:none!important}body{padding-top:0}}";
 const DEMO_BODY = `var s=document.createElement("style");
