@@ -432,7 +432,7 @@ async function api(req, env, ctx, url, p) {
         await mailUser(env, u.email, "تم تجديد اشتراكك", ["تم تجديد اشتراكك في مُيَسِّر حتى " + fmtD(exp) + "."], { url: site + "/", text: "فتح الموقع" });
         return json({ ok: true });
       }
-      const maxd = Math.max(1, Math.min(10, +b.max_devices || 2));
+      const maxd = Math.max(1, Math.min(10, +b.max_devices || 3));
       try {
         await env.DB.prepare("INSERT INTO users(email,name,salt,hash,expires_at,max_devices,created_at) VALUES(?,?,?,?,?,?,?)").bind(r.email, r.name || "", r.salt, r.hash, now + days * DAY, maxd, now).run();
       } catch (e) { return json({ error: "هذا البريد لديه حساب بالفعل" }, 409); }
@@ -474,7 +474,7 @@ async function api(req, env, ctx, url, p) {
       const days = Math.max(1, Math.min(3660, +b.days || 30)), pw = String(b.password || "").trim() || tempPass(), salt = rand(16);
       try {
         await env.DB.prepare("INSERT INTO users(email,name,salt,hash,expires_at,max_devices,created_at,note) VALUES(?,?,?,?,?,?,?,?)")
-          .bind(email, String(b.name || "").trim(), salt, await pbkdf2(pw, salt), now + days * DAY, Math.max(1, Math.min(10, +b.max_devices || 2)), now, String(b.note || "").trim()).run();
+          .bind(email, String(b.name || "").trim(), salt, await pbkdf2(pw, salt), now + days * DAY, Math.max(1, Math.min(10, +b.max_devices || 3)), now, String(b.note || "").trim()).run();
       } catch (e) { return json({ error: "هذا البريد مسجّل مسبقًا" }, 409); }
       return json({ ok: true, email, password: pw });
     }
