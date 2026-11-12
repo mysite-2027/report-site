@@ -18,8 +18,9 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:"Tajawal","Sego
 .card{background:var(--surface);border:2px solid var(--navy);border-radius:18px;padding:6px 20px 18px;margin-top:16px}
 h2{color:var(--green);font-size:1.15rem;margin:16px 0 6px}
 ul,ol{margin:6px 0;padding-inline-start:22px}li{margin:4px 0}
-.plans{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.plans{display:grid;grid-template-columns:minmax(0,320px);justify-content:center;gap:12px;margin-top:10px}
 @media(max-width:520px){.plans{grid-template-columns:1fr}}
+.plan{cursor:default}
 .plan{position:relative;display:block;border:2px solid var(--border);border-radius:14px;padding:12px 14px;cursor:pointer;text-align:center}
 .plan input{position:absolute;opacity:0;pointer-events:none}
 .plan b{display:block;font-size:1.05rem}
@@ -67,7 +68,7 @@ input:focus{outline:2px solid var(--blue);border-color:var(--blue)}
 <li>تعبئة سريعة وحفظ بصيغة PDF وطباعة بتنسيق جاهز.</li>
 <li>تتم معالجة بياناتك داخل متصفحك، ولا نحتفظ بأسماء الطلاب ولا بدرجاتهم.</li>
 </ul>
-<div id="plansWrap"><h2 style="margin-top:14px">اختر الباقة</h2>
+<div id="plansWrap"><h2 style="margin-top:14px;text-align:center">الاشتراك الشهري</h2>
 <div class="plans" id="plans"></div></div>
 <p class="note" id="trialInfo" hidden>التجربة المجانية: <b>3 أيام</b> بكامل النماذج، ويُحفظ ما تنتجه <b>بعلامة مائية «نسخة تجريبية»</b>، على <b>جهاز واحد</b>، ومرة واحدة لكل بريد. بعدها تستطيع الاشتراك إن أعجبتك. لا نطلب منك أي بيانات دفع.</p>
 </section>
