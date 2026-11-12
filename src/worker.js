@@ -702,7 +702,7 @@ export default {
       const isFile = /\.[a-z0-9]+$/i.test(p) && !/\.html$/i.test(p);
       const name = p.replace(/\.html$/i, "");
       const target = isFile ? p : (name === "/" ? "/index" : name) + ".html";
-      const open = !isFile && (name === "/login" || name === "/admin" || name === "/terms" || name === "/subscribe" || name === "/forgot" || name === "/reset");
+      const open = !isFile && (name === "/login" || name === "/admin" || name === "/terms" || name === "/subscribe" || name === "/forgot" || name === "/reset" || name === "/faq");
       if (open) return page(await env.ASSETS.fetch(new Request(new URL(target, url), req)), false);
 
       const s = await getSession(req, env, ctx);
