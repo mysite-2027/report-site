@@ -35,6 +35,15 @@ button.r{background:var(--err)}
 .acts button{padding:5px 10px;font-size:.85rem}
 .ev{font-size:.9rem;border-top:1px solid var(--border);padding:6px 0}
 .ev small{color:var(--muted)}
+.evbar{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:10px}
+@media(max-width:640px){.evbar{grid-template-columns:1fr}}
+.eg{border:1.5px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.eg>summary{list-style:none;cursor:pointer;padding:9px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.eg>summary::-webkit-details-marker{display:none}
+.eg[open]>summary{background:var(--bg);border-bottom:1px solid var(--border)}
+.eg .bd{padding:2px 12px 6px}
+.dh{font-weight:800;color:var(--navy);margin:12px 0 2px;font-size:.9rem}
+@media (prefers-color-scheme:dark){.dh{color:var(--green)}}
 .dv{font-size:.88rem;background:var(--bg);border-radius:8px;padding:6px 10px;margin-top:6px;display:flex;justify-content:space-between;gap:8px;align-items:center}
 #login{max-width:380px;margin:60px auto}
 @media (max-width:520px){.wrap{padding:10px}}
@@ -63,7 +72,13 @@ button.r{background:var(--err)}
     <div id="am2" class="msg"></div><div id="apw"></div>
   </div>
   <div class="card"><h2>المشتركون <span id="cnt" class="meta"></span></h2><div id="mail" class="meta"></div><div id="tm" class="meta"></div><div id="users"></div></div>
-  <div class="card"><h2>سجل الأحداث (آخر 150)</h2><div id="events"></div></div>
+  <div class="card"><h2>سجل الأحداث <span id="evc" class="meta"></span></h2>
+    <div class="evbar">
+      <input id="evq" type="search" placeholder="ابحث بالبريد أو التفاصيل" dir="ltr">
+      <select id="evf"><option value="all">كل الأحداث</option><option value="imp" selected>التنبيهات المهمة فقط</option><option value="fin">الطلبات والتفعيل</option><option value="dev">الأجهزة</option><option value="acc">الحساب وكلمة المرور</option></select>
+      <select id="evv"><option value="u">مجمّعة حسب المشترك</option><option value="t">بالتسلسل الزمني</option></select>
+    </div>
+    <div id="events"></div></div>
 </div>
 </div>
 <script>
@@ -92,7 +107,23 @@ function load(){loadReq();
    '<div class="meta">'+(u.name?esc(u.name)+' — ':'')+'ينتهي: '+esc(u.expires_text)+' ('+u.days_left+' يوم) — الأجهزة: '+u.devs+' من '+u.max_devices+' — آخر دخول: '+esc(u.last_text)+'</div>'+
    '<div class="acts"><button data-a="extend" data-d="30">+30 يوم</button><button class="g" data-a="devices">الأجهزة</button><button class="g" data-a="maxdev" data-m="'+u.max_devices+'">عدد الأجهزة المسموح</button><button class="g" data-a="reset">كلمة مرور جديدة</button><button class="g" data-a="revoke">إزالة كل الأجهزة</button>'+
    (u.active?'<button class="g" data-a="suspend">إيقاف</button>':'<button data-a="activate">تفعيل</button>')+'<button class="r" data-a="delete">حذف</button></div><div class="dvs"></div><div class="pwo"></div></div>'}).join("")||'<div class="meta">لا يوجد مشتركون بعد.</div>'});
- call("/api/admin/events").then(function(x){if(!x.ok)return;$("events").innerHTML=x.j.events.map(function(e){var k=KIND[e.kind]||[e.kind,"m"];return '<div class="ev"><span class="tag '+k[1]+'">'+esc(k[0])+'</span> <b dir="ltr">'+esc(e.email)+'</b> — '+esc(e.detail)+' <small>'+esc(e.text)+'</small></div>'}).join("")||'<div class="meta">لا أحداث.</div>'});
+ var EV=[];
+var CAT={fin:["signup_request","renew_request","signup_approved","signup_rejected","extend","suspend","account_deleted","trial_start","reminder"],dev:["new_device","over_limit","blocked","user_remove","concurrent","revoke"],acc:["password_reset_request","password_reset","mail_error"],imp:["over_limit","blocked","concurrent","signup_request","renew_request","mail_error"]};
+function evRow(e,withEmail){var k=KIND[e.kind]||[e.kind,"m"];return '<div class="ev"><span class="tag '+k[1]+'">'+esc(k[0])+'</span> '+(withEmail?'<b dir="ltr">'+esc(e.email)+'</b> — ':'')+esc(e.detail)+' <small>'+esc(e.text)+'</small></div>'}
+function evDay(ts){return new Date(ts).toLocaleDateString("ar-SA",{timeZone:"Asia/Riyadh",weekday:"long",day:"numeric",month:"long"})}
+function evDraw(){
+ var q=($("evq").value||"").trim().toLowerCase(),f=$("evf").value,v=$("evv").value;
+ var L=EV.filter(function(e){return(f==="all"||CAT[f].indexOf(e.kind)>-1)&&(!q||(e.email+" "+e.detail).toLowerCase().indexOf(q)>-1)});
+ $("evc").textContent="("+L.length+" من "+EV.length+")";
+ if(!L.length){$("events").innerHTML='<div class="meta">لا أحداث مطابقة.</div>';return}
+ var h="";
+ if(v==="t"){var d="";L.forEach(function(e){var dd=evDay(e.ts);if(dd!==d){d=dd;h+='<div class="dh">'+esc(d)+'</div>'}h+=evRow(e,true)})}
+ else{var G={},O=[];L.forEach(function(e){var k=e.email||"—";if(!G[k]){G[k]=[];O.push(k)}G[k].push(e)});
+  O.forEach(function(k,n){var A=G[k],w=A.filter(function(e){var t=(KIND[e.kind]||[0,"m"])[1];return t==="w"||t==="x"}).length;
+   h+='<details class="eg"'+(O.length<=3?' open':'')+'><summary><b dir="ltr">'+esc(k)+'</b><span><span class="tag m">'+A.length+' حدث</span> '+(w?'<span class="tag w">'+w+' تنبيه</span> ':'')+'<small class="meta">آخر نشاط: '+esc(A[0].text)+'</small></span></summary><div class="bd">'+A.map(function(e){return evRow(e,false)}).join("")+'</div></details>'})}
+ $("events").innerHTML=h}
+ call("/api/admin/events?limit=600").then(function(x){if(!x.ok)return;EV=x.j.events;evDraw()});
+ if(!window.EVB){window.EVB=1;["evq","evf","evv"].forEach(function(i){$(i).addEventListener(i==="evq"?"input":"change",function(){evDraw()})})}
 }
 $("af").onsubmit=function(e){e.preventDefault();
  call("/api/admin/user","POST",{email:$("ae").value,name:$("an").value,days:+$("ad").value,max_devices:+$("am").value,password:$("ap2").value}).then(function(x){
