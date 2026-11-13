@@ -121,7 +121,7 @@ body{background:#fff}
 var $=function(i){return document.getElementById(i)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 var KEEP=["dept","school","gender","teacher","principal","clr","aln"];
-var CLR={n:"#17445a",g:"#00682f",t:"#008080",b:"#2c7db5",k:"#374151"};var CLG={g:["#00421e","#00682f"],t:["#005a5a","#008080"],b:["#1d587f","#2c7db5"],k:["#1f2937","#374151"]};
+var CLR={n:"#17445a",g:"#00421e",t:"#005a5a",b:"#1d587f",k:"#1f2937"};var CLG={g:["#00421e","#00421e"],t:["#005a5a","#005a5a"],b:["#1d587f","#1d587f"],k:["#1f2937","#1f2937"]};
 var FIELDS=KEEP.concat(["pname","executor","place","target","count","pdate","goal","goals"]);
 var rows=[{c:"",s:"تحقق",n:"",m:""}],imgs=[null,null,null,null],logo=null,stamp=null;
 function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
