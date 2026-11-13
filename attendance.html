@@ -136,7 +136,7 @@ table.at2 td.nm{text-align:right}
 var $=function(i){return document.getElementById(i)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
-var CLR={n:"#17445a",g:"#00682f",t:"#008080",b:"#2c7db5",k:"#374151"};var CLG={g:["#00421e","#00682f"],t:["#005a5a","#008080"],b:["#1d587f","#2c7db5"],k:["#1f2937","#374151"]};
+var CLR={n:"#17445a",g:"#00421e",t:"#005a5a",b:"#1d587f",k:"#1f2937"};var CLG={g:["#00421e","#00421e"],t:["#005a5a","#005a5a"],b:["#1d587f","#1d587f"],k:["#1f2937","#1f2937"]};
 var SET={};try{SET=JSON.parse(sto("rpt_settings")||"{}")}catch(e){}
 var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["clr","alx","dept","school","principal","gv","tname"];
 var imgs=[null,null,null,null],acts=[],ACT=["قراءة موجهة","مراجعة دروس سابقة","حل أوراق عمل","نشاط إثرائي","ألعاب تعليمية","مناقشة وحوار","متابعة الدفاتر والواجبات","تعزيز القيم والسلوك","مسابقات","ورشة عمل","حصة إرشادية"];
@@ -159,7 +159,7 @@ var IDS=["clr","alx","dept","school","gv","att","prog","tname","vdate","vtime","
 SAVED.forEach(function(k){if(SET[k]&&$(k))$(k).value=SET[k]});
 function parse(){return String($("names").value||"").split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean).map(function(x){var p=x.split("|");return{n:p[0].trim(),c:(p[1]||"").trim()}})}
 function render(){
-var _s=$("sheet");_s.style.setProperty("--p",CLR[$("clr").value]||CLR.n);var _g=CLG[$("clr").value];_s.style.setProperty("--g1",_g?_g[0]:"");_s.style.setProperty("--g2",_g?_g[1]:"");_s.classList.toggle("al-r",$("alx").value==="r");_s.classList.toggle("al-c",$("alx").value==="c");
+var _s=$("sheet");_s.style.setProperty("--p",CLR[$("clr").value]||CLR.n);var _g=CLG[$("clr").value];_s.style.setProperty("--g1",_g?_g[0]:"");_s.style.setProperty("--g2",_g?_g[1]:"");_s.style.setProperty("--tl",_g?_g[1]:"");_s.classList.toggle("al-r",$("alx").value==="r");_s.classList.toggle("al-c",$("alx").value==="c");
 var v=function(i){return $(i).value.trim()},f=$("gv").value==="f",AT=$("att").value,TY={s:[f?"الطالبات":"الطلاب",f?"الطالبة":"الطالب","الصف","عدد "+(f?"طالبات":"طلاب")+" الفصل"],t:[f?"المعلمات":"المعلمين",f?"المعلمة":"المعلم","التخصص","عدد الحاضرين"],a:[f?"الإداريات":"الإداريين",f?"الإدارية":"الإداري","المهمة","عدد الحاضرين"],p:["أولياء الأمور","ولي الأمر","الطالب","عدد الحاضرين"]}[AT],S=TY[0],nm=parse(),n=nm.length,bl=parseInt(v("blank"),10)||0;
 $("cnt").textContent=n?"عدد الأسماء: "+n:"";
 var rows=nm.slice(),hasC=nm.some(function(r){return r.c});

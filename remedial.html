@@ -120,7 +120,7 @@ body{background:#fff}
 var $=function(i){return document.getElementById(i)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
-var CLR={n:"#17445a",g:"#00682f",t:"#008080",b:"#2c7db5",k:"#374151"};var CLG={g:["#00421e","#00682f"],t:["#005a5a","#008080"],b:["#1d587f","#2c7db5"],k:["#1f2937","#374151"]};
+var CLR={n:"#17445a",g:"#00421e",t:"#005a5a",b:"#1d587f",k:"#1f2937"};var CLG={g:["#00421e","#00421e"],t:["#005a5a","#005a5a"],b:["#1d587f","#1d587f"],k:["#1f2937","#1f2937"]};
 var SET={};try{SET=JSON.parse(sto("rpt_settings")||"{}")}catch(e){}
 var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["clr","alx","dept","school","gender","teacher","principal"];
 var METH=["أوراق عمل علاجية","تعلّم بالأقران","تدريب فردي","أنشطة تفاعلية","إعادة شرح الدرس","تقويم تكويني متكرر","التواصل مع ولي الأمر","التواصل مع التوجيه الطلابي"];
@@ -145,7 +145,7 @@ $("meths").innerHTML=METH.map(function(m,i){return '<label class="ck"><input typ
 $("causes").innerHTML=CAUSE.map(function(m,i){return '<label class="ck"><input type="checkbox" data-c="'+i+'"> '+m+"</label>"}).join("");
 function drawRows(){$("rows").innerHTML=rows.map(function(r,i){return '<div class="row" data-i="'+i+'"><label>اسم الطالب / الطالبة</label><input data-k="n" value="'+esc(r.n)+'"><label>المهارة / الدرس المراد علاجه</label><input data-k="s" value="'+esc(r.s)+'"><label>نتيجة التحسن</label><select data-k="r"><option value="">— اختر —</option>'+IMP.map(function(o){return '<option'+(r.r===o?" selected":"")+">"+o+"</option>"}).join("")+'</select><button type="button" class="del" data-del="'+i+'">حذف</button></div>'}).join("")}
 function render(){
-var _s=$("sheet");_s.style.setProperty("--p",CLR[$("clr").value]||CLR.n);var _g=CLG[$("clr").value];_s.style.setProperty("--g1",_g?_g[0]:"");_s.style.setProperty("--g2",_g?_g[1]:"");_s.classList.toggle("al-r",$("alx").value==="r");_s.classList.toggle("al-c",$("alx").value==="c");
+var _s=$("sheet");_s.style.setProperty("--p",CLR[$("clr").value]||CLR.n);var _g=CLG[$("clr").value];_s.style.setProperty("--g1",_g?_g[0]:"");_s.style.setProperty("--g2",_g?_g[1]:"");_s.style.setProperty("--tl",_g?_g[1]:"");_s.classList.toggle("al-r",$("alx").value==="r");_s.classList.toggle("al-c",$("alx").value==="c");
 var f=$("gender").value==="f",S=f?"الطالبات":"الطلاب",one=f?"الطالبة":"الطالب",v=function(i){return $(i).value.trim()};
 var filled=rows.filter(function(r){return r.n||r.s||r.a||r.d||r.r}),cnt=rows.filter(function(r){return r.n.trim()}).length,show=filled.slice();
 while(show.length<5)show.push({n:"",s:"",a:"",d:"",r:""});

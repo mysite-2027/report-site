@@ -149,7 +149,7 @@ function tokens(txt){return toLat(txt).replace(/٫/g,".").split(/[\s;،]+/).filt
 var $=function(i){return document.getElementById(i)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
-var CLR={n:"#17445a",g:"#00682f",t:"#008080",b:"#2c7db5",k:"#374151"};var CLG={g:["#00421e","#00682f"],t:["#005a5a","#008080"],b:["#1d587f","#2c7db5"],k:["#1f2937","#374151"]};
+var CLR={n:"#17445a",g:"#00421e",t:"#005a5a",b:"#1d587f",k:"#1f2937"};var CLG={g:["#00421e","#00421e"],t:["#005a5a","#005a5a"],b:["#1d587f","#1d587f"],k:["#1f2937","#1f2937"]};
 var SET={};try{SET=JSON.parse(sto("rpt_settings")||"{}")}catch(e){}
 var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,COLS=6,grades=[];
 var SAVED=["clr","alx","dept","school","gender","teacher","principal","ctype","max"];
@@ -177,7 +177,7 @@ return '<div class="dn"><div class="ring"><svg viewBox="0 0 200 200">'+seg+'</sv
 var fit=function(){var last=-1;grades.forEach(function(g,i){if(String(g).trim())last=i});var rows=Math.max(5,Math.ceil((last+1)/COLS)+1);while(grades.length<rows*COLS)grades.push("");grades.length=rows*COLS};
 function drawGrid(){fit();$("grid").innerHTML=grades.map(function(g,i){return '<input class="cell" data-i="'+i+'" value="'+esc(g)+'" inputmode="decimal" autocomplete="off" aria-label="الدرجة '+(i+1)+'">'}).join("")}
 function render(){
-var _s=$("sheet");_s.style.setProperty("--p",CLR[$("clr").value]||CLR.n);var _g=CLG[$("clr").value];_s.style.setProperty("--g1",_g?_g[0]:"");_s.style.setProperty("--g2",_g?_g[1]:"");_s.classList.toggle("al-r",$("alx").value==="r");_s.classList.toggle("al-c",$("alx").value==="c");
+var _s=$("sheet");_s.style.setProperty("--p",CLR[$("clr").value]||CLR.n);var _g=CLG[$("clr").value];_s.style.setProperty("--g1",_g?_g[0]:"");_s.style.setProperty("--g2",_g?_g[1]:"");_s.style.setProperty("--tl",_g?_g[1]:"");_s.classList.toggle("al-r",$("alx").value==="r");_s.classList.toggle("al-c",$("alx").value==="c");
 var f=$("gender").value==="f",S=f?"الطالبات":"الطلاب",L=logo;
 var mx=parseFloat($("max").value)||100,v=function(i){return $(i).value.trim()};
 var T=["t1","t2","t3","t4"].map(function(i,k){return parseFloat($(i).value)||[90,80,70,60][k]}).sort(function(a,b){return b-a});
