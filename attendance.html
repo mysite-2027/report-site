@@ -109,7 +109,7 @@ table.at2 td.nm{text-align:right}
 <label>اسم البرنامج / الورشة</label><input id="prog" placeholder="مثال: ورشة الذكاء الاصطناعي">
 <label>اسم المنفذ / المنفذة (اختياري)</label><input id="tname">
 <div class="two"><div><label>اليوم / التاريخ</label><input id="vdate" placeholder="الأحد 1448/3/27"></div><div><label>الحصة (اختياري)</label><input id="vtime" list="periods" placeholder="الثالثة"><datalist id="periods"><option value="الأولى"><option value="الثانية"><option value="الثالثة"><option value="الرابعة"><option value="الخامسة"><option value="السادسة"><option value="السابعة"></datalist></div></div>
-<div class="two"><div><label>المكان (اختياري)</label><input id="place" list="places" placeholder="اختر أو اكتب"><datalist id="places"><option value="الفصل"><option value="معمل الحاسب الآلي"><option value="معمل العلوم"><option value="غرفة المصادر"><option value="الساحة الداخلية"><option value="الساحة الخارجية"><option value="غرفة المعلمات"><option value="غرفة المديرة"><option value="غرفة الاجتماعات"></datalist></div><div id="clsBox"><label>الصف (اختياري)</label><input id="cls"></div></div>
+<div class="two"><div><label>المكان (اختياري)</label><input id="place" list="places" placeholder="اختر أو اكتب"><datalist id="places"><option value="الفصل / القاعة الدراسية"><option value="معمل الحاسب الآلي"><option value="معمل العلوم"><option value="غرفة المصادر"><option value="الساحة الداخلية"><option value="الساحة الخارجية"><option value="غرفة المعلمات"><option value="غرفة المديرة"><option value="غرفة الاجتماعات"></datalist></div><div id="clsBox"><label>الصف (اختياري)</label><input id="cls"></div></div>
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، انقر على الصورة بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
 <label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logoIn" accept="image/*">
@@ -119,7 +119,7 @@ table.at2 td.nm{text-align:right}
 <fieldset><legend>الأسماء</legend>
 <p class="hint" style="margin-top:0">اكتب اسمًا في كل سطر. ويمكنك إضافة عمود ثانٍ بعد علامة | مثل: «نورة محمد | 2/ب» (الصف للطلاب، أو التخصص للمعلمين، أو المهمة للإداريين). اكتب في الحقل أدناه عدد صفوف الجدول (عدد الحاضرين)، فتظهر الأسماء في الصفوف الأولى وتبقى الباقية فارغة للكتابة باليد. وبدون أسماء ولا رقم يُنشأ 30 صفًا، ومع أسماء بدون رقم يظهر صف لكل اسم.</p>
 <textarea id="names" style="min-height:120px"></textarea>
-<label id="blL">عدد الصفوف (عدد طالبات الفصل)</label><input id="blank" inputmode="numeric" placeholder="30">
+<label id="blL">عدد الصفوف (عدد طالبات الفصل - الشعبة)</label><input id="blank" inputmode="numeric" placeholder="30">
 <p class="hint" id="cnt"></p></fieldset>
 <fieldset><legend>التوقيعات</legend>
 <label>اسم مديرة / مدير المدرسة</label><input id="principal">
@@ -160,7 +160,7 @@ SAVED.forEach(function(k){if(SET[k]&&$(k))$(k).value=SET[k]});
 function parse(){return String($("names").value||"").split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean).map(function(x){var p=x.split("|");return{n:p[0].trim(),c:(p[1]||"").trim()}})}
 function render(){
 var _s=$("sheet");_s.style.setProperty("--p",CLR[$("clr").value]||CLR.n);var _g=CLG[$("clr").value];_s.style.setProperty("--g1",_g?_g[0]:"");_s.style.setProperty("--g2",_g?_g[1]:"");_s.style.setProperty("--tl",_g?_g[1]:"");_s.classList.toggle("al-r",$("alx").value==="r");_s.classList.toggle("al-c",$("alx").value==="c");
-var v=function(i){return $(i).value.trim()},f=$("gv").value==="f",AT=$("att").value,TY={s:[f?"الطالبات":"الطلاب",f?"الطالبة":"الطالب","الصف","عدد "+(f?"طالبات":"طلاب")+" الفصل"],t:[f?"المعلمات":"المعلمين",f?"المعلمة":"المعلم","التخصص","عدد الحاضرين"],a:[f?"الإداريات":"الإداريين",f?"الإدارية":"الإداري","المهمة","عدد الحاضرين"],p:["أولياء الأمور","ولي الأمر","الطالب","عدد الحاضرين"]}[AT],S=TY[0],nm=parse(),n=nm.length,bl=parseInt(v("blank"),10)||0;
+var v=function(i){return $(i).value.trim()},f=$("gv").value==="f",AT=$("att").value,TY={s:[f?"الطالبات":"الطلاب",f?"الطالبة":"الطالب","الصف","عدد "+(f?"طالبات":"طلاب")+" الفصل - الشعبة"],t:[f?"المعلمات":"المعلمين",f?"المعلمة":"المعلم","التخصص","عدد الحاضرين"],a:[f?"الإداريات":"الإداريين",f?"الإدارية":"الإداري","المهمة","عدد الحاضرين"],p:["أولياء الأمور","ولي الأمر","الطالب","عدد الحاضرين"]}[AT],S=TY[0],nm=parse(),n=nm.length,bl=parseInt(v("blank"),10)||0;
 $("cnt").textContent=n?"عدد الأسماء: "+n:"";
 var rows=nm.slice(),hasC=nm.some(function(r){return r.c});
 var total=n?Math.max(n,bl):(bl||30);
@@ -205,7 +205,7 @@ try{
 var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
 var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
 var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true}),pw=210,ph=297,H=Math.round(cv.width*ph/pw),y=0,first=true,imgH=cv.height*pw/cv.width;
-if(imgH<=ph*1.3){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);y=cv.height}
+if(imgH<=ph*1.3){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);if(k<1){var _sh=document.getElementById("sheet"),_K=_sh.children,_bh=Math.round(_K[_K.length-1].getBoundingClientRect().height*cv.width/_sh.offsetWidth),_bc=document.createElement("canvas");_bc.width=cv.width;_bc.height=_bh;_bc.getContext("2d").drawImage(cv,0,cv.height-_bh,cv.width,_bh,0,0,cv.width,_bh);var _mm=_bh*pw/cv.width;pdf.addImage(_bc.toDataURL("image/jpeg",.95),"JPEG",0,ph-_mm,pw,_mm)}y=cv.height}
 var sc=cv.width/sh.offsetWidth,K=sh.children,R=function(e){return e.getBoundingClientRect()},t0=R(sh).top,nk=K.length,hb=Math.round((R(K[0]).bottom-t0)*sc),bandPx=Math.round(R(K[nk-1]).height*sc),bandY=cv.height-bandPx,SG=K[nk-2],sigTop=Math.round((R(SG).top-t0)*sc),sigPx=Math.round(R(SG).height*sc),gap=Math.round(10*sc),cEnd=sigTop,bs=[],br=[],extra=false;
 for(var q=0;q<nk-2;q++)bs.push((R(K[q]).bottom-t0)*sc);
 Array.prototype.forEach.call(sh.querySelectorAll("tr"),function(e){br.push((R(e).bottom-t0)*sc)});

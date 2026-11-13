@@ -100,7 +100,8 @@ body{background:#fff}
 <div id="causes"></div>
 <label>إضافة أخرى (اختياري)</label><input id="cauOther" placeholder="اكتب ما تريد إضافته"></fieldset>
 <fieldset><legend>الإجراءات العلاجية (يمكن اختيار أكثر من خيار)</legend>
-<div id="meths"></div></fieldset>
+<div id="meths"></div>
+<label>إضافة أخرى (اختياري)</label><input id="methOther" placeholder="اكتب ما تريد إضافته"></fieldset>
 <fieldset><legend>جدول الطلاب</legend>
 <p class="hint" style="margin-top:0">أضف الطلاب المحتاجين للعلاج. تبقى الأسماء في متصفحك فقط ولا تُحفظ بعد إغلاق الصفحة.<br><b>ملاحظة:</b> إذا تركت خانة «المهارة / الدرس المراد علاجه» فارغة لجميع الطلاب فلن يظهر عمود المهارة في التقرير.</p>
 <div id="rows"></div><button type="button" id="addRow" style="margin-top:8px">+ إضافة طالب</button></fieldset>
@@ -159,20 +160,20 @@ $("sheet").innerHTML=
 '<div class="sh-head"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
 '<div class="bar">الخطة العلاجية لمادة '+esc(v("subj")||"…")+"</div>"+
 '<div class="info"><div class="w"><b>اسم '+(f?"المعلمة":"المعلم")+":</b>"+esc(v("teacher")||"—")+"</div><div><b>الصف:</b>"+esc(v("cls")||"—")+"</div><div><b>الفصل / الشعبة:</b>"+esc(v("sect")||"—")+"</div><div><b>تاريخ التنفيذ:</b>"+esc(v("pdate")||"—")+"</div><div><b>عدد "+S+":</b>"+cnt+"</div></div>"+
-ca+'<div class="sec"><h3>الإجراءات العلاجية</h3><div class="meth">'+mh+"</div></div>"+
+ca+'<div class="sec"><h3>الإجراءات العلاجية</h3><div class="meth">'+mh+"</div>"+(v("methOther")?"<p><b>أخرى:</b> "+esc(v("methOther"))+"</p>":"")+"</div>"+
 '<div class="sec"><h3>جدول الخطة العلاجية</h3><table class="t"><tr><th style="width:5%">م</th><th style="width:'+(hs?25:35)+'%">اسم '+one+'</th>'+(hs?'<th style="width:30%">المهارة / الدرس</th>':"")+'<th style="width:'+(hs?40:60)+'%">نتيجة التحسن</th></tr>'+tb+"</table></div>"+
 (evs?'<div class="sec"><h3>الشواهد</h3><div class="ev">'+evs+"</div></div>":"")+
 '<div class="sig"><div><b>'+(f?"المعلمة":"المعلم")+"</b>"+esc(v("teacher"))+'</div><div><b>الختم</b><div class="st">'+(stamp?'<img alt="" src="'+stamp+'">':"")+"</div></div><div><b>"+(f?"مديرة المدرسة":"مدير المدرسة")+"</b>"+esc(v("principal"))+"</div></div>"+
 '<div class="band"></div>'
 }
-["clr","alx","dept","school","subj","teacher","cls","sect","pdate","gender","cauOther","principal"].forEach(function(i){$(i).addEventListener("input",function(){if(SAVED.indexOf(i)>-1){SET[i]=$(i).value;sto("rpt_settings",JSON.stringify(SET))}render()})});
+["clr","alx","dept","school","subj","teacher","cls","sect","pdate","gender","cauOther","methOther","principal"].forEach(function(i){$(i).addEventListener("input",function(){if(SAVED.indexOf(i)>-1){SET[i]=$(i).value;sto("rpt_settings",JSON.stringify(SET))}render()})});
 $("meths").addEventListener("change",function(e){var i=+e.target.dataset.m;if(isNaN(i))return;var k=meths.indexOf(i);if(e.target.checked&&k<0)meths.push(i);if(!e.target.checked&&k>-1)meths.splice(k,1);render()});
 $("causes").addEventListener("change",function(e){var i=+e.target.dataset.c;if(isNaN(i))return;var k=causes.indexOf(i);if(e.target.checked&&k<0)causes.push(i);if(!e.target.checked&&k>-1)causes.splice(k,1);render()});
 $("rows").addEventListener("change",function(e){var d=e.target.closest(".row");if(d&&e.target.tagName==="SELECT"){rows[+d.dataset.i][e.target.dataset.k]=e.target.value;render()}});
 $("rows").addEventListener("input",function(e){var d=e.target.closest(".row");if(d&&e.target.dataset.k){rows[+d.dataset.i][e.target.dataset.k]=e.target.value;render()}});
 $("rows").addEventListener("click",function(e){var i=e.target.dataset.del;if(i!=null){rows.splice(+i,1);if(!rows.length)rows.push({n:"",s:"",a:"",d:"",r:""});drawRows();render()}});
 $("addRow").onclick=function(){rows.push({n:"",s:"",a:"",d:"",r:""});drawRows()};
-$("reset").onclick=function(){rows=[{n:"",s:"",a:"",d:"",r:""}];meths=[];causes=[];imgs=[null,null,null,null];Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el){el.value=""});Array.prototype.forEach.call(document.querySelectorAll("#meths input,#causes input"),function(c){c.checked=false});["subj","cauOther","cls","sect","pdate"].forEach(function(i){$(i).value=""});drawRows();render()};
+$("reset").onclick=function(){rows=[{n:"",s:"",a:"",d:"",r:""}];meths=[];causes=[];imgs=[null,null,null,null];Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el){el.value=""});Array.prototype.forEach.call(document.querySelectorAll("#meths input,#causes input"),function(c){c.checked=false});["subj","cauOther","methOther","cls","sect","pdate"].forEach(function(i){$(i).value=""});drawRows();render()};
 Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el,i){el.onchange=function(e){var f=e.target.files[0];if(f)shrink(f,900,"image/jpeg",function(d){imgs[i]=d;render()});else{imgs[i]=null;render()}}});
 $("logoIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render()})};
 $("logoDel").onclick=function(){logo=null;$("logoIn").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
@@ -196,7 +197,7 @@ try{
 var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
 var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
 var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true}),pw=210,ph=297,H=Math.round(cv.width*ph/pw),y=0,first=true,imgH=cv.height*pw/cv.width;
-if(imgH<=ph*1.3){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);y=cv.height}
+if(imgH<=ph*1.3){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);if(k<1){var _sh=document.getElementById("sheet"),_K=_sh.children,_bh=Math.round(_K[_K.length-1].getBoundingClientRect().height*cv.width/_sh.offsetWidth),_bc=document.createElement("canvas");_bc.width=cv.width;_bc.height=_bh;_bc.getContext("2d").drawImage(cv,0,cv.height-_bh,cv.width,_bh,0,0,cv.width,_bh);var _mm=_bh*pw/cv.width;pdf.addImage(_bc.toDataURL("image/jpeg",.95),"JPEG",0,ph-_mm,pw,_mm)}y=cv.height}
 var sc=cv.width/sh.offsetWidth,K=sh.children,R=function(e){return e.getBoundingClientRect()},t0=R(sh).top,nk=K.length,hb=Math.round((R(K[0]).bottom-t0)*sc),bandPx=Math.round(R(K[nk-1]).height*sc),bandY=cv.height-bandPx,SG=K[nk-2],sigTop=Math.round((R(SG).top-t0)*sc),sigPx=Math.round(R(SG).height*sc),gap=Math.round(10*sc),cEnd=sigTop,bs=[],br=[],extra=false;
 for(var q=0;q<nk-2;q++)bs.push((R(K[q]).bottom-t0)*sc);
 Array.prototype.forEach.call(sh.querySelectorAll("tr"),function(e){br.push((R(e).bottom-t0)*sc)});

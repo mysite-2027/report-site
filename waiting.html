@@ -101,7 +101,8 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 <label>الصفة</label><select id="role"><option value="t">معلم</option><option value="c">موجه طلابي</option></select>
 <label>اسم المنفذ (المعلم أو الموجه الطلابي)</label><input id="tname">
 <div class="two"><div><label>اليوم / التاريخ</label><input id="vdate" placeholder="الأحد 1448/3/27"></div><div><label>رقم الحصة</label><input id="period" list="periods" placeholder="الثالثة"><datalist id="periods"><option value="الأولى"><option value="الثانية"><option value="الثالثة"><option value="الرابعة"><option value="الخامسة"><option value="السادسة"><option value="السابعة"></datalist></div></div>
-<div class="two"><div><label>الصف / الفصل</label><input id="cls" placeholder="ثاني متوسط / 2"></div><div><label id="cntL">عدد الطالبات (اختياري)</label><input id="cnt" inputmode="numeric"></div></div>
+<div class="two"><div><label>الصف</label><input id="cls" placeholder="ثاني متوسط"></div><div><label>الفصل / الشعبة</label><input id="sect" placeholder="2"></div></div>
+<label id="cntL">عدد الطالبات (اختياري)</label><input id="cnt" inputmode="numeric">
 <label>المادة (اختياري)</label><input id="subj">
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، انقر على الصورة بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
@@ -152,7 +153,7 @@ if(x1>x0&&y1>y0){var pd=Math.round(Math.max(c.width,c.height)*.02),c2=document.c
 cb(c.toDataURL(type,.82))};im.src=src};
 sv?r.readAsText(file):r.readAsDataURL(file)}
 
-var IDS=["clr","alx","dept","school","gv","role","tname","vdate","period","cls","cnt","subj","actOther","topic","goals","notes","principal"];
+var IDS=["clr","alx","dept","school","gv","role","tname","vdate","period","cls","sect","cnt","subj","actOther","topic","goals","notes","principal"];
 SAVED.forEach(function(k){if(SET[k]&&$(k))$(k).value=SET[k]});
 $("acts").innerHTML=ACT.map(function(m,i){return '<label class="ck"><input type="checkbox" data-a="'+i+'"> '+m+"</label>"}).join("");
 function lines(t){return String(t||"").split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean)}
@@ -168,7 +169,7 @@ $("cntL").textContent=(f?"عدد الطالبات":"عدد الطلاب")+" (ا�
 $("sheet").innerHTML=
 '<div class="sh-head"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
 '<div class="bar">تقرير حصة انتظار</div>'+
-'<div class="info">'+info("اسم "+EX,"tname",1)+info("اليوم / التاريخ","vdate")+info("رقم الحصة","period")+info("الصف / الفصل","cls")+(v("subj")?info("المادة","subj"):"")+(v("cnt")?info(f?"عدد الطالبات":"عدد الطلاب","cnt"):"")+"</div>"+
+'<div class="info">'+info("اسم "+EX,"tname",1)+info("اليوم / التاريخ","vdate")+info("رقم الحصة","period")+info("الصف","cls")+info("الفصل / الشعبة","sect")+(v("subj")?info("المادة","subj"):"")+(v("cnt")?info(f?"عدد الطالبات":"عدد الطلاب","cnt"):"")+"</div>"+
 '<div class="sec"><h3>الأنشطة المنفذة</h3><div class="meth">'+ah+"</div>"+(ao?"<p><b>أخرى:</b> "+esc(ao)+"</p>":"")+"</div>"+
 '<div class="sec ctr"><h3>العنوان</h3><p>'+esc(v("topic")||"—")+"</p></div>"+
 (v("goals")?'<div class="sec ctr"><h3>الأهداف</h3>'+numl($("goals").value)+"</div>":"")+
@@ -179,7 +180,7 @@ $("sheet").innerHTML=
 }
 IDS.forEach(function(i){$(i).addEventListener("input",function(){if(SAVED.indexOf(i)>-1){SET[i]=$(i).value;sto("rpt_settings",JSON.stringify(SET))}render()})});
 $("acts").addEventListener("change",function(e){var i=+e.target.dataset.a;if(isNaN(i))return;var k=acts.indexOf(i);if(e.target.checked&&k<0)acts.push(i);if(!e.target.checked&&k>-1)acts.splice(k,1);render()});
-$("reset").onclick=function(){["vdate","period","cls","cnt","subj","actOther","topic","goals","notes"].forEach(function(i){$(i).value=""});acts=[];imgs=[null,null,null,null];Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el){el.value=""});Array.prototype.forEach.call(document.querySelectorAll("#acts input"),function(c){c.checked=false});render()};
+$("reset").onclick=function(){["vdate","period","cls","sect","cnt","subj","actOther","topic","goals","notes"].forEach(function(i){$(i).value=""});acts=[];imgs=[null,null,null,null];Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el){el.value=""});Array.prototype.forEach.call(document.querySelectorAll("#acts input"),function(c){c.checked=false});render()};
 Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el,i){el.onchange=function(e){var f=e.target.files[0];if(f)shrink(f,900,"image/jpeg",function(d){imgs[i]=d;render()});else{imgs[i]=null;render()}}});
 $("logoIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render()})};
 $("logoDel").onclick=function(){logo=null;$("logoIn").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
@@ -204,7 +205,7 @@ try{
 var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
 var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
 var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true}),pw=210,ph=297,H=Math.round(cv.width*ph/pw),y=0,first=true,imgH=cv.height*pw/cv.width;
-if(imgH<=ph*1.3){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);y=cv.height}
+if(imgH<=ph*1.3){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);if(k<1){var _sh=document.getElementById("sheet"),_K=_sh.children,_bh=Math.round(_K[_K.length-1].getBoundingClientRect().height*cv.width/_sh.offsetWidth),_bc=document.createElement("canvas");_bc.width=cv.width;_bc.height=_bh;_bc.getContext("2d").drawImage(cv,0,cv.height-_bh,cv.width,_bh,0,0,cv.width,_bh);var _mm=_bh*pw/cv.width;pdf.addImage(_bc.toDataURL("image/jpeg",.95),"JPEG",0,ph-_mm,pw,_mm)}y=cv.height}
 var sc=cv.width/sh.offsetWidth,K=sh.children,R=function(e){return e.getBoundingClientRect()},t0=R(sh).top,nk=K.length,hb=Math.round((R(K[0]).bottom-t0)*sc),bandPx=Math.round(R(K[nk-1]).height*sc),bandY=cv.height-bandPx,SG=K[nk-2],sigTop=Math.round((R(SG).top-t0)*sc),sigPx=Math.round(R(SG).height*sc),gap=Math.round(10*sc),cEnd=sigTop,bs=[],br=[],extra=false;
 for(var q=0;q<nk-2;q++)bs.push((R(K[q]).bottom-t0)*sc);
 Array.prototype.forEach.call(sh.querySelectorAll("tr"),function(e){br.push((R(e).bottom-t0)*sc)});
