@@ -348,8 +348,8 @@ async function api(req, env, ctx, url, p) {
     if (p === "/api/profile") {
       // «بيانات مدرستي»: اختيارية، تُحفظ فقط بما يدخله المشترك بنفسه في «حسابي»
       if (m === "GET") {
-        const r = await env.DB.prepare("SELECT dept,school,principal,gv FROM profiles WHERE user_id=?").bind(u.id).first();
-        return json({ saved: !!r, dept: r ? r.dept : "", school: r ? r.school : "", principal: r ? r.principal : "", gv: r ? r.gv : "" });
+        const r = await env.DB.prepare("SELECT dept,school,principal,gv,updated_at FROM profiles WHERE user_id=?").bind(u.id).first();
+        return json({ saved: !!r, updated: r ? r.updated_at : 0, dept: r ? r.dept : "", school: r ? r.school : "", principal: r ? r.principal : "", gv: r ? r.gv : "" });
       }
       if (m === "POST") {
         const b = await body(req), cl = x => String(x || "").replace(/\s+/g, " ").trim().slice(0, 80);
