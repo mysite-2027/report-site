@@ -23,7 +23,8 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS codes(email TEXT PRIMARY KEY,h TEXT,exp INTEGER,tries INTEGER DEFAULT 0)`,
   `CREATE TABLE IF NOT EXISTS resets(h TEXT PRIMARY KEY,user_id INTEGER,exp INTEGER)`,
   `CREATE TABLE IF NOT EXISTS trials(email TEXT PRIMARY KEY,ts INTEGER,iph TEXT)`,
-  `CREATE TABLE IF NOT EXISTS reminders(user_id INTEGER,expires_at INTEGER,PRIMARY KEY(user_id,expires_at))`
+  `CREATE TABLE IF NOT EXISTS reminders(user_id INTEGER,expires_at INTEGER,PRIMARY KEY(user_id,expires_at))`,
+  `CREATE TABLE IF NOT EXISTS profiles(user_id INTEGER PRIMARY KEY,dept TEXT DEFAULT '',school TEXT DEFAULT '',principal TEXT DEFAULT '',gv TEXT DEFAULT '',updated_at INTEGER)`
 ];
 let ready = null;
 function init(env) {
@@ -334,7 +335,7 @@ async function api(req, env, ctx, url, p) {
     return json({ ok: true }, 200, { "set-cookie": ckDel("sid") });
   }
 
-  if (p === "/api/me" || p === "/api/ack" || p === "/api/password" || p === "/api/device" || p === "/api/renew") {
+  if (p === "/api/me" || p === "/api/ack" || p === "/api/password" || p === "/api/device" || p === "/api/renew" || p === "/api/profile") {
     const s = await getSession(req, env, ctx);
     if (!s.ok) return json({ error: s.why }, 401);
     const u = s.user, now = Date.now();
@@ -343,6 +344,25 @@ async function api(req, env, ctx, url, p) {
       if (b.kind === "welcome") await env.DB.prepare("UPDATE users SET welcome_ack=1 WHERE id=?").bind(u.id).run();
       else if (b.kind === "warn") await env.DB.prepare("UPDATE users SET warn_ack=? WHERE id=?").bind(u.warn_at, u.id).run();
       return json({ ok: true });
+    }
+    if (p === "/api/profile") {
+      // «بيانات مدرستي»: اختيارية، تُحفظ فقط بما يدخله المشترك بنفسه في «حسابي»
+      if (m === "GET") {
+        const r = await env.DB.prepare("SELECT dept,school,principal,gv FROM profiles WHERE user_id=?").bind(u.id).first();
+        return json({ saved: !!r, dept: r ? r.dept : "", school: r ? r.school : "", principal: r ? r.principal : "", gv: r ? r.gv : "" });
+      }
+      if (m === "POST") {
+        const b = await body(req), cl = x => String(x || "").replace(/\s+/g, " ").trim().slice(0, 80);
+        const dept = cl(b.dept), school = cl(b.school), principal = cl(b.principal), gv = b.gv === "m" || b.gv === "f" ? b.gv : "";
+        if (!dept && !school && !principal && !gv) return json({ error: "اكتب بيانًا واحدًا على الأقل" }, 400);
+        await env.DB.prepare("INSERT INTO profiles(user_id,dept,school,principal,gv,updated_at) VALUES(?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET dept=excluded.dept,school=excluded.school,principal=excluded.principal,gv=excluded.gv,updated_at=excluded.updated_at").bind(u.id, dept, school, principal, gv, now).run();
+        return json({ ok: true, dept, school, principal, gv });
+      }
+      if (m === "DELETE") {
+        await env.DB.prepare("DELETE FROM profiles WHERE user_id=?").bind(u.id).run();
+        return json({ ok: true });
+      }
+      return json({ error: "method" }, 405);
     }
     if (p === "/api/renew" && m === "POST") {
       const b = await body(req), plan = PLAN_DAYS[b.plan] ? b.plan : null, ref = String(b.ref || "").trim().slice(0, 80);
@@ -499,7 +519,7 @@ async function api(req, env, ctx, url, p) {
       } else if (act === "delete") {
         // حذف الحساب: تُمسح بيانات الاستخدام، ويُحتفظ بالسجل المالي والإثباتي فقط (للنزاعات والأغراض النظامية)
         const KEEP = "('signup_request','renew_request','signup_approved','extend','suspend','account_deleted')";
-        await env.DB.batch(["sessions", "devices", "resets"].map(t => env.DB.prepare(`DELETE FROM ${t} WHERE user_id=?`).bind(id)).concat(
+        await env.DB.batch(["sessions", "devices", "resets", "profiles"].map(t => env.DB.prepare(`DELETE FROM ${t} WHERE user_id=?`).bind(id)).concat(
           env.DB.prepare(`DELETE FROM events WHERE (user_id=? OR email=?) AND kind NOT IN ${KEEP}`).bind(id, u.email),
           env.DB.prepare("UPDATE requests SET salt=NULL,hash=NULL WHERE user_id=? OR email=?").bind(id, u.email),
           env.DB.prepare("DELETE FROM codes WHERE email=?").bind(u.email),
