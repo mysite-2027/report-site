@@ -68,6 +68,8 @@ table.t td.n{text-align:right}
 .sig .st{height:26mm;display:flex;align-items:center;justify-content:center}
 .sig .st img{max-height:26mm;max-width:100%;object-fit:contain}
 .band{height:20px;margin:0 -14mm -12mm;background:linear-gradient(to bottom,var(--p) 65%,transparent 65%),linear-gradient(90deg,var(--b),var(--gr))}
+.sheet.al-r .info div{justify-content:flex-start;text-align:right}.sheet.al-r .sec h3,.sheet.al-r .sec p,.sheet.al-r .lst li,.sheet.al-r table.t td,.sheet.al-r table.v td,.sheet.al-r table.at td,.sheet.al-r table.at2 td{text-align:right}.sheet.al-r .g{justify-content:flex-start}.sheet.al-r .ev div{justify-content:flex-start}.sheet.al-r .ev img{object-position:right center}
+.sheet.al-c .sec h3,.sheet.al-c .sec p,.sheet.al-c .lst li,.sheet.al-c table.t td,.sheet.al-c table.v td,.sheet.al-c table.at td,.sheet.al-c table.at2 td{text-align:center}.sheet.al-c .g{justify-content:center}
 @media print{
 @page{size:A4;margin:0}
 body{background:#fff}
@@ -99,6 +101,7 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 <label>الإدارة العامة للتعليم</label><input id="dept">
 <label>اسم المدرسة</label><input id="school">
 <label>الصيغة (مؤنث / مذكر)</label><select id="gv"><option value="f">مؤنث</option><option value="m">مذكر</option></select>
+<div class="two"><div><label>لون الإطارات والأشرطة</label><select id="clr"><option value="n">كحلي (الافتراضي)</option><option value="g">أخضر</option><option value="t">أخضر مزرق</option><option value="b">أزرق</option><option value="k">رمادي داكن</option></select></div><div><label>محاذاة النصوص</label><select id="alx"><option value="o">كما في النموذج (الافتراضي)</option><option value="c">وسط</option><option value="r">يمين</option></select></div></div>
 <div class="two"><div><label>العام الدراسي</label><input id="year" placeholder="1447 / 1448 هـ"></div><div><label>الفصل الدراسي</label><select id="term"><option value="">اختر الفصل</option><option>الأول</option><option>الثاني</option></select></div></div>
 <label>اللجنة / الفريق</label><input id="kind" list="kinds" placeholder="اختر أو اكتب"><datalist id="kinds"><option value="لجنة التوجيه الطلابي"><option value="لجنة التحصيل الدراسي"><option value="لجنة التميز"><option value="اللجنة الإدارية"><option value="فريق الأمن والسلامة"><option value="فريق الصندوق المدرسي"><option value="فريق التربية الخاصة"></datalist>
 <div class="two"><div><label>رقم الاجتماع (اختياري)</label><input id="num" placeholder="الأول"></div><div><label>اليوم</label><select id="vday"><option value="">اختر اليوم</option><option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option><option>الأربعاء</option><option>الخميس</option><option>الجمعة</option><option>السبت</option></select></div></div>
@@ -135,8 +138,9 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 var $=function(i){return document.getElementById(i)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+var CLR={n:"#17445a",g:"#00682f",t:"#008080",b:"#2c7db5",k:"#374151"};
 var SET={};try{SET=JSON.parse(sto("rpt_settings")||"{}")}catch(e){}
-var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["dept","school","principal","gv","alg","intro","year","term"];
+var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["clr","alx","dept","school","principal","gv","alg","intro","year","term"];
 var imgs=[null,null,null,null];
 SAVED.forEach(function(k){if(SET[k])$(k).value=SET[k]});
 if(!$("dept").value)$("dept").value="الإدارة العامة للتعليم بمنطقة الرياض";
@@ -155,10 +159,11 @@ sv?r.readAsText(file):r.readAsDataURL(file)}
 
 var AR=[0,1,2,3,4,5].map(function(){return{n:"",j:"",r:""}});
 function drawA(){$("arows").innerHTML=AR.map(function(r,i){return '<div class="arow" data-i="'+i+'"><span class="an">'+(i+1)+'</span><input data-k="n" placeholder="الاسم" value="'+esc(r.n)+'"><input data-k="j" placeholder="الوظيفة" value="'+esc(r.j)+'"><input data-k="r" placeholder="الصفة" value="'+esc(r.r)+'"><button type="button" class="x" data-del="'+i+'" title="حذف">×</button></div>'}).join("")}
-var IDS=["dept","school","gv","alg","intro","opn","year","term","kind","num","vday","vdate","vtime","place","disc","dec","principal"];
+var IDS=["clr","alx","dept","school","gv","alg","intro","opn","year","term","kind","num","vday","vdate","vtime","place","disc","dec","principal"];
 function lines(t){return String(t||"").split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean)}
 function numl(t){return '<ul class="lst">'+lines(t).map(function(x,i){return "<li>"+(i+1)+". "+esc(x)+"</li>"}).join("")+"</ul>"}
 function render(){
+var _s=$("sheet");_s.style.setProperty("--p",CLR[$("clr").value]||CLR.n);_s.classList.toggle("al-r",$("alx").value==="r");_s.classList.toggle("al-c",$("alx").value==="c");
 var CN={"لجنة التحصيل الدراسي":7,"اللجنة الإدارية":8,"لجنة التميز":7,"فريق الأمن والسلامة":6,"فريق الصندوق المدرسي":5,"فريق التربية الخاصة":6,"لجنة التوجيه الطلابي":6},kv=$("kind").value.trim(),cn=CN[kv],isT=!!cn;if(isT&&window.PADD!==kv){window.PADD=kv;var emp=AR.every(function(r){return!(r.n.trim()||r.j.trim()||r.r.trim())});if(emp)AR.length=Math.min(AR.length,cn);while(AR.length<cn)AR.push({n:"",j:"",r:""});drawA()}if(!isT)window.PADD="";
 var v=function(i){return $(i).value.trim()},f=$("gv").value==="f",GJ=function(t){var W=[["مديرة","مدير"],["وكيلة","وكيل"],["معلمة","معلم"],["موجهة","موجه"],["مرشدة","مرشد"],["رائدة","رائد"],["محضرة","محضر"],["أمينة","أمين"],["مشرفة","مشرف"],["منسقة","منسق"],["مقررة","مقرر"],["سكرتيرة","سكرتير"],["عضوة","عضو"]];W.forEach(function(w){var from=f?w[1]:w[0],to=f?w[0]:w[1];t=t.replace(new RegExp("(^|[\\s،,/-])"+from+"(?=$|[\\s،,/-])","g"),function(m,p){return p+to})});return t},DJ=function(k){var c=$("kind").value.trim();if(c==="لجنة التحصيل الدراسي"||c==="اللجنة الإدارية")return k===0?(f?"مديرة المدرسة":"مدير المدرسة"):k===1?(f?"وكيلة المدرسة":"وكيل المدرسة"):k===2?(f?"الموجهة الطلابية":"الموجه الطلابي"):k===3?(f?"رائدة النشاط":"رائد النشاط"):c==="اللجنة الإدارية"&&k===7?"مساعد إداري":"";if(c==="فريق الأمن والسلامة"||c==="فريق الصندوق المدرسي"||c==="فريق التربية الخاصة")return k===0?"وكيل"+(f?"ة":"")+" المدرسة":c==="فريق التربية الخاصة"?(k===1?(f?"الموجهة الطلابية":"الموجه الطلابي"):k===2?(f?"الموجهة الصحية":"الموجه الصحي"):k===3?(f?"معلمة التربية الخاصة":"معلم التربية الخاصة"):""):c==="فريق الصندوق المدرسي"?(k===1?(f?"الموجهة الطلابية":"الموجه الطلابي"):k===2?(f?"رائدة النشاط":"رائد النشاط"):k===3?"مساعد إداري":""):c==="فريق الأمن والسلامة"?(k===1?"مساعد إداري":k===2?(f?"الموجهة الطلابية":"الموجه الطلابي"):k===3?(f?"الموجهة الصحية":"الموجه الصحي"):""):"";if(c==="لجنة التميز")return k===0?(f?"مديرة المدرسة":"مدير المدرسة"):k===1?(f?"وكيلة المدرسة":"وكيل المدرسة"):k===2?(f?"الموجهة الطلابية":"الموجه الطلابي"):k===3?(f?"رائدة النشاط":"رائد النشاط"):"";if(c==="لجنة التوجيه الطلابي")return k===0?"وكيل"+(f?"ة":"")+" المدرسة للشؤون الطلابية":k===1?(f?"الموجهة الطلابية":"الموجه الطلابي"):"";return""},DR=function(k){return k===0?"رئيس "+(/^فريق/.test($("kind").value.trim())?"الفريق":"اللجنة"):k===1?($("kind").value.trim()==="لجنة التوجيه الطلابي"?"عضو":($("kind").value.trim()==="فريق الصندوق المدرسي"||$("kind").value.trim()==="فريق التربية الخاصة")?"عضو":$("kind").value.trim()==="فريق الأمن والسلامة"?(f?"منسقة الأمن والسلامة":"منسق الأمن والسلامة"):$("kind").value.trim()==="لجنة التميز"?"عضو":"نائب الرئيس"):"عضو"},DJ0=DJ,DJ=function(k){return DJ0(k)||(f?"معلمة":"معلم")},nm=AR.filter(function(r){return r.n.trim()||r.j.trim()||r.r.trim()}),n=nm.length;
 $("cnt").textContent=n?"عدد "+(f?"الحاضرات":"الحاضرين")+": "+n:"";$("lgN").textContent=f?"الحاضرات":"الحاضرين";Array.prototype.forEach.call(document.querySelectorAll("#arows .arow"),function(d,k){var x=d.querySelector("input[data-k=r]");if(x)x.placeholder=DR(k);var y=d.querySelector("input[data-k=j]");if(y)y.placeholder=DJ(k)||"الوظيفة"});

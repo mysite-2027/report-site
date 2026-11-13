@@ -63,6 +63,8 @@ table.t td.n{text-align:right}
 .sig .st{height:26mm;display:flex;align-items:center;justify-content:center}
 .sig .st img{max-height:26mm;max-width:100%;object-fit:contain}
 .band{height:20px;margin:0 -14mm -12mm;background:linear-gradient(to bottom,var(--p) 65%,transparent 65%),linear-gradient(90deg,var(--b),var(--gr))}
+.sheet.al-r .info div{justify-content:flex-start;text-align:right}.sheet.al-r .sec h3,.sheet.al-r .sec p,.sheet.al-r .lst li,.sheet.al-r table.t td,.sheet.al-r table.v td,.sheet.al-r table.at td,.sheet.al-r table.at2 td{text-align:right}.sheet.al-r .g{justify-content:flex-start}.sheet.al-r .ev div{justify-content:flex-start}.sheet.al-r .ev img{object-position:right center}
+.sheet.al-c .sec h3,.sheet.al-c .sec p,.sheet.al-c .lst li,.sheet.al-c table.t td,.sheet.al-c table.v td,.sheet.al-c table.at td,.sheet.al-c table.at2 td{text-align:center}.sheet.al-c .g{justify-content:center}
 @media print{
 @page{size:A4;margin:0}
 body{background:#fff}
@@ -87,6 +89,7 @@ body{background:#fff}
 <div class="two"><div><label>الصف (اختياري)</label><input id="cls" placeholder="ثاني متوسط"></div><div><label>الفصل / الشعبة (اختياري)</label><input id="sect" placeholder="2/ب"></div></div>
 <label>تاريخ التنفيذ (اختياري)</label><input id="pdate" placeholder="الفصل الأول 1448 هـ">
 <label>الصيغة</label><select id="gender"><option value="f">مؤنث</option><option value="m">مذكر</option></select>
+<div class="two"><div><label>لون الإطارات والأشرطة</label><select id="clr"><option value="n">كحلي (الافتراضي)</option><option value="g">أخضر</option><option value="t">أخضر مزرق</option><option value="b">أزرق</option><option value="k">رمادي داكن</option></select></div><div><label>محاذاة النصوص</label><select id="alx"><option value="o">كما في النموذج (الافتراضي)</option><option value="c">وسط</option><option value="r">يمين</option></select></div></div>
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، انقر على الصورة بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
 <label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logoIn" accept="image/*">
@@ -119,8 +122,9 @@ body{background:#fff}
 var $=function(i){return document.getElementById(i)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+var CLR={n:"#17445a",g:"#00682f",t:"#008080",b:"#2c7db5",k:"#374151"};
 var SET={};try{SET=JSON.parse(sto("rpt_settings")||"{}")}catch(e){}
-var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["dept","school","gender","teacher","principal"];
+var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["clr","alx","dept","school","gender","teacher","principal"];
 var METH=["الثناء والتعزيز المعنوي","شهادات شكر وتقدير","نقاط ومكافآت تحفيزية","إسناد مهام قيادية","التكريم في الإذاعة المدرسية","التواصل مع ولي الأمر"];
 var ENR=["مشاريع وتجارب","أنشطة تفكير إبداعي وناقد","مسائل وتحديات متقدمة","القراءة الموسعة","تقديم الشرح للأقران","برامج وتطبيقات تعليمية","أوراق عمل إثرائية","التعلم الذاتي والاستكشاف","إشراكه في المسابقات والمبادرات"];
 var CAUSE=["تفوق دراسي وتحصيل مرتفع","مهارات تفكير عليا وإبداع","مشاركة صفية فاعلة","حب الاستطلاع والبحث","إنجاز المهام قبل أقرانه","مهارات قيادية وتعاونية"];
@@ -143,6 +147,7 @@ $("enrs").innerHTML=ENR.map(function(m,i){return '<label class="ck"><input type=
 $("causes").innerHTML=CAUSE.map(function(m,i){return '<label class="ck"><input type="checkbox" data-c="'+i+'"> '+m+"</label>"}).join("");
 function drawRows(){$("rows").innerHTML=rows.map(function(r,i){return '<div class="row" data-i="'+i+'"><label>اسم الطالب / الطالبة</label><input data-k="n" value="'+esc(r.n)+'"><button type="button" class="del" data-del="'+i+'">حذف</button></div>'}).join("")}
 function render(){
+var _s=$("sheet");_s.style.setProperty("--p",CLR[$("clr").value]||CLR.n);_s.classList.toggle("al-r",$("alx").value==="r");_s.classList.toggle("al-c",$("alx").value==="c");
 var f=$("gender").value==="f",S=f?"الطالبات":"الطلاب",one=f?"الطالبة":"الطالب",v=function(i){return $(i).value.trim()};
 var filled=rows.filter(function(r){return r.n||r.s||r.a||r.d||r.r}),cnt=rows.filter(function(r){return r.n.trim()}).length,show=filled.slice();
 while(show.length<5)show.push({n:"",s:"",a:"",d:"",r:""});
@@ -163,7 +168,7 @@ ca+'<div class="sec"><h3>أساليب وطرق التحفيز</h3><div class="me
 '<div class="sig"><div><b>'+(f?"المعلمة":"المعلم")+"</b>"+esc(v("teacher"))+'</div><div><b>الختم</b><div class="st">'+(stamp?'<img alt="" src="'+stamp+'">':"")+"</div></div><div><b>"+(f?"مديرة المدرسة":"مدير المدرسة")+"</b>"+esc(v("principal"))+"</div></div>"+
 '<div class="band"></div>'
 }
-["dept","school","subj","teacher","cls","sect","pdate","gender","cauOther","principal"].forEach(function(i){$(i).addEventListener("input",function(){if(SAVED.indexOf(i)>-1){SET[i]=$(i).value;sto("rpt_settings",JSON.stringify(SET))}render()})});
+["clr","alx","dept","school","subj","teacher","cls","sect","pdate","gender","cauOther","principal"].forEach(function(i){$(i).addEventListener("input",function(){if(SAVED.indexOf(i)>-1){SET[i]=$(i).value;sto("rpt_settings",JSON.stringify(SET))}render()})});
 $("meths").addEventListener("change",function(e){var i=+e.target.dataset.m;if(isNaN(i))return;var k=meths.indexOf(i);if(e.target.checked&&k<0)meths.push(i);if(!e.target.checked&&k>-1)meths.splice(k,1);render()});
 $("enrs").addEventListener("change",function(e){var i=+e.target.dataset.e;if(isNaN(i))return;var k=enrs.indexOf(i);if(e.target.checked&&k<0)enrs.push(i);if(!e.target.checked&&k>-1)enrs.splice(k,1);render()});
 $("causes").addEventListener("change",function(e){var i=+e.target.dataset.c;if(isNaN(i))return;var k=causes.indexOf(i);if(e.target.checked&&k<0)causes.push(i);if(!e.target.checked&&k>-1)causes.splice(k,1);render()});

@@ -63,6 +63,8 @@ table.t td.n{text-align:right}
 .sig .st{height:26mm;display:flex;align-items:center;justify-content:center}
 .sig .st img{max-height:26mm;max-width:100%;object-fit:contain}
 .band{height:20px;margin:0 -14mm -12mm;background:linear-gradient(to bottom,var(--p) 65%,transparent 65%),linear-gradient(90deg,var(--b),var(--gr))}
+.sheet.al-r .info div{justify-content:flex-start;text-align:right}.sheet.al-r .sec h3,.sheet.al-r .sec p,.sheet.al-r .lst li,.sheet.al-r table.t td,.sheet.al-r table.v td,.sheet.al-r table.at td,.sheet.al-r table.at2 td{text-align:right}.sheet.al-r .g{justify-content:flex-start}.sheet.al-r .ev div{justify-content:flex-start}.sheet.al-r .ev img{object-position:right center}
+.sheet.al-c .sec h3,.sheet.al-c .sec p,.sheet.al-c .lst li,.sheet.al-c table.t td,.sheet.al-c table.v td,.sheet.al-c table.at td,.sheet.al-c table.at2 td{text-align:center}.sheet.al-c .g{justify-content:center}
 @media print{
 @page{size:A4;margin:0}
 body{background:#fff}
@@ -95,6 +97,7 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 <label>الإدارة العامة للتعليم</label><input id="dept">
 <label>اسم المدرسة</label><input id="school">
 <label>الصيغة (مؤنث / مذكر)</label><select id="gv"><option value="f">مؤنث</option><option value="m">مذكر</option></select>
+<div class="two"><div><label>لون الإطارات والأشرطة</label><select id="clr"><option value="n">كحلي (الافتراضي)</option><option value="g">أخضر</option><option value="t">أخضر مزرق</option><option value="b">أزرق</option><option value="k">رمادي داكن</option></select></div><div><label>محاذاة النصوص</label><select id="alx"><option value="o">كما في النموذج (الافتراضي)</option><option value="c">وسط</option><option value="r">يمين</option></select></div></div>
 <label>الصفة</label><select id="role"><option value="t">معلم</option><option value="c">موجه طلابي</option></select>
 <label>اسم المنفذ (المعلم أو الموجه الطلابي)</label><input id="tname">
 <div class="two"><div><label>اليوم / التاريخ</label><input id="vdate" placeholder="الأحد 1448/3/27"></div><div><label>رقم الحصة</label><input id="period" list="periods" placeholder="الثالثة"><datalist id="periods"><option value="الأولى"><option value="الثانية"><option value="الثالثة"><option value="الرابعة"><option value="الخامسة"><option value="السادسة"><option value="السابعة"></datalist></div></div>
@@ -130,8 +133,9 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 var $=function(i){return document.getElementById(i)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+var CLR={n:"#17445a",g:"#00682f",t:"#008080",b:"#2c7db5",k:"#374151"};
 var SET={};try{SET=JSON.parse(sto("rpt_settings")||"{}")}catch(e){}
-var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["dept","school","principal","gv","tname","role"];
+var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["clr","alx","dept","school","principal","gv","tname","role"];
 var imgs=[null,null,null,null],acts=[],ACT=["قراءة موجهة","مراجعة دروس سابقة","حل أوراق عمل","نشاط إثرائي","ألعاب تعليمية","مناقشة وحوار","متابعة الدفاتر والواجبات","تعزيز القيم والسلوك","مسابقات","ورشة عمل","حصة إرشادية"];
 SAVED.forEach(function(k){if(SET[k])$(k).value=SET[k]});
 if(!$("dept").value)$("dept").value="الإدارة العامة للتعليم بمنطقة الرياض";
@@ -147,12 +151,13 @@ if(x1>x0&&y1>y0){var pd=Math.round(Math.max(c.width,c.height)*.02),c2=document.c
 cb(c.toDataURL(type,.82))};im.src=src};
 sv?r.readAsText(file):r.readAsDataURL(file)}
 
-var IDS=["dept","school","gv","role","tname","vdate","period","cls","cnt","subj","actOther","topic","goals","notes","principal"];
+var IDS=["clr","alx","dept","school","gv","role","tname","vdate","period","cls","cnt","subj","actOther","topic","goals","notes","principal"];
 SAVED.forEach(function(k){if(SET[k]&&$(k))$(k).value=SET[k]});
 $("acts").innerHTML=ACT.map(function(m,i){return '<label class="ck"><input type="checkbox" data-a="'+i+'"> '+m+"</label>"}).join("");
 function lines(t){return String(t||"").split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean)}
 function numl(t){return '<ul class="lst">'+lines(t).map(function(x,i){return "<li>"+(i+1)+". "+esc(x)+"</li>"}).join("")+"</ul>"}
 function render(){
+var _s=$("sheet");_s.style.setProperty("--p",CLR[$("clr").value]||CLR.n);_s.classList.toggle("al-r",$("alx").value==="r");_s.classList.toggle("al-c",$("alx").value==="c");
 var v=function(i){return $(i).value.trim()},f=$("gv").value==="f",RL=$("role").value==="c"?(f?"الموجهة الطلابية":"الموجه الطلابي"):(f?"المعلمة":"المعلم"),EX=RL+(f?" المنفذة":" المنفذ");
 var info=function(l,w,full){return '<div'+(full?' class="w"':"")+"><b>"+l+":</b>"+esc(v(w)||"—")+"</div>"};
 var ah=ACT.map(function(m,i){return "<div><i class=\"bx"+(acts.indexOf(i)>-1?" on":"")+"\"></i>"+m+"</div>"}).join(""),ao=v("actOther");
