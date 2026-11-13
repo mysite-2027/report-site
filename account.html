@@ -25,6 +25,10 @@ h1{color:var(--green);font-size:1.4rem;margin:8px 0 16px}
 .dev small{color:var(--muted);display:block}
 .tag{display:inline-block;background:var(--green);color:#fff;border-radius:99px;padding:0 10px;font-size:.8rem;margin-right:6px}
 label{display:block;font-weight:700;margin:10px 0 4px;font-size:.95rem}
+select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}
+.dl{background:#fff;border:1.5px solid #c0392b;color:#c0392b;margin-inline-start:8px}
+.dl.arm{background:#c0392b;color:#fff}
+.sub{color:var(--muted);margin:0 0 4px;font-size:.95rem}
 input{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}
 button,.btn{display:inline-block;margin-top:12px;padding:10px 20px;border:0;border-radius:10px;background:var(--green);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
 .btn.g{background:none;color:var(--text);border:1.5px solid var(--border)}
@@ -39,6 +43,18 @@ button,.btn{display:inline-block;margin-top:12px;padding:10px 20px;border:0;bord
   <h1>حسابي</h1>
   <div class="card" id="info"><h2>الاشتراك</h2><div class="row"><span>البريد</span><b id="em" dir="ltr">…</b></div><div class="row"><span>ينتهي في</span><b id="ex">…</b></div><div class="row"><span>المتبقي</span><b id="dl">…</b></div></div>
   <div class="card"><h2>الأجهزة المسجّلة (<span id="dc">0</span> من <span id="mx">3</span>)</h2><div id="devs"></div></div>
+  <div class="card" id="schoolCard">
+    <h2>بيانات مدرستي (اختياري)</h2>
+    <p class="sub">اكتب اسم الإدارة والمدرسة والمديرة مرة واحدة، وتظهر جاهزة في النماذج على كل أجهزتك. لا تريد؟ اتركها فارغة، والموقع يعمل كالمعتاد. وتحذفها متى شئت.</p>
+    <form id="sf">
+      <label for="sd">اسم إدارة التعليم</label><input id="sd" maxlength="80" autocomplete="off" placeholder="الإدارة العامة للتعليم بمنطقة الرياض">
+      <label for="ss">اسم المدرسة</label><input id="ss" maxlength="80" autocomplete="off">
+      <label for="sp">اسم المدير أو المديرة</label><input id="sp" maxlength="80" autocomplete="off">
+      <label for="sg">الصيغة</label><select id="sg"><option value="">بدون تحديد</option><option value="f">مؤنث</option><option value="m">مذكر</option></select>
+      <button type="submit">حفظ</button><button type="button" class="dl" id="sdel" hidden>حذف بياناتي المحفوظة</button>
+      <div class="msg" id="sm"></div>
+    </form>
+  </div>
   <div class="card rules"><h2>قواعد الاشتراك</h2>
     <ul>
       <li><b>الاشتراك شخصي</b> لصاحب البريد فقط، ولا تجوز مشاركته مع الآخرين.</li>
@@ -78,6 +94,18 @@ fetch("/api/me").then(function(r){if(!r.ok){location.href="/login";return}return
 $("devs").onclick=function(e){var b=e.target.closest(".rm");if(!b||!confirm("حذف هذا الجهاز؟ سيخرج منه الحساب فورًا."))return;
  fetch("/api/device",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({did:b.getAttribute("data-d")})}).then(function(r){if(r.ok)location.reload();else alert("تعذّر الحذف")})};
 $("out").onclick=function(){fetch("/api/logout",{method:"POST",headers:{"content-type":"application/json"},body:"{}"}).then(function(){location.href="/login"})};
+var J={"content-type":"application/json"};
+function sFill(d){$("sd").value=d.dept||"";$("ss").value=d.school||"";$("sp").value=d.principal||"";$("sg").value=d.gv||"";$("sdel").hidden=!d.saved}
+fetch("/api/profile").then(function(r){return r.ok?r.json():null}).then(function(d){if(d)sFill(d)}).catch(function(){});
+$("sf").onsubmit=function(e){e.preventDefault();var m=$("sm");m.className="msg";m.textContent="…";
+ fetch("/api/profile",{method:"POST",headers:J,body:JSON.stringify({dept:$("sd").value,school:$("ss").value,principal:$("sp").value,gv:$("sg").value})})
+ .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})}).then(function(x){
+  if(x.ok){x.j.saved=true;sFill(x.j);m.textContent="تم الحفظ. ستظهر في النماذج عند فتحها."}else{m.className="msg warn";m.textContent=x.j.error||"تعذّر الحفظ"}
+ }).catch(function(){m.className="msg warn";m.textContent="تعذّر الاتصال"})};
+var sArm=0;$("sdel").onclick=function(){var b=this,m=$("sm");
+ if(!sArm){sArm=1;b.textContent="اضغط مرة أخرى للتأكيد";b.classList.add("arm");setTimeout(function(){sArm=0;b.textContent="حذف بياناتي المحفوظة";b.classList.remove("arm")},3000);return}
+ sArm=0;b.classList.remove("arm");b.textContent="حذف بياناتي المحفوظة";
+ fetch("/api/profile",{method:"DELETE",headers:J,body:"{}"}).then(function(r){if(r.ok){sFill({});m.className="msg";m.textContent="تم حذف بياناتك المحفوظة."}else{m.className="msg warn";m.textContent="تعذّر الحذف"}})};
 $("pf").onsubmit=function(e){e.preventDefault();var m=$("pm");m.className="msg";m.textContent="…";
  fetch("/api/password",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({old:$("o").value,new:$("n").value})})
  .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})}).then(function(x){

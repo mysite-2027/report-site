@@ -130,6 +130,7 @@ var ENR=["مشاريع وتجارب","أنشطة تفكير إبداعي ونا�
 var CAUSE=["تفوق دراسي وتحصيل مرتفع","مهارات تفكير عليا وإبداع","مشاركة صفية فاعلة","حب الاستطلاع والبحث","إنجاز المهام قبل أقرانه","مهارات قيادية وتعاونية"];
 var rows=[{n:"",s:"",a:"",d:"",r:""}],meths=[],enrs=[],causes=[],imgs=[null,null,null,null];
 SAVED.forEach(function(k){if(SET[k])$(k).value=SET[k]});
+(function(){if(location.pathname.indexOf("/demo")===0)return;var G=$("gender")?"gender":"gv";fetch("/api/profile",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!d||!d.saved)return;var L={};try{L=JSON.parse(localStorage.getItem("rpt_settings")||"{}")||{}}catch(e){}var M={dept:d.dept,school:d.school,principal:d.principal};M[G]=d.gv;for(var k in M){if(M[k]&&!L[k]&&$(k))$(k).value=M[k]}render()}).catch(function(){})})();
 if(!$("dept").value)$("dept").value="الإدارة العامة للتعليم بمنطقة الرياض";
 function shrink(file,max,type,cb){if(type==="image/png")max*=2;var r=new FileReader(),sv=/svg/i.test(file.type)||/\.svg$/i.test(file.name);
 r.onload=function(){var src=r.result;

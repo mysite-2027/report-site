@@ -143,6 +143,7 @@ var SET={};try{SET=JSON.parse(sto("rpt_settings")||"{}")}catch(e){}
 var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["clr","alx","dept","school","principal","gv","alg","intro","year","term"];
 var imgs=[null,null,null,null];
 SAVED.forEach(function(k){if(SET[k])$(k).value=SET[k]});
+(function(){if(location.pathname.indexOf("/demo")===0)return;var G=$("gender")?"gender":"gv";fetch("/api/profile",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!d||!d.saved)return;var L={};try{L=JSON.parse(localStorage.getItem("rpt_settings")||"{}")||{}}catch(e){}var M={dept:d.dept,school:d.school,principal:d.principal};M[G]=d.gv;for(var k in M){if(M[k]&&!L[k]&&$(k))$(k).value=M[k]}render()}).catch(function(){})})();
 if(!$("dept").value)$("dept").value="الإدارة العامة للتعليم بمنطقة الرياض";
 if(!$("intro").value)$("intro").value="الحمد لله رب العالمين، والصلاة والسلام على سيد المرسلين، محمد وعلى آله وصحبه وسلم، وبعد:";
 function shrink(file,max,type,cb){if(type==="image/png")max*=2;var r=new FileReader(),sv=/svg/i.test(file.type)||/\.svg$/i.test(file.name);
