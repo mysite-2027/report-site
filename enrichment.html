@@ -98,13 +98,13 @@ body{background:#fff}
 </fieldset>
 <fieldset><legend>مظاهر التميز (يمكن اختيار أكثر من خيار)</legend>
 <div id="causes"></div>
-<label>إضافة أخرى (اختياري)</label><input id="cauOther" placeholder="اكتب ما تريد إضافته"></fieldset>
+<label>إضافة أخرى (اختياري)</label><input id="cauOther" placeholder="افصل بين البنود بفاصلة ( ، ) أو ( - )"></fieldset>
 <fieldset><legend>أساليب وطرق التحفيز (يمكن اختيار أكثر من خيار)</legend>
 <div id="meths"></div>
-<label>إضافة أخرى (اختياري)</label><input id="methOther" placeholder="اكتب ما تريد إضافته"></fieldset>
+<label>إضافة أخرى (اختياري)</label><input id="methOther" placeholder="افصل بين البنود بفاصلة ( ، ) أو ( - )"></fieldset>
 <fieldset><legend>الإجراءات الإثرائية (يمكن اختيار أكثر من خيار)</legend>
 <div id="enrs"></div>
-<label>إضافة أخرى (اختياري)</label><input id="enrOther" placeholder="اكتب ما تريد إضافته"></fieldset>
+<label>إضافة أخرى (اختياري)</label><input id="enrOther" placeholder="افصل بين البنود بفاصلة ( ، ) أو ( - )"></fieldset>
 <fieldset><legend>جدول الطلاب</legend>
 <p class="hint" style="margin-top:0">أضف الطلاب المتميزين. تبقى الأسماء في متصفحك فقط ولا تُحفظ بعد إغلاق الصفحة.</p>
 <div id="rows"></div><button type="button" id="addRow" style="margin-top:8px">+ إضافة طالب</button></fieldset>
@@ -201,9 +201,10 @@ if(!window.html2canvas||!window.jspdf){m.textContent="تعذّر تحميل مك
 b.disabled=true;b.textContent="جارٍ إنشاء الملف…";
 try{
 var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
-var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
+var _one=0,_e=document.getElementById("sheet"),_o={w:_e.style.width,m:_e.style.minHeight};try{var _W0=_e.offsetWidth,_H0=_e.offsetHeight,_R=297/210,_ok=0;if(_H0>_W0*_R+1&&_H0<=_W0*_R*1.3){for(var _w=_W0*1.02;_w<=_W0*1.31;_w+=_W0*.01){_e.style.width=_w+"px";_e.style.minHeight="0";if(_e.offsetHeight<=_w*_R){_e.style.minHeight=(_w*_R)+"px";_ok=1;break}}if(!_ok){_e.style.width=_o.w;_e.style.minHeight=_o.m}}}catch(_x){_e.style.width=_o.w;_e.style.minHeight=_o.m}
+var cv;try{cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});}finally{_e.style.width=_o.w;_e.style.minHeight=_o.m}
 var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true}),pw=210,ph=297,H=Math.round(cv.width*ph/pw),y=0,first=true,imgH=cv.height*pw/cv.width;
-if(imgH<=ph*1.3){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);if(k<1){var _sh=document.getElementById("sheet"),_K=_sh.children,_bh=Math.round(_K[_K.length-1].getBoundingClientRect().height*cv.width/_sh.offsetWidth),_bc=document.createElement("canvas");_bc.width=cv.width;_bc.height=_bh;_bc.getContext("2d").drawImage(cv,0,cv.height-_bh,cv.width,_bh,0,0,cv.width,_bh);var _mm=_bh*pw/cv.width;pdf.addImage(_bc.toDataURL("image/jpeg",.95),"JPEG",0,ph-_mm,pw,_mm)}y=cv.height}
+if(imgH<=ph*1.3){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);if(k<.97){var _sh=document.getElementById("sheet"),_K=_sh.children,_bh=Math.round(_K[_K.length-1].getBoundingClientRect().height*cv.width/_sh.offsetWidth),_bc=document.createElement("canvas");_bc.width=cv.width;_bc.height=_bh;_bc.getContext("2d").drawImage(cv,0,cv.height-_bh,cv.width,_bh,0,0,cv.width,_bh);var _mm=_bh*pw/cv.width;pdf.addImage(_bc.toDataURL("image/jpeg",.95),"JPEG",0,ph-_mm,pw,_mm)}y=cv.height;_one=1}
 var sc=cv.width/sh.offsetWidth,K=sh.children,R=function(e){return e.getBoundingClientRect()},t0=R(sh).top,nk=K.length,hb=Math.round((R(K[0]).bottom-t0)*sc),bandPx=Math.round(R(K[nk-1]).height*sc),bandY=cv.height-bandPx,SG=K[nk-2],sigTop=Math.round((R(SG).top-t0)*sc),sigPx=Math.round(R(SG).height*sc),gap=Math.round(10*sc),cEnd=sigTop,bs=[],br=[],extra=false;
 for(var q=0;q<nk-2;q++)bs.push((R(K[q]).bottom-t0)*sc);
 Array.prototype.forEach.call(sh.querySelectorAll("tr"),function(e){br.push((R(e).bottom-t0)*sc)});
@@ -211,7 +212,7 @@ var mkPage=function(){var c=document.createElement("canvas");c.width=cv.width;c.
 var addSig=function(P){P.x.drawImage(cv,0,sigTop,cv.width,sigPx,0,H-bandPx-gap-sigPx,cv.width,sigPx)};
 var addBand=function(P){P.x.drawImage(cv,0,bandY,cv.width,bandPx,0,H-bandPx,cv.width,bandPx)};
 var push=function(P){if(!first)pdf.addPage();pdf.addImage(P.c.toDataURL("image/jpeg",.95),"JPEG",0,0,pw,ph);first=false};
-while(y<cEnd-5){var cap=(first?H:H-hb)-bandPx,end=Math.min(y+cap,cEnd);
+while(!_one&&y<cEnd-5){var cap=(first?H:H-hb)-bandPx,end=Math.min(y+cap,cEnd);
 if(end<cEnd){var pick=function(arr,lo){var c=arr.filter(function(z){return z>lo&&z<=end+1});return c.length?Math.max.apply(null,c):null};var e1=pick(bs,y+cap*.7)||pick(br,y+cap*.4)||pick(bs,y+cap*.4);if(e1)end=Math.min(cEnd,Math.round(e1))}
 var P=mkPage(),oy=0;if(!first){P.x.drawImage(cv,0,0,cv.width,hb,0,0,cv.width,hb);oy=hb}
 P.x.drawImage(cv,0,y,cv.width,end-y,0,oy,cv.width,end-y);
