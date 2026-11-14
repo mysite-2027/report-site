@@ -115,8 +115,8 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 <label>أهداف الجلسة</label><textarea id="goals"></textarea>
 <label>نتائج الجلسة</label><textarea id="res"></textarea>
 <label>التوصيات</label><textarea id="recs"></textarea></fieldset>
-<fieldset><legend>الحاضرون</legend>
-<label>أسماء الحاضرين (اسم في كل سطر)</label><textarea id="names" style="min-height:110px"></textarea>
+<fieldset><legend id="lgN">الحاضرون</legend>
+<label id="nmL">أسماء الحاضرين (اسم في كل سطر)</label><textarea id="names" style="min-height:110px"></textarea>
 <p class="hint" id="cnt"></p></fieldset>
 <fieldset><legend>الشواهد (اختياري - حتى 4 صور)</legend><p class="hint" style="margin-top:0">إن لم تضف صورًا فلن يظهر قسم الشواهد في التقرير.</p><div class="two"><input type="file" class="ev-in" accept="image/*"><input type="file" class="ev-in" accept="image/*"><input type="file" class="ev-in" accept="image/*"><input type="file" class="ev-in" accept="image/*"></div></fieldset>
 <fieldset><legend>التوقيعات</legend>
@@ -161,13 +161,13 @@ function numl(t){return '<ul class="lst">'+lines(t).map(function(x,i){return "<l
 function render(){
 var _s=$("sheet");_s.style.setProperty("--p",CLR[$("clr").value]||CLR.n);var _g=CLG[$("clr").value];_s.style.setProperty("--g1",_g?_g[0]:"");_s.style.setProperty("--g2",_g?_g[1]:"");_s.style.setProperty("--tl",_g?_g[1]:"");_s.classList.toggle("al-r",$("alx").value==="r");_s.classList.toggle("al-c",$("alx").value==="c");
 var v=function(i){return $(i).value.trim()},f=$("gv").value==="f",nm=lines($("names").value),n=nm.length;
-$("cnt").textContent=n?"عدد الحاضرين: "+n:"";
+$("cnt").textContent=n?"عدد "+(f?"الحاضرات":"الحاضرين")+": "+n:"";$("lgN").textContent=f?"الحاضرات":"الحاضرون";$("nmL").textContent="أسماء "+(f?"الحاضرات":"الحاضرين")+" (اسم في كل سطر)";
 var cell=function(l,w){return '<div class="w"><b>'+l+":</b>"+esc(v(w)||"—")+"</div>"};
 var info=function(l,w,full){return '<div'+(full?' class="w"':"")+"><b>"+l+":</b>"+esc(v(w)||"—")+"</div>"};
 var sec=function(h,id){return v(id)?'<div class="sec"><h3>'+h+"</h3>"+numl($(id).value)+"</div>":""};
 var k=Math.max(4,Math.ceil(n/2)),tr="",i;
 for(i=0;i<k;i++){var r=function(j){return j<n?"<td>"+(j+1)+'</td><td class="nm">'+esc(nm[j])+"</td><td></td>":"<td>"+(j<k*2&&false?"":"")+"</td><td></td><td></td>"};tr+="<tr>"+r(i)+'<td class="sp"></td>'+r(i+k)+"</tr>"}
-var at='<div class="sec"><h3>أسماء وتواقيع الحاضرين</h3><table class="t at"><tr><th style="width:5%">م</th><th style="width:25%">الاسم</th><th style="width:19%">التوقيع</th><th class="sp"></th><th style="width:5%">م</th><th style="width:25%">الاسم</th><th style="width:19%">التوقيع</th></tr>'+tr+"</table></div>";
+var at='<div class="sec"><h3>أسماء وتواقيع '+(f?"الحاضرات":"الحاضرين")+'</h3><table class="t at"><tr><th style="width:5%">م</th><th style="width:25%">الاسم</th><th style="width:19%">التوقيع</th><th class="sp"></th><th style="width:5%">م</th><th style="width:25%">الاسم</th><th style="width:19%">التوقيع</th></tr>'+tr+"</table></div>";
 var evs=imgs.filter(Boolean).map(function(d){return '<div><img alt="" src="'+d+'"></div>'}).join("");
 var L=logo,term=v("term"),yr=v("year");
 var gl=sec("أهداف الجلسة","goals"),rs=sec("نتائج الجلسة","res"),rc=sec("التوصيات","recs");
