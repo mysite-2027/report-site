@@ -184,22 +184,20 @@
 
     /* الشواهد */
     var evGrid = function (ev, iw) {
-      var items = Array.prototype.slice.call(ev.children), half = Math.floor(iw / 2), rows = [];
+      var items = Array.prototype.slice.call(ev.children), q = Math.floor(iw / 4), half = q * 2, rows = [];
+      var one = function (it) {
+        var kids = [], img = it.querySelector("img"), im = img ? pic(img, px(half) - 24, 200) : null;
+        if (im) kids = [new D.Paragraph({ alignment: CEN, spacing: { after: 0 }, children: [im] })];
+        else kids = [para([runs(it.textContent.trim() || " ", { color: "6B7280" })], { alignment: CEN, spacing: { after: 0 } })];
+        return cell(kids, half, { borders: BOX, columnSpan: 2 });
+      };
       for (var i = 0; i < items.length; i += 2) {
-        var cs2 = [];
-        for (var j = 0; j < 2; j++) {
-          var it = items[i + j], kids = [], bordered = false;
-          if (it) {
-            var img = it.querySelector("img"), im = img ? pic(img, px(half) - 24, 200) : null;
-            bordered = true;
-            if (im) kids = [new D.Paragraph({ alignment: CEN, spacing: { after: 0 }, children: [im] })];
-            else kids = [para([runs(it.textContent.trim() || " ", { color: "6B7280" })], { alignment: CEN, spacing: { after: 0 } })];
-          }
-          cs2.push(cell(kids, half, { borders: bordered ? BOX : NOB }));
-        }
+        var cs2;
+        if (i + 1 < items.length) cs2 = [one(items[i]), one(items[i + 1])];
+        else cs2 = [cell([empty()], q), one(items[i]), cell([empty()], q)];
         rows.push(new D.TableRow({ cantSplit: true, height: { value: 1500, rule: D.HeightRule.ATLEAST }, children: cs2 }));
       }
-      return table(rows, [half, half]);
+      return table(rows, [q, q, q, q]);
     };
 
     /* ملخص الدرجات (.stats) */
