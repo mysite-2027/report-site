@@ -58,6 +58,7 @@ table.imp td{border:1px solid var(--l);padding:4px 6px;text-align:center;vertica
 .ev{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ev div{border:1.5px solid var(--p);border-radius:10px;height:34mm;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff;color:#9aa8b2}
 .ev img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
+.ev div:last-child:nth-child(odd){grid-column:1/-1;justify-self:center;width:calc(50% - 4px)}
 .sheet.al-r .info div{justify-content:flex-start;text-align:right}
 .sheet.al-r .sec p,.sheet.al-r table.imp td{text-align:right}
 .sheet.al-r .ev div{justify-content:flex-start}
