@@ -226,93 +226,18 @@ m.textContent="تم تجهيز الملف.";
 }catch(e){m.textContent="تعذّر إنشاء الملف تلقائيًا. استخدم زر الطباعة ثم اختر «حفظ بصيغة PDF»."}
 finally{b.disabled=false;b.textContent=old}
 };
-$("word").onclick=async function(){
-var b=$("word"),old=b.textContent,m=$("pm");m.textContent="";b.disabled=true;b.textContent="جارٍ إنشاء ملف Word…";
-try{
-if(!window.docx){await new Promise(function(ok,no){var s=document.createElement("script");s.src="/vendor/docx.min.js";s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
-var D=window.docx,W=10206,CL=(CLR[$("clr").value]||CLR.n).replace("#",""),AX=$("alx").value;
-var f=$("gender").value==="f",S=f?"الطالبات":"الطلاب",one=f?"الطالبة":"الطالب",v=function(i){return $(i).value.trim()};
-var CEN=D.AlignmentType.CENTER,BODY=AX==="c"?CEN:undefined,INF=AX==="r"?undefined:CEN,NUMA=AX==="r"?undefined:CEN;
-var FN={ascii:"Arial",hAnsi:"Arial",cs:"Arial",eastAsia:"Arial"};
-var run=function(t,o){return String(t).split(/([0-9]+)/).filter(function(x){return x!==""}).map(function(x){var dg=/^[0-9]+$/.test(x);return new D.TextRun(Object.assign({text:x,font:FN,rightToLeft:!dg,size:22,sizeComplexScript:22},o||{}))})};
-var bold=function(t,o){return run(t,Object.assign({bold:true,boldComplexScript:true},o||{}))};
-var flat=function(a){return[].concat.apply([],a)};
-var para=function(ch,o){return new D.Paragraph(Object.assign({bidirectional:true,alignment:BODY,spacing:{after:60},children:flat(ch)},o||{}))};
-var NB={style:D.BorderStyle.NONE,size:0,color:"FFFFFF"},NOB={top:NB,bottom:NB,left:NB,right:NB};
-var bd=function(c,sz){var x={style:D.BorderStyle.SINGLE,size:sz,color:c};return{top:x,bottom:x,left:x,right:x}};
-var LINE=bd("C9D3DA",4),BOX=bd(CL,8),BIG=bd(CL,12),INFB=bd(CL,12);
-var cell=function(ch,w,o){return new D.TableCell(Object.assign({children:ch,width:{size:w,type:D.WidthType.DXA},borders:NOB,verticalAlign:D.VerticalAlign.CENTER,margins:{top:60,bottom:60,left:110,right:110}},o||{}))};
-var table=function(rows,cols,o){return new D.Table(Object.assign({layout:D.TableLayoutType.FIXED,visuallyRightToLeft:true,width:{size:cols.reduce(function(a,c){return a+c},0),type:D.WidthType.DXA},columnWidths:cols,rows:rows},o||{}))};
-var gap=function(n){return new D.Paragraph({spacing:{after:n||80},children:[]})};
-var fill=function(c){return{type:D.ShadingType.CLEAR,fill:c,color:"auto"}};
-var u8=function(d){var s=atob(d.split(",")[1]),a=new Uint8Array(s.length);for(var i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a};
-var dim=function(d){return new Promise(function(ok){var im=new Image();im.onload=function(){ok({w:im.width,h:im.height})};im.onerror=function(){ok(null)};im.src=d})};
-var pic=async function(d,mw,mh){var z=await dim(d);if(!z)return null;var k=Math.min(mw/z.w,mh/z.h,1);return new D.ImageRun({type:/^data:image\/png/.test(d)?"png":"jpg",data:u8(d),transformation:{width:Math.max(1,Math.round(z.w*k)),height:Math.max(1,Math.round(z.h*k))},altText:{title:"صورة",description:"صورة",name:"img"}})};
-var ch=[];
-/* الترويسة */
-var lg=logo?await pic(logo,190,70):null;
-var HB={top:NB,left:NB,right:NB,bottom:{style:D.BorderStyle.SINGLE,size:24,color:CL}};
-ch.push(table([new D.TableRow({children:[
-cell([para([bold(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض",{color:CL,size:24})],{alignment:CEN,spacing:{after:20}}),para([run(v("school")||"اسم المدرسة")],{alignment:CEN,spacing:{after:0}})],3500,{borders:HB}),
-cell([new D.Paragraph({spacing:{after:0},children:[]})],3500,{borders:HB}),
-cell([new D.Paragraph({alignment:D.AlignmentType.LEFT,spacing:{after:0},children:lg?[lg]:[]})],3206,{borders:HB})]})],[3500,3500,3206]));
-ch.push(gap(100));
-/* العنوان */
-ch.push(table([new D.TableRow({children:[cell([para([bold("الخطة الإثرائية لمادة "+(v("subj")||"…"),{color:"FFFFFF",size:30})],{alignment:CEN,spacing:{before:40,after:40}})],W,{shading:fill(CL)})]})],[W]));
-ch.push(gap(100));
-/* البيانات: خانات منفصلة بإطار ملون */
-var inf=function(l,x){return para([bold(l+": ",{color:CL}),run(x||"—")],{alignment:INF,spacing:{after:0}})};
-var ib=function(c,w,o){return cell([c],w,Object.assign({borders:INFB},o||{}))};
-var HW=(W-120)/2;
-ch.push(table([
-new D.TableRow({children:[ib(inf("اسم "+(f?"المعلمة":"المعلم"),v("teacher")),W,{columnSpan:2})]}),
-new D.TableRow({children:[ib(inf("الصف",v("cls")),W/2),ib(inf("الفصل / الشعبة",v("sect")),W/2)]}),
-new D.TableRow({children:[ib(inf("تاريخ التنفيذ",v("pdate")),W/2),ib(inf("عدد "+S,String(rows.filter(function(r){return r.n.trim()}).length)),W/2)]})
-],[W/2,W/2]));
-/* أقسام الخيارات داخل إطار */
-var SYM={ascii:"Segoe UI Symbol",hAnsi:"Segoe UI Symbol",cs:"Segoe UI Symbol",eastAsia:"Segoe UI Symbol"};
-var IW=W-500,CW=Math.floor(IW/3);
-var h3=function(t){return para([bold(t,{color:CL,size:25})],{keepNext:true,spacing:{after:80}})};
-var box=function(inner){ch.push(gap(100));ch.push(table([new D.TableRow({cantSplit:true,children:[cell(inner,W,{borders:BIG,margins:{top:100,bottom:100,left:200,right:200}})]})],[W]))};
-var sect=function(title,list,sel,other){
-var rw=[];for(var i=0;i<list.length;i+=3){var cs=[];for(var j=0;j<3;j++){var k=i+j,t=list[k],on=sel.indexOf(k)>-1;cs.push(cell([para(t==null?[]:[run(on?"■ ":"□ ",{font:SYM,color:on?CL:"6B7280",size:22}),run(t)],{spacing:{after:0}})],CW,{margins:{top:30,bottom:30,left:60,right:60}}))}rw.push(new D.TableRow({cantSplit:true,children:cs}))}
-var inner=[h3(title),table(rw,[CW,CW,CW])];
-inner.push(other?para([bold("أخرى: ",{color:CL}),run(other)],{spacing:{before:60,after:0}}):new D.Paragraph({spacing:{after:0},children:[]}));
-box(inner)};
-sect("مظاهر التميز",CAUSE,causes,v("cauOther"));
-sect("أساليب وطرق التحفيز",METH,meths,v("methOther"));
-sect("الإجراءات الإثرائية",ENR,enrs,v("enrOther"));
-/* جدول الطلاب */
-var show=rows.filter(function(r){return r.n||r.s||r.a||r.d||r.r});while(show.length<5)show.push({n:""});
-var hc=function(t,w){return cell([para([bold(t,{color:"FFFFFF"})],{alignment:CEN,spacing:{after:0}})],w,{borders:bd(CL,4),shading:fill(CL)})};
-var tr=[new D.TableRow({tableHeader:true,cantSplit:true,children:[hc("م",900),hc("اسم "+one,W-900)]})];
-show.forEach(function(r,i){tr.push(new D.TableRow({cantSplit:true,height:{value:420,rule:D.HeightRule.ATLEAST},children:[cell([para([run(String(i+1))],{alignment:NUMA,spacing:{after:0}})],900,{borders:LINE}),cell([para(r.n?[run(r.n)]:[],{spacing:{after:0}})],W-900,{borders:LINE})]}))});
-box([h3("جدول الخطة الإثرائية"),table(tr,[900,W-900]),new D.Paragraph({spacing:{after:0},children:[]})]);
-/* الشواهد */
-var ev=imgs.filter(Boolean);
-if(ev.length){
-var er=[];for(var i=0;i<ev.length;i+=2){var cs=[];for(var j=0;j<2;j++){var d=ev[i+j],im=d?await pic(d,290,200):null;cs.push(cell([new D.Paragraph({alignment:CEN,spacing:{after:0},children:im?[im]:[]})],Math.floor(IW/2),{borders:im?BOX:NOB}))}er.push(new D.TableRow({cantSplit:true,children:cs}))}
-box([h3("الشواهد"),table(er,[Math.floor(IW/2),Math.floor(IW/2)]),new D.Paragraph({spacing:{after:0},children:[]})])}
-/* التوقيعات */
-ch.push(gap(120));
-var st=stamp?await pic(stamp,90,70):null;
-var sg=function(role,name){return cell([para([bold(role,{color:CL})],{alignment:CEN,spacing:{after:40}}),para([run(name||" ")],{alignment:CEN,spacing:{after:0}})],W/3)};
-ch.push(table([new D.TableRow({cantSplit:true,children:[
-sg(f?"المعلمة":"المعلم",v("teacher")),
-cell([para([bold("الختم",{color:CL})],{alignment:CEN,spacing:{after:40}}),new D.Paragraph({alignment:CEN,spacing:{after:0},children:st?[st]:run(" ")})],W/3),
-sg(f?"مديرة المدرسة":"مدير المدرسة",v("principal"))]})],[W/3,W/3,W/3]));
-ch.push(new D.Paragraph({spacing:{after:0},children:[]}));
-var band=new D.Footer({children:[table([new D.TableRow({height:{value:260,rule:D.HeightRule.EXACT},children:[cell([new D.Paragraph({spacing:{after:0},children:[]})],W,{shading:fill(CL),margins:{top:0,bottom:0,left:0,right:0}})]})],[W]),new D.Paragraph({spacing:{after:0,line:20,lineRule:D.LineRuleType.EXACT},children:[]})]});
-var doc=new D.Document({creator:"مُيَسِّر التقارير المدرسية",title:"الخطة الإثرائية",styles:{default:{document:{run:{font:FN,size:22,rightToLeft:true}}}},sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:850,bottom:900,left:850,right:850,footer:360}}},footers:{default:band},children:ch}]});
-var blob=await D.Packer.toBlob(doc);
-var nm=("الخطة الإثرائية "+(v("subj")||"")).trim().replace(/[\\\/:*?"<>|]/g,"-");
+drawRows();render();
+$("word").onclick=async function(){var b=$("word"),old=b.textContent,m=$("pm")||$("msg");if(m)m.textContent="";b.disabled=true;b.textContent="جارٍ إنشاء ملف Word…";
+try{var ld=function(u){return new Promise(function(ok,no){var s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)})};
+if(!window.docx)await ld("/vendor/docx.min.js?v=1");if(!window.muyassirWord)await ld("/vendor/word.js?v=1");
+var nm=("الخطة الإثرائية "+($("subj").value.trim()||"")).trim().replace(/[\\\/:*?"<>|]/g,"-");
+var blob=await window.muyassirWord($("sheet"),{title:nm});
 var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nm+".docx";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
-m.textContent="تم تجهيز ملف Word. افتحه وعدّل ما تشاء.";
-}catch(e){m.textContent="تعذّر إنشاء ملف Word. تأكد من اتصالك بالإنترنت ثم أعد المحاولة، أو استخدم حفظ PDF."}
+if(m)m.textContent="تم تجهيز ملف Word. افتحه وعدّل ما تشاء.";
+}catch(e){if(m)m.textContent="تعذّر إنشاء ملف Word. تأكد من اتصالك بالإنترنت ثم أعد المحاولة، أو استخدم حفظ PDF."}
 finally{b.disabled=false;b.textContent=old}
 };
 if(location.pathname.indexOf("/demo")===0)$("word").style.display="none";
-drawRows();render();
 </script>
 </body>
 </html>

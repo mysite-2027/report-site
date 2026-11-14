@@ -51,7 +51,7 @@ button.del{border-color:var(--border);color:var(--muted);padding:3px 10px;margin
 .meth div{font-size:1em}
 .ev{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ev div{border:1.5px solid var(--p);border-radius:10px;height:34mm;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff}
-.ev img{width:100%;height:100%;object-fit:contain;display:block}
+.ev img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
 .bx{display:inline-block;width:12px;height:12px;border:1.5px solid var(--p);border-radius:3px;vertical-align:middle;margin-inline-end:6px}
 .bx.on{background:var(--g2);border-color:var(--g2)}
 table.t{width:100%;border-collapse:collapse;font-size:1em;table-layout:fixed}
@@ -119,6 +119,7 @@ table.v td.mk{font-size:1.15em;color:var(--g2);font-weight:800}
 <label>صورة الختم (اختياري)</label><input type="file" id="stampIn" accept="image/*"><button type="button" class="del" id="stampDel" style="width:100%">إزالة الختم</button>
 <p class="hint">يُحفظ الختم والشعار في متصفحك ويظهران أيضًا في بقية النماذج.</p></fieldset>
 <button class="main" id="pdf" type="button">حفظ PDF</button>
+<button class="del" id="word" type="button" style="width:100%">حفظ Word (قابل للتعديل)</button>
 <button class="del" id="print" type="button" style="width:100%">طباعة</button>
 <button class="del" id="reset" type="button" style="width:100%">مسح بيانات الاستمارة</button>
 <p class="hint" id="pm"></p>
@@ -218,6 +219,17 @@ m.textContent="تم تجهيز الملف.";
 finally{b.disabled=false;b.textContent=old}
 };
 drawRows();render();
+$("word").onclick=async function(){var b=$("word"),old=b.textContent,m=$("pm")||$("msg");if(m)m.textContent="";b.disabled=true;b.textContent="جارٍ إنشاء ملف Word…";
+try{var ld=function(u){return new Promise(function(ok,no){var s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)})};
+if(!window.docx)await ld("/vendor/docx.min.js?v=1");if(!window.muyassirWord)await ld("/vendor/word.js?v=1");
+var nm=("استمارة زيارة صفية "+($("subj").value.trim()||"")).trim().replace(/[\\\/:*?"<>|]/g,"-");
+var blob=await window.muyassirWord($("sheet"),{title:nm});
+var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nm+".docx";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
+if(m)m.textContent="تم تجهيز ملف Word. افتحه وعدّل ما تشاء.";
+}catch(e){if(m)m.textContent="تعذّر إنشاء ملف Word. تأكد من اتصالك بالإنترنت ثم أعد المحاولة، أو استخدم حفظ PDF."}
+finally{b.disabled=false;b.textContent=old}
+};
+if(location.pathname.indexOf("/demo")===0)$("word").style.display="none";
 </script>
 </body>
 </html>

@@ -133,6 +133,7 @@ body{background:#fff}
 <label>صورة الختم (اختياري)</label><input type="file" id="stampIn" accept="image/*"><button type="button" class="del" id="stampDel">إزالة الختم</button>
 <p class="hint">يُحفظ الختم والشعار في متصفحك ويظهران أيضًا في صفحة تقرير تنفيذ البرنامج.</p></fieldset>
 <button class="main" id="pdf" type="button">حفظ PDF</button>
+<button class="del" id="word" type="button" style="width:100%">حفظ Word (قابل للتعديل)</button>
 <button class="del" id="print" type="button">طباعة</button>
 <button class="del" id="reset" type="button">مسح الدرجات</button>
 <p class="hint" id="pm"></p>
@@ -240,6 +241,17 @@ m.textContent="تم تجهيز الملف.";
 finally{b.disabled=false;b.textContent=old}
 };
 drawGrid();render();
+$("word").onclick=async function(){var b=$("word"),old=b.textContent,m=$("pm")||$("msg");if(m)m.textContent="";b.disabled=true;b.textContent="جارٍ إنشاء ملف Word…";
+try{var ld=function(u){return new Promise(function(ok,no){var s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)})};
+if(!window.docx)await ld("/vendor/docx.min.js?v=1");if(!window.muyassirWord)await ld("/vendor/word.js?v=1");
+var nm=("تحليل درجات "+($("subj").value.trim()||"مادة")).replace(/[\\\/:*?"<>|]/g,"-");
+var blob=await window.muyassirWord($("sheet"),{title:nm});
+var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nm+".docx";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
+if(m)m.textContent="تم تجهيز ملف Word. افتحه وعدّل ما تشاء.";
+}catch(e){if(m)m.textContent="تعذّر إنشاء ملف Word. تأكد من اتصالك بالإنترنت ثم أعد المحاولة، أو استخدم حفظ PDF."}
+finally{b.disabled=false;b.textContent=old}
+};
+if(location.pathname.indexOf("/demo")===0)$("word").style.display="none";
 </script>
 </body>
 </html>
