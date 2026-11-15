@@ -12,6 +12,14 @@ const okEmail = e => e.length <= 120 && /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(e);
 const DV = n => n === 1 ? "جهاز واحد" : n === 2 ? "جهازين" : n + " أجهزة";
 const SESSION_DAYS = 30, DEVICE_WINDOW = 30 * DAY;
 const enc = new TextEncoder();
+const FORM_NAMES = { report: "تقرير تنفيذ برنامج", analysis: "تحليل نتائج الدرجات", remedial: "الخطة العلاجية", enrichment: "الخطة الإثرائية", certificate: "الشهادات", visit: "تبادل الزيارات", plc: "المجتمعات المهنية", waiting: "حصص الانتظار", attendance: "كشف حضور وتوقيع", minutes: "المحاضر", learning: "استبانة أنماط التعلم" };
+const USE_KINDS = ["pdf", "word", "print"];
+const riyadhDay = (t = Date.now()) => new Date(t + 3 * 3600 * 1000).toISOString().slice(0, 10);
+const TRACK_JS = `(function(){var F=location.pathname.replace(/^\\/+|\\.html$/g,""),last="";
+function send(k){try{fetch("/api/track",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({form:F,kind:k}),keepalive:true})}catch(e){}}
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("#pdf,#word,#print");if(!b)return;last=b.id;if(last==="print")send("print")},true);
+var pm=document.getElementById("pm")||document.getElementById("msg");
+if(pm)new MutationObserver(function(){var t=pm.textContent||"";if(/^تم تجهيز/.test(t)&&(last==="pdf"||last==="word")){send(last);last=""}}).observe(pm,{childList:true,characterData:true,subtree:true})})();`;
 
 const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT,email TEXT UNIQUE NOT NULL,name TEXT DEFAULT '',salt TEXT NOT NULL,hash TEXT NOT NULL,expires_at INTEGER NOT NULL,active INTEGER DEFAULT 1,max_devices INTEGER DEFAULT 3,created_at INTEGER NOT NULL,welcome_ack INTEGER DEFAULT 0,warn_at INTEGER DEFAULT 0,warn_ack INTEGER DEFAULT 0,note TEXT DEFAULT '')`,
@@ -24,6 +32,7 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS resets(h TEXT PRIMARY KEY,user_id INTEGER,exp INTEGER)`,
   `CREATE TABLE IF NOT EXISTS trials(email TEXT PRIMARY KEY,ts INTEGER,iph TEXT)`,
   `CREATE TABLE IF NOT EXISTS reminders(user_id INTEGER,expires_at INTEGER,PRIMARY KEY(user_id,expires_at))`,
+  `CREATE TABLE IF NOT EXISTS usage(day TEXT NOT NULL,form TEXT NOT NULL,kind TEXT NOT NULL,user_id INTEGER NOT NULL,n INTEGER DEFAULT 0,PRIMARY KEY(day,form,kind,user_id))`,
   `CREATE TABLE IF NOT EXISTS profiles(user_id INTEGER PRIMARY KEY,dept TEXT DEFAULT '',school TEXT DEFAULT '',principal TEXT DEFAULT '',gv TEXT DEFAULT '',updated_at INTEGER)`
 ];
 let ready = null;
@@ -335,10 +344,16 @@ async function api(req, env, ctx, url, p) {
     return json({ ok: true }, 200, { "set-cookie": ckDel("sid") });
   }
 
-  if (p === "/api/me" || p === "/api/ack" || p === "/api/password" || p === "/api/device" || p === "/api/renew" || p === "/api/profile") {
+  if (p === "/api/me" || p === "/api/ack" || p === "/api/password" || p === "/api/device" || p === "/api/renew" || p === "/api/profile" || p === "/api/track") {
     const s = await getSession(req, env, ctx);
     if (!s.ok) return json({ error: s.why }, 401);
     const u = s.user, now = Date.now();
+    if (p === "/api/track" && m === "POST") {
+      const b = await body(req), f = String(b.form || ""), k = String(b.kind || "");
+      if (FORM_NAMES[f] && USE_KINDS.includes(k))
+        await env.DB.prepare("INSERT INTO usage(day,form,kind,user_id,n) VALUES(?,?,?,?,1) ON CONFLICT(day,form,kind,user_id) DO UPDATE SET n=n+1").bind(riyadhDay(), f, k, u.id).run();
+      return json({ ok: true });
+    }
     if (p === "/api/ack" && m === "POST") {
       const b = await body(req);
       if (b.kind === "welcome") await env.DB.prepare("UPDATE users SET welcome_ack=1 WHERE id=?").bind(u.id).run();
@@ -482,6 +497,19 @@ async function api(req, env, ctx, url, p) {
     if (p === "/api/admin/backup" && m === "POST") {
       const r = await backupJob(env);
       return json(r, r.ok ? 200 : 400);
+    }
+    if (p === "/api/admin/usage" && m === "GET") {
+      const d7 = riyadhDay(Date.now() - 6 * DAY), d30 = riyadhDay(Date.now() - 29 * DAY), today = riyadhDay();
+      const q = async (sql, ...a) => (await env.DB.prepare(sql).bind(...a).all()).results;
+      const forms = await q("SELECT form,kind,SUM(n) total,SUM(CASE WHEN day>=? THEN n ELSE 0 END) d7,SUM(CASE WHEN day>=? THEN n ELSE 0 END) d30,SUM(CASE WHEN day=? THEN n ELSE 0 END) d1,COUNT(DISTINCT CASE WHEN day>=? THEN user_id END) u30 FROM usage GROUP BY form,kind", d7, d30, today, d30);
+      const users = await q("SELECT u.email,SUM(x.n) total,SUM(CASE WHEN x.day>=? THEN x.n ELSE 0 END) d30,MAX(x.day) last FROM usage x JOIN users u ON u.id=x.user_id GROUP BY x.user_id ORDER BY d30 DESC,total DESC LIMIT 15", d30);
+      const days = await q("SELECT day,SUM(n) n FROM usage WHERE day>=? GROUP BY day ORDER BY day", riyadhDay(Date.now() - 13 * DAY));
+      const d14 = riyadhDay(Date.now() - 13 * DAY);
+      const fd = await q("SELECT form,day,SUM(n) n FROM usage WHERE day>=? GROUP BY form,day", d14);
+      const ud = await q("SELECT u.email,x.day,x.form,x.kind,x.n FROM usage x JOIN users u ON u.id=x.user_id WHERE x.day>=? ORDER BY x.day DESC LIMIT 3000", d14);
+      const rows = (await q("SELECT COUNT(*) c FROM usage"))[0].c;
+      const cities = await q("SELECT country,city,COUNT(*) users,MAX(ls) last FROM (SELECT d.user_id,d.country,d.city,MAX(d.last_seen) ls FROM devices d JOIN users u ON u.id=d.user_id WHERE d.removed=0 AND u.active=1 GROUP BY d.user_id) GROUP BY country,city ORDER BY users DESC,last DESC");
+      return json({ forms, users, days, fd, ud, cities, rows, names: FORM_NAMES });
     }
     if (p === "/api/admin/events" && m === "GET") {
       const lim = Math.min(1000, Math.max(50, +new URL(req.url).searchParams.get("limit") || 150));
@@ -634,14 +662,14 @@ function previewJs(form) {
 
 /* ---------- المعالج الرئيسي ---------- */
 const NOSTORE = { "cache-control": "no-store" };
-function page(res, extra) {
+function page(res, extra, form) {
   const h = new Headers(res.headers);
   h.set("cache-control", "no-store");
   h.set("x-content-type-options", "nosniff");
   h.set("referrer-policy", "same-origin");
   const r = new Response(res.body, { status: res.status, headers: h });
   if (extra && (h.get("content-type") || "").includes("text/html"))
-    return new HTMLRewriter().on("body", { element(e) { e.append('<script src="/_acct.js" defer></script>', { html: true }); } }).transform(r);
+    return new HTMLRewriter().on("body", { element(e) { e.append('<script src="/_acct.js" defer></script>' + (FORM_NAMES[form] ? '<script src="/_track.js" defer></script>' : ""), { html: true }); } }).transform(r);
   return r;
 }
 
@@ -717,6 +745,7 @@ export default {
           } })
           .transform(new Response(dr.body, { status: dr.status, headers: dh }));
       }
+      if (p === "/_track.js") return new Response(TRACK_JS, { headers: { "content-type": "application/javascript; charset=utf-8", ...NOSTORE } });
       if (p === "/_acct.js") return new Response(ACCT_JS, { headers: { "content-type": "application/javascript; charset=utf-8", ...NOSTORE } });
 
       const isFile = /\.[a-z0-9]+$/i.test(p) && !/\.html$/i.test(p);
@@ -733,7 +762,7 @@ export default {
         return Response.redirect(to.toString(), 302);
       }
       const res = await env.ASSETS.fetch(new Request(new URL(target, url), req));
-      return page(res, !isFile && name !== "/account");
+      return page(res, !isFile && name !== "/account", isFile ? "" : name.replace(/^\//, ""));
     } catch (e) {
       return new Response("حدث خطأ مؤقت. حاول مرة أخرى.", { status: 500, headers: { "content-type": "text/plain; charset=utf-8" } });
     }
