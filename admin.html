@@ -51,6 +51,9 @@ button.r{background:var(--err)}
 .dv{font-size:.88rem;background:var(--bg);border-radius:8px;padding:6px 10px;margin-top:6px;display:flex;justify-content:space-between;gap:8px;align-items:center}
 #login{max-width:380px;margin:60px auto}
 @media (max-width:520px){.wrap{padding:10px}}
+@media print{body.pr-use #lo,body.pr-use #login,body.pr-use #app>div:first-child,body.pr-use #app>.card:not(#useCard),body.pr-use .noprint{display:none!important}
+body.pr-use{background:#fff}body.pr-use #useCard{border:0;box-shadow:none;padding:0}body.pr-use #useCard h2{break-after:avoid}body.pr-use #useCard details>*{display:block}
+body.pr-use #usm,body.pr-use #usf{overflow:visible!important}body.pr-use *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 </head>
 <body>
@@ -76,6 +79,14 @@ button.r{background:var(--err)}
     <div id="am2" class="msg"></div><div id="apw"></div>
   </div>
   <div class="card"><h2>المشتركون <span id="cnt" class="meta"></span></h2><div id="mail" class="meta"></div><div id="tm" class="meta"></div><div id="users"></div></div>
+  <div class="card" id="useCard"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 style="margin:0">استخدام النماذج <span id="usn" class="meta"></span></h2><button class="g noprint" id="usPrint" type="button">طباعة الإحصائيات</button></div>
+    <div class="meta">يُحتسب كل ملف PDF أو Word يُجهَّز بنجاح، وكل ضغطة طباعة. الأرقام منذ تفعيل هذه الميزة.</div>
+    <div id="usf"></div>
+    <h2 style="margin-top:16px">استخدام كل نموذج يوميًا (آخر 14 يومًا)</h2><div id="usm"></div>
+    <h2 style="margin-top:16px">ملفات كل مشترك يوميًا (آخر 14 يومًا)</h2><div id="usp"></div>
+    <h2 style="margin-top:16px">أكثر المشتركين استخدامًا (آخر 30 يومًا)</h2><div id="usu"></div>
+    <h2 style="margin-top:16px">إجمالي النشاط اليومي</h2><div id="usd"></div>
+    <h2 style="margin-top:16px">المشتركون حسب المدينة <span id="ctn" class="meta"></span></h2><div class="meta">تُحدَّد المدينة تقريبيًا من آخر جهاز دخل به المشترك (بحسب عنوان الشبكة)، وقد تختلف عن مدينته الفعلية، وبعض المشتركين قد لا تظهر مدينتهم.</div><div id="usc"></div></div>
   <div class="card"><h2>سجل الأحداث <span id="evc" class="meta"></span></h2>
     <div class="evbar">
       <input id="evq" type="search" placeholder="ابحث بالبريد أو التفاصيل" dir="ltr">
@@ -99,7 +110,31 @@ function loadReq(){call("/api/admin/requests").then(function(x){if(!x.ok)return;
 $("rqs").onclick=function(e){var b=e.target.closest("button");if(b&&b.dataset.cp){var t=b.dataset.cp;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent="تم"},function(){b.textContent="!"});setTimeout(function(){b.textContent="نسخ"},1500);return}if(!b||!b.dataset.qa)return;var box=b.closest("[data-q]"),id=box.dataset.q;
  if(b.dataset.qa==="approve"){if(!confirm("هل تأكدت من وصول المبلغ؟ سيُفعَّل الحساب فورًا."))return;call("/api/admin/request/"+id+"/approve","POST",{days:+box.dataset.days}).then(function(x){if(!x.ok)alert(x.j.error||"خطأ");loadReq();load()})}
  else{var r=prompt("سبب الرفض (اختياري، يصل للمشترك بالإيميل):","");if(r===null)return;call("/api/admin/request/"+id+"/reject","POST",{reason:r}).then(function(){loadReq();load()})}};
-function load(){loadReq();
+$("usPrint").onclick=function(){var ds=document.querySelectorAll("#useCard details"),was=[].map.call(ds,function(d){return d.open});ds.forEach(function(d){d.open=true});document.body.classList.add("pr-use");var t=document.title;document.title="إحصائيات الاستخدام "+new Date(Date.now()+10800000).toISOString().slice(0,10);
+ var done=function(){document.body.classList.remove("pr-use");document.title=t;ds.forEach(function(d,i){d.open=was[i]});window.removeEventListener("afterprint",done)};window.addEventListener("afterprint",done);window.print()};
+function loadUse(){call("/api/admin/usage").then(function(x){if(!x.ok)return;var j=x.j,N=j.names,F={};
+ j.forms.forEach(function(r){var o=F[r.form]||(F[r.form]={pdf:0,word:0,print:0,d1:0,d7:0,d30:0,t:0,u30:0});o[r.kind]=r.total;o.d1+=r.d1;o.d7+=r.d7;o.d30+=r.d30;o.t+=r.total;o.u30=Math.max(o.u30,r.u30)});
+ var ks=Object.keys(N).sort(function(a,b){return((F[b]||{}).d30||0)-((F[a]||{}).d30||0)}),tot=0;
+ var th='<table style="width:100%;border-collapse:collapse;font-size:13px"><tr style="text-align:right;color:var(--mut,#666)"><th>النموذج</th><th>اليوم</th><th>7 أيام</th><th>30 يومًا</th><th>الإجمالي</th><th>PDF</th><th>Word</th><th>طباعة</th><th>مشتركون (30 يومًا)</th></tr>';
+ ks.forEach(function(k){var o=F[k]||{pdf:0,word:0,print:0,d1:0,d7:0,d30:0,t:0,u30:0};tot+=o.t;th+='<tr style="border-top:1px solid #e3e8ec"><td><b>'+esc(N[k])+'</b></td><td>'+o.d1+'</td><td>'+o.d7+'</td><td>'+o.d30+'</td><td><b>'+o.t+'</b></td><td>'+o.pdf+'</td><td>'+o.word+'</td><td>'+o.print+'</td><td>'+o.u30+'</td></tr>'});
+ $("usf").innerHTML='<div style="overflow-x:auto">'+th+'</table></div>';$("usn").textContent="(إجمالي "+tot+")";
+ $("usu").innerHTML=j.users.length?j.users.map(function(u,i){return '<div class="ev"><b dir="ltr">'+esc(u.email)+'</b> — '+u.d30+' ملفًا في 30 يومًا (الإجمالي '+u.total+') <small>آخر استخدام: '+esc(u.last)+'</small></div>'}).join(""):'<div class="meta">لا بيانات بعد.</div>';
+ var mx=Math.max.apply(null,[1].concat(j.days.map(function(d){return d.n})));
+ var D=[];for(var i=13;i>=0;i--)D.push(new Date(Date.now()+10800000-i*864e5).toISOString().slice(0,10));
+ var M={};j.fd.forEach(function(r){(M[r.form]||(M[r.form]={}))[r.day]=r.n});
+ var mh='<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;min-width:100%"><tr><th style="text-align:right;position:sticky;right:0;background:#fff">النموذج</th>'+D.map(function(d){return '<th style="padding:3px 6px">'+esc(d.slice(5))+'</th>'}).join("")+'</tr>';
+ ks.forEach(function(k){mh+='<tr style="border-top:1px solid #e3e8ec"><td style="white-space:nowrap;position:sticky;right:0;background:#fff"><b>'+esc(N[k])+'</b></td>'+D.map(function(d){var n=(M[k]||{})[d]||0;return '<td style="text-align:center;padding:3px 6px;'+(n?'background:rgba(61,126,185,'+Math.min(.12+n*.08,.6)+');font-weight:700':'color:#b6bec6')+'">'+(n||"·")+'</td>'}).join("")+'</tr>'});
+ $("usm").innerHTML=j.fd.length?mh+'</table></div>':'<div class="meta">لا بيانات بعد.</div>';
+ var U={},UO=[];j.ud.forEach(function(r){var o=U[r.email];if(!o){o=U[r.email]={t:0,days:{}};UO.push(r.email)}o.t+=r.n;var dd=o.days[r.day]||(o.days[r.day]={n:0,f:{}});dd.n+=r.n;dd.f[r.form]=(dd.f[r.form]||0)+r.n});
+ UO.sort(function(a,b){return U[b].t-U[a].t});
+ $("usp").innerHTML=UO.length?UO.map(function(e){var o=U[e],ds=Object.keys(o.days).sort().reverse();return '<details class="eg"'+(UO.length<=3?' open':'')+'><summary><b dir="ltr">'+esc(e)+'</b><span><span class="tag m">'+o.t+' ملفًا</span></span></summary>'+ds.map(function(d){var x=o.days[d];return '<div class="ev"><b>'+esc(d)+'</b> — '+x.n+' ملف: '+Object.keys(x.f).map(function(f){return esc(N[f]||f)+' ('+x.f[f]+')'}).join("، ")+'</div>'}).join("")+'</details>'}).join(""):'<div class="meta">لا بيانات بعد.</div>';
+ var CN=function(c){try{return c?new Intl.DisplayNames(["ar"],{type:"region"}).of(c):""}catch(e){return c||""}};
+ var cmx=Math.max.apply(null,[1].concat((j.cities||[]).map(function(c){return c.users}))),ct=0;
+ (j.cities||[]).forEach(function(c){ct+=c.users});
+ $("ctn").textContent="("+ct+" مشترك فعّال)";
+ $("usc").innerHTML=(j.cities||[]).length?(j.cities||[]).map(function(c){var nm=(c.city||"غير معروفة")+(c.country?" — "+CN(c.country):"");return '<div class="ev" style="display:flex;align-items:center;gap:8px"><span style="width:200px;flex:none">'+esc(nm)+'</span><span style="display:inline-block;height:10px;border-radius:5px;background:#07a869;width:'+Math.round(c.users/cmx*50+2)+'%"></span><b>'+c.users+'</b></div>'}).join(""):'<div class="meta">لا بيانات بعد.</div>';
+ $("usd").innerHTML=j.days.length?j.days.map(function(d){return '<div class="ev" style="display:flex;align-items:center;gap:8px"><small style="width:84px">'+esc(d.day)+'</small><span style="display:inline-block;height:10px;border-radius:5px;background:#3d7eb9;width:'+Math.round(d.n/mx*60+2)+'%"></span><b>'+d.n+'</b></div>'}).join(""):'<div class="meta">لا بيانات بعد.</div>'})}
+function load(){loadReq();loadUse();
  call("/api/admin/users").then(function(x){if(!x.ok)return;var us=x.j.users;$("cnt").textContent="("+us.length+")";
   $("mail").textContent=x.j.mailer?"تنبيهات الإيميل: مفعّلة":"تنبيهات الإيميل: غير مفعّلة (تظهر الأحداث هنا فقط)";
   $("tm").innerHTML=x.j.mailer?'<button id="tmb" type="button" style="margin:6px 0">إرسال إيميل اختبار</button> <span id="tmr"></span> <button id="bkb" type="button" style="margin:6px 0">أرسل نسخة احتياطية الآن</button> <span id="bkr"></span>':"";
