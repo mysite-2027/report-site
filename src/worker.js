@@ -14,6 +14,15 @@ const SESSION_DAYS = 30, DEVICE_WINDOW = 30 * DAY;
 const enc = new TextEncoder();
 const FORM_NAMES = { report: "تقرير تنفيذ برنامج", analysis: "تحليل نتائج الدرجات", remedial: "الخطة العلاجية", enrichment: "الخطة الإثرائية", certificate: "الشهادات", visit: "تبادل الزيارات", plc: "المجتمعات المهنية", waiting: "حصص الانتظار", attendance: "كشف حضور وتوقيع", minutes: "المحاضر", learning: "استبانة أنماط التعلم" };
 const USE_KINDS = ["pdf", "word", "print"];
+const PUB_PAGES = { "/login": "login", "/subscribe": "subscribe", "/faq": "faq", "/terms": "terms", "/demo": "demo" };
+const PUB_NAMES = { login: "صفحة الدخول (الصفحة الأولى)", subscribe: "صفحة الاشتراك", faq: "الأسئلة الشائعة", terms: "الشروط", demo: "المعاينة المجانية" };
+const BOT = /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|headless|monitor|curl|wget|python|axios|go-http/i;
+async function trackVisit(req, env, page) {
+  const ua = req.headers.get("user-agent") || "";
+  if (!ua || BOT.test(ua)) return;
+  const day = riyadhDay(), vh = (await sha((req.headers.get("cf-connecting-ip") || "") + "|" + ua + "|" + day + "|v1")).slice(0, 16);
+  await env.DB.prepare("INSERT INTO visits(day,page,vh,n) VALUES(?,?,?,1) ON CONFLICT(day,page,vh) DO UPDATE SET n=n+1").bind(day, page, vh).run();
+}
 const riyadhDay = (t = Date.now()) => new Date(t + 3 * 3600 * 1000).toISOString().slice(0, 10);
 const TRACK_JS = `(function(){var F=location.pathname.replace(/^\\/+|\\.html$/g,""),last="";
 function send(k){try{fetch("/api/track",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({form:F,kind:k}),keepalive:true})}catch(e){}}
@@ -33,6 +42,7 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS trials(email TEXT PRIMARY KEY,ts INTEGER,iph TEXT)`,
   `CREATE TABLE IF NOT EXISTS reminders(user_id INTEGER,expires_at INTEGER,PRIMARY KEY(user_id,expires_at))`,
   `CREATE TABLE IF NOT EXISTS usage(day TEXT NOT NULL,form TEXT NOT NULL,kind TEXT NOT NULL,user_id INTEGER NOT NULL,n INTEGER DEFAULT 0,PRIMARY KEY(day,form,kind,user_id))`,
+  `CREATE TABLE IF NOT EXISTS visits(day TEXT NOT NULL,page TEXT NOT NULL,vh TEXT NOT NULL,n INTEGER DEFAULT 1,PRIMARY KEY(day,page,vh))`,
   `CREATE TABLE IF NOT EXISTS profiles(user_id INTEGER PRIMARY KEY,dept TEXT DEFAULT '',school TEXT DEFAULT '',principal TEXT DEFAULT '',gv TEXT DEFAULT '',updated_at INTEGER)`
 ];
 let ready = null;
@@ -480,6 +490,8 @@ async function api(req, env, ctx, url, p) {
       const rows = (await env.DB.prepare(`SELECT u.id,u.email,u.name,u.note,u.expires_at,u.active,u.max_devices,u.warn_at,u.warn_ack,
         (SELECT COUNT(*) FROM devices d WHERE d.user_id=u.id AND d.removed=0 AND d.last_seen>?) devs,
         (SELECT MAX(last_seen) FROM devices d WHERE d.user_id=u.id) last_seen,
+        (SELECT city FROM devices d WHERE d.user_id=u.id AND d.city IS NOT NULL ORDER BY d.last_seen DESC LIMIT 1) city,
+        (SELECT country FROM devices d WHERE d.user_id=u.id AND d.country IS NOT NULL ORDER BY d.last_seen DESC LIMIT 1) country,
         (SELECT COUNT(*) FROM events e WHERE e.user_id=u.id AND e.kind IN('over_limit','concurrent','blocked') AND e.ts>?) flags
         FROM users u ORDER BY u.id DESC`).bind(now - DEVICE_WINDOW, now - 7 * DAY).all()).results;
       const cg = (await env.DB.prepare("SELECT user_id,city,country FROM devices WHERE removed=0 AND last_seen>? AND (city IS NOT NULL OR country IS NOT NULL)").bind(now - 7 * DAY).all()).results, cs = {};
@@ -509,7 +521,11 @@ async function api(req, env, ctx, url, p) {
       const ud = await q("SELECT u.email,x.day,x.form,x.kind,x.n FROM usage x JOIN users u ON u.id=x.user_id WHERE x.day>=? ORDER BY x.day DESC LIMIT 3000", d14);
       const rows = (await q("SELECT COUNT(*) c FROM usage"))[0].c;
       const cities = await q("SELECT country,city,COUNT(*) users,MAX(ls) last FROM (SELECT d.user_id,d.country,d.city,MAX(d.last_seen) ls FROM devices d JOIN users u ON u.id=d.user_id WHERE d.removed=0 AND u.active=1 GROUP BY d.user_id) GROUP BY country,city ORDER BY users DESC,last DESC");
-      return json({ forms, users, days, fd, ud, cities, rows, names: FORM_NAMES });
+      const vis = await q("SELECT page,day,COUNT(*) u,SUM(n) v FROM visits WHERE day>=? GROUP BY page,day", d14);
+      const vtot = await q("SELECT page,COUNT(*) u,SUM(n) v,SUM(CASE WHEN day>=? THEN 1 ELSE 0 END) u7,SUM(CASE WHEN day=? THEN 1 ELSE 0 END) u1 FROM visits WHERE day>=? GROUP BY page", d7, today, d30);
+      const since = Date.now() - 30 * DAY;
+      const fun = await q("SELECT kind,COUNT(*) c FROM events WHERE ts>? AND kind IN('trial_start','signup_request','signup_approved') GROUP BY kind", since);
+      return json({ forms, users, days, fd, ud, cities, vis, vtot, fun, pubnames: PUB_NAMES, rows, names: FORM_NAMES });
     }
     if (p === "/api/admin/events" && m === "GET") {
       const lim = Math.min(1000, Math.max(50, +new URL(req.url).searchParams.get("limit") || 150));
@@ -730,6 +746,10 @@ export default {
       const url = new URL(req.url);
       let p = url.pathname.replace(/\/+$/, "") || "/";
       if (p.startsWith("/api/")) return await api(req, env, ctx, url, p);
+      if (req.method === "GET" && !cookies(req).sid) {
+        const pk = p.startsWith("/demo") ? "demo" : PUB_PAGES[p.replace(/\.html$/, "")];
+        if (pk && !/\.[a-z0-9]+$/i.test(p.replace(/\.html$/, ""))) ctx.waitUntil(trackVisit(req, env, pk).catch(() => {}));
+      }
       if (p === "/_demo.js") return new Response(demoJs(DEMO_FORMS_ALL.includes(url.searchParams.get("f") || "") ? url.searchParams.get("f") : ""), { headers: { "content-type": "application/javascript; charset=utf-8", ...NOSTORE } });
       const DEMO_FORMS = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes"];
       const dm = p === "/demo" ? "index" : (/^\/demo\/[a-z]+$/.test(p) ? p.slice(6) : null);
