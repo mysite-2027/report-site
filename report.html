@@ -33,13 +33,13 @@ button.del{border-color:var(--border);color:var(--muted);padding:3px 10px;margin
 .hint{font-size:.8rem;color:var(--muted);margin:4px 0 0}
 .hint a{color:var(--accent);font-weight:700}
 .stage{overflow-x:auto;padding-bottom:8px}
-.sheet{--p:#17445a;--g1:#00421e;--g2:#00682f;--tl:#008080;--b:#2c7db5;--gr:#3fac72;--t:#0b1620;--l:#c9d3da;-webkit-print-color-adjust:exact;print-color-adjust:exact;-webkit-text-size-adjust:100%;text-size-adjust:100%;background:#fff;color:var(--t);width:210mm;min-height:297mm;margin:0 auto;padding:12mm 14mm;box-shadow:0 2px 14px rgba(0,0,0,.2);font-size:12.5px;font-weight:500;display:flex;flex-direction:column;gap:9px}
+.sheet{--p:#15445a;--g1:#15445a;--g2:#0a7f7d;--tl:#0a7f7d;--b:#3d7eb9;--gr:#07a869;--t:#0b1620;--l:#c9d3da;-webkit-print-color-adjust:exact;print-color-adjust:exact;-webkit-text-size-adjust:100%;text-size-adjust:100%;background:#fff;color:var(--t);width:210mm;min-height:297mm;margin:0 auto;padding:12mm 14mm;box-shadow:0 2px 14px rgba(0,0,0,.2);font-size:12.5px;font-weight:500;display:flex;flex-direction:column;gap:9px}
 .sh-head{display:flex;justify-content:space-between;align-items:center;gap:10px;position:relative;padding-bottom:12px}
 .sh-head::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--b),var(--gr))}
 .sh-head img{max-height:70px;max-width:190px;object-fit:contain;display:block}
 .sh-head .tx{text-align:center;font-weight:700;color:var(--tl);line-height:1.5}
 .sh-head .tx span{display:block;font-weight:500;color:var(--t)}
-.bar{background:var(--p);color:#fff;text-align:center;font-weight:700;font-size:1.25em;padding:9px 12px;border-radius:10px}
+.bar{background:var(--bp,var(--p));color:var(--bt,#fff);text-align:center;font-weight:700;font-size:1.25em;padding:9px 12px;border-radius:10px}
 .info{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .info div{border:1.5px solid var(--p);border-radius:10px;padding:5px 10px;display:flex;gap:6px;justify-content:center;text-align:center}
 .info b{color:var(--g2);white-space:nowrap}
@@ -88,7 +88,7 @@ body{background:#fff}
 <label>اسم المدرسة</label><input id="school">
 <div class="two"><div><label>الصيغة</label><select id="gender"><option value="f">مؤنث (معلمات، طالبات)</option><option value="m">مذكر (معلمون، طلاب)</option></select></div>
 </div>
-<div class="two"><div><label>لون الإطارات والأشرطة</label><select id="clr"><option value="n">كحلي (الافتراضي)</option><option value="g">أخضر</option><option value="t">أخضر مزرق</option><option value="b">أزرق</option><option value="k">رمادي داكن</option></select></div><div><label>محاذاة النصوص</label><select id="aln"><option value="c">وسط (الافتراضي)</option><option value="r">يمين</option></select></div></div>
+<div class="two"><div><label>لون الإطارات والأشرطة</label><select id="clr"><option value="n">كحلي (الافتراضي)</option><option value="g">أخضر</option><option value="t">تركوازي</option><option value="b">أزرق</option><option value="d">بيج</option><option value="v">بنفسجي</option><option value="m">موف</option><option value="s">أزرق مخضر داكن</option><option value="k">رمادي</option></select></div><div><label>محاذاة النصوص</label><select id="aln"><option value="c">وسط (الافتراضي)</option><option value="r">يمين</option></select></div></div>
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، انقر على الصورة بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
 <label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logo" accept="image/*">
@@ -123,7 +123,7 @@ body{background:#fff}
 var $=function(i){return document.getElementById(i)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 var KEEP=["dept","school","gender","teacher","principal","clr","aln"];
-var CLR={n:"#17445a",g:"#00421e",t:"#005a5a",b:"#1d587f",k:"#1f2937"};var CLG={g:["#00421e","#00421e"],t:["#005a5a","#005a5a"],b:["#1d587f","#1d587f"],k:["#1f2937","#1f2937"]};
+var CLR={n:"#15445a",g:"#07a869",t:"#0da9a6",b:"#3d7eb9",d:"#c1b489",k:"#c2c1c1",v:"#351375",m:"#7258a4",s:"#218caa"};var CLG={g:["#067a4d","#067a4d"],t:["#0a7f7d","#0a7f7d"],b:["#2a5f93","#2a5f93"],d:["#7a6a3a","#7a6a3a"],k:["#5f5f5f","#5f5f5f"],v:["#351375","#351375"],m:["#5a428a","#5a428a"],s:["#176f89","#176f89"]};var CLL={n:["#3d7eb9","#07a869"],v:["#351375","#7258a4"],m:["#7258a4","#3d7eb9"],s:["#218caa","#69cee3"]};var CLBG={d:"#a8975c"};var CLB={d:"#15445a",k:"#15445a"};
 var FIELDS=KEEP.concat(["pname","executor","place","target","count","pdate","goal","goals"]);
 var rows=[{c:"",s:"تحقق",n:"",m:""}],imgs=[null,null,null,null],logo=null,stamp=null;
 function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
@@ -139,7 +139,7 @@ if(x1>x0&&y1>y0){var pd=Math.round(Math.max(c.width,c.height)*.02),c2=document.c
 cb(c.toDataURL(type,.82))};im.src=src};
 sv?r.readAsText(file):r.readAsDataURL(file)}
 function render(){
-var sh=$("sheet");sh.style.setProperty("--p",CLR[$("clr").value]||CLR.n);var _g=CLG[$("clr").value];sh.style.setProperty("--g1",_g?_g[0]:"");sh.style.setProperty("--g2",_g?_g[1]:"");sh.style.setProperty("--tl",_g?_g[1]:"");sh.classList.toggle("al-r",$("aln").value==="r");
+var sh=$("sheet");sh.style.setProperty("--p",CLR[$("clr").value]||CLR.n);var _g=CLG[$("clr").value];sh.style.setProperty("--g1",_g?_g[0]:"");sh.style.setProperty("--g2",_g?_g[1]:"");sh.style.setProperty("--tl",_g?_g[1]:"");sh.style.setProperty("--bt",CLB[$("clr").value]||"");sh.style.setProperty("--bp",CLBG[$("clr").value]||"");var _k=$("clr").value;var _l=CLL[_k]||[CLR[_k]||"",CLR[_k]||""];sh.style.setProperty("--b",_l[0]);sh.style.setProperty("--gr",_l[1]);sh.classList.toggle("al-r",$("aln").value==="r");
 var L=logo,f=$("gender").value==="f",v=function(i){return $(i).value.trim()};
 var T={ex:f?"المنفّذة":"المنفّذ",ta:f?"المستهدفات":"المستهدفون",ben:f?"المستفيدات":"المستفيدين",role:f?"مديرة المدرسة":"مدير المدرسة",who:f?"المعلمة":"المعلم"};
 var info=[["البرنامج","pname"]];
