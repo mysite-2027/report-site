@@ -146,6 +146,7 @@
           if (t0) {
             runs(t0, { bold: isTh || parseInt(s.fontWeight, 10) >= 600, color: color, size: 20 }).forEach(function (x) { rr.push(x); });
           }
+          else if (c.querySelector(".bx")) { runs("□", { font: SYM, color: "6B7280", size: 26 }).forEach(function (x) { rr.push(x); }); }
           return cell([para(rr, { alignment: isTh ? CEN : alignOf(c), spacing: { after: 0 } })], cols[ci], o);
         });
         var hasTh = r.cells.length && r.cells[0].tagName === "TH";
