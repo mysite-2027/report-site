@@ -473,8 +473,11 @@
     if (!footer && sigTable) footer = new D.Footer({ children: [sigTable, empty()] });
 
     var sect = { properties: { page: { size: LAND ? { width: 11906, height: 16838, orientation: D.PageOrientation.LANDSCAPE } : { width: 11906, height: 16838 }, margin: { top: 850, bottom: 900, left: 850, right: 850, footer: 360 } } }, children: ch };
+    var DEMO = location.pathname.indexOf("/demo") === 0;
+    var demoP = function () { return new D.Paragraph({ alignment: CEN, bidirectional: true, spacing: { before: 40, after: 40 }, children: runs("نسخة تجريبية — مُيَسِّر التقارير المدرسية — اشترك للحصول على النسخة الكاملة", { bold: true, color: "B42318", size: 26 }) }); };
     if (footer) sect.footers = { default: footer };
-    if (hdrArr.length) sect.headers = { default: new D.Header({ children: hdrArr.concat([gap(60)]) }) };
+    if (DEMO) sect.headers = { default: new D.Header({ children: [demoP()].concat(hdrArr.length ? hdrArr.concat([gap(60)]) : []) }) };
+    else if (hdrArr.length) sect.headers = { default: new D.Header({ children: hdrArr.concat([gap(60)]) }) };
     var doc = new D.Document({
       creator: "مُيَسِّر التقارير المدرسية", title: opt.title || "تقرير",
       styles: { default: { document: { run: { font: FN, size: 22, rightToLeft: true } } } },
