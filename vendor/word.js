@@ -216,12 +216,18 @@
     /* الشواهد */
     var evGrid = function (ev, iw) {
       var items = Array.prototype.slice.call(ev.children), q = Math.floor(iw / 4), half = q * 2, rows = [];
-      var one = function (it) {
-        var kids = [], img = it.querySelector("img"), im = img ? pic(img, px(half) - 24, 200) : null;
+      var pf = /\bpf\b/.test(ev.className || ""), cnt = items.length;
+      var a1 = /\ba1\b/.test(ev.className || ""), mhOf = pf ? (a1 ? (cnt === 1 ? 520 : (cnt === 2 ? 380 : 290)) : (cnt === 1 ? 340 : (cnt === 2 ? 270 : 220))) : 200;
+      var one = function (it, wide) {
+        var kids = [], img = it.querySelector("img"), im = img ? pic(img, px(wide ? q * 4 : half) - 24, mhOf) : null;
         if (im) kids = [new D.Paragraph({ alignment: CEN, spacing: { after: 0 }, children: [im] })];
         else kids = [para([runs(it.textContent.trim() || " ", { color: "6B7280" })], { alignment: CEN, spacing: { after: 0 } })];
-        return cell(kids, half, { borders: BOX, columnSpan: 2 });
+        return cell(kids, wide ? q * 4 : half, { borders: BOX, columnSpan: wide ? 4 : 2 });
       };
+      if (pf && cnt === 1) {
+        rows.push(new D.TableRow({ cantSplit: true, height: { value: 1500, rule: D.HeightRule.ATLEAST }, children: [one(items[0], true)] }));
+        return table(rows, [q, q, q, q]);
+      }
       for (var i = 0; i < items.length; i += 2) {
         var cs2;
         if (i + 1 < items.length) cs2 = [one(items[i]), one(items[i + 1])];
@@ -405,6 +411,7 @@
           cell([new D.Paragraph({ alignment: D.AlignmentType.LEFT, spacing: { after: 0 }, children: lg ? [lg] : [] })], 3206, { borders: HB })
         ] })], [3500, W - 6706, 3206]), 100);
       } else if (/\bbar\b/.test(cn)) {
+        if (/\bpgb\b/.test(cn)) { ch.push(new D.Paragraph({ pageBreakBefore: true, spacing: { after: 0, line: 20, lineRule: D.LineRuleType.EXACT }, children: [] })); first = true; }
         add(table([new D.TableRow({ children: [cell([para([runs(el.textContent.trim(), { bold: true, color: "FFFFFF", size: 30 })],
           { alignment: CEN, spacing: { before: 40, after: 40 } })], W, { shading: fill(hexOf(cs(el).backgroundColor) || CL) })] })], [W]), 100);
       } else if (/\binfo\b/.test(cn) && /\brow1\b/.test(cn)) {
