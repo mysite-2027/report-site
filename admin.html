@@ -81,6 +81,7 @@ body.pr-sub{background:#fff}body.pr-sub #subCard{border:0;box-shadow:none;paddin
     <div id="am2" class="msg"></div><div id="apw"></div>
   </div>
   <div class="card"><h2>المشتركون <span id="cnt" class="meta"></span></h2><div id="mail" class="meta"></div><div id="tm" class="meta"></div><div id="users"></div></div>
+  <div class="card" id="lkCard"><h2>فحص رابط شعار وزارة التعليم</h2><div class="meta">الرابط الذي نعرضه للمشتركين في صفحات النماذج ليفتحوه ويحفظوا الشعار منه.</div><button id="lkb" type="button" style="margin:8px 0">افحص الرابط الآن</button> <span id="lkr"></span></div>
   <div class="card" id="subCard"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">فرز المشتركين وتصديرهم <span id="sbn" class="meta"></span></h2>
     <div class="noprint" style="display:flex;gap:6px;flex-wrap:wrap"><button class="g" id="sbCopy" type="button">نسخ البريد</button><button class="g" id="sbCsv" type="button">تصدير Excel</button><button class="g" id="sbPrint" type="button">طباعة</button></div></div>
     <div class="noprint" style="margin:8px 0"><select id="sbf"><option value="all">كل المشتركين</option><option value="active">الفعّالون</option><option value="exp7">ينتهي اشتراكهم خلال 7 أيام</option><option value="exp">المنتهية اشتراكاتهم</option><option value="idle">لم يدخلوا منذ 14 يومًا (وفعّالون)</option><option value="susp">الموقوفون</option></select></div>
@@ -163,7 +164,12 @@ function loadUse(){call("/api/admin/usage").then(function(x){if(!x.ok)return;var
  $("ctn").textContent="("+ct+" مشترك فعّال)";
  $("usc").innerHTML=(j.cities||[]).length?(j.cities||[]).map(function(c){var nm=(c.city||"غير معروفة")+(c.country?" — "+CN(c.country):"");return '<div class="ev" style="display:flex;align-items:center;gap:8px"><span style="width:200px;flex:none">'+esc(nm)+'</span><span style="display:inline-block;height:10px;border-radius:5px;background:#07a869;width:'+Math.round(c.users/cmx*50+2)+'%"></span><b>'+c.users+'</b></div>'}).join(""):'<div class="meta">لا بيانات بعد.</div>';
  $("usd").innerHTML=j.days.length?j.days.map(function(d){return '<div class="ev" style="display:flex;align-items:center;gap:8px"><small style="width:84px">'+esc(d.day)+'</small><span style="display:inline-block;height:10px;border-radius:5px;background:#3d7eb9;width:'+Math.round(d.n/mx*60+2)+'%"></span><b>'+d.n+'</b></div>'}).join(""):'<div class="meta">لا بيانات بعد.</div>'})}
-function load(){loadReq();loadUse();
+function lkCheck(){var r=$("lkr");r.style.color="";r.textContent="جارٍ الفحص…";call("/api/admin/linkcheck").then(function(x){var j=x.j||{};
+ if(j.ok){r.style.color="#0a7f3f";r.textContent="الرابط يعمل ✓ (استجابة "+j.status+" خلال "+j.ms+" م.ث)"}
+ else{r.style.color="#b3261e";r.textContent="الرابط لا يعمل ✗ "+(j.status?"(رمز الاستجابة "+j.status+(j.type?"، والنوع "+j.type:"")+")":"(تعذّر الوصول إليه)")+" — حدّث الرابط في صفحات النماذج."}
+ }).catch(function(){r.style.color="#b3261e";r.textContent="تعذّر إجراء الفحص"})}
+$("lkb").onclick=lkCheck;
+function load(){loadReq();loadUse();lkCheck();
  call("/api/admin/users").then(function(x){if(!x.ok)return;var us=x.j.users;window.US=us;window.NOW=x.j.now;if(window.subDraw)window.subDraw();$("cnt").textContent="("+us.length+")";
   $("mail").textContent=x.j.mailer?"تنبيهات الإيميل: مفعّلة":"تنبيهات الإيميل: غير مفعّلة (تظهر الأحداث هنا فقط)";
   $("tm").innerHTML=x.j.mailer?'<button id="tmb" type="button" style="margin:6px 0">إرسال إيميل اختبار</button> <span id="tmr"></span> <button id="bkb" type="button" style="margin:6px 0">أرسل نسخة احتياطية الآن</button> <span id="bkr"></span>':"";
