@@ -130,7 +130,14 @@
     var tableFrom = function (t, total) {
       var rowsEl = Array.prototype.slice.call(t.rows);
       if (!rowsEl.length) return null;
-      var first = Array.prototype.slice.call(rowsEl[0].cells);
+      var spanned = rowsEl.some(function (r) { return Array.prototype.some.call(r.cells, function (c) { return c.colSpan > 1 || c.rowSpan > 1; }); });
+      var wrow = rowsEl[0];
+      if (spanned) {
+        var gridN = Array.prototype.reduce.call(rowsEl[0].cells, function (a, c) { return a + c.colSpan; }, 0);
+        wrow = rowsEl.filter(function (r) { return r.cells.length === gridN && Array.prototype.every.call(r.cells, function (c) { return c.colSpan === 1; }); })[0] || rowsEl[0];
+      }
+      var first = Array.prototype.slice.call(wrow.cells);
+      var occ = [], hdrN = rowsEl.filter(function (r) { return /\bhh\b/.test(r.className); }).length;
       var ws = first.map(function (c) { return Math.max(1, c.getBoundingClientRect().width); });
       var sum = ws.reduce(function (a, b) { return a + b; }, 0);
       var cols = ws.map(function (w) { return Math.max(120, Math.floor(w / sum * total)); });
@@ -138,31 +145,43 @@
       cols[0] += diff;
       var dense = /\bdense\b/.test(t.className);
       var rows = rowsEl.map(function (r, ri) {
+        var gi = 0, newOcc = occ.map(function (x) { return Math.max(0, (x || 0) - 1); });
         var cells = Array.prototype.slice.call(r.cells).map(function (c, ci) {
+          var cspan = 1, rspan = 1, gw = cols[ci];
+          if (spanned) {
+            while (occ[gi] > 0) gi++;
+            cspan = c.colSpan || 1; rspan = c.rowSpan || 1;
+            gw = 0; for (var kk = gi; kk < gi + cspan; kk++) { gw += cols[kk] || 0; if (rspan > 1) newOcc[kk] = rspan - 1; }
+            gi += cspan;
+          }
           var s = cs(c), isTh = c.tagName === "TH", isSp = /\bsp\b/.test(c.className);
           if (isSp) return cell([empty()], cols[ci], { margins: { top: 0, bottom: 0, left: 0, right: 0 } });
           var o = { borders: isTh ? bd(hexOf(s.borderTopColor) || CL, 4) : LINE };
           if (isTh) o.shading = fill(hexOf(s.backgroundColor) || CL);
+          if (!isTh && /\bck-/.test(c.className) && hexOf(s.backgroundColor)) o.shading = fill(hexOf(s.backgroundColor));
           var fsz = 20;
           if (!isTh && r.classList && r.classList.contains("hr")) o.margins = { top: 10, bottom: 10, left: 110, right: 110 };
-          if (dense && isTh) { o.margins = { top: 30, bottom: 30, left: 10, right: 10 }; fsz = cols[ci] < 520 ? 12 : (cols[ci] < 800 ? 16 : 18); }
-          var color = isTh ? "FFFFFF" : (hexOf(s.color) || "0B1620");
+          if (dense && isTh) { o.margins = { top: 30, bottom: 30, left: 10, right: 10 }; fsz = gw < 520 ? 12 : (gw < 800 ? 16 : 18); }
+          var color = isTh ? (hexOf(s.color) || "FFFFFF") : (hexOf(s.color) || "0B1620");
           var rr = [];
           var t0 = c.textContent.replace(/\s+/g, " ").trim();
-          var parts = (dense && isTh && /<br/i.test(c.innerHTML)) ? c.innerHTML.split(/<br\s*\/?>/i).map(function (p) { return p.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim(); }).filter(Boolean) : null;
+          var parts = (isTh && (c.querySelector(".mx") || (dense && /<br/i.test(c.innerHTML)))) ? c.innerHTML.replace(/<span[^>]*class="mx"[^>]*>/i, "<br>").split(/<br\s*\/?>/i).map(function (p) { return p.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim(); }).filter(Boolean) : null;
           var pl = null;
           if (parts && parts.length > 1) {
-            pl = parts.map(function (p) { return para(runs(p, { bold: false, color: color, size: fsz }), { alignment: CEN, spacing: { after: 0 } }); });
+            pl = parts.map(function (p, pi) { return para(runs(p, { bold: !dense && pi === 0, color: color, size: (!dense && pi > 0) ? 16 : fsz }), { alignment: CEN, spacing: { after: 0 } }); });
           }
           else if (t0) {
             runs(t0, { bold: (dense && isTh) ? false : (isTh || parseInt(s.fontWeight, 10) >= 600), color: color, size: fsz }).forEach(function (x) { rr.push(x); });
           }
           else if (c.querySelector(".bx")) { runs("□", { font: SYM, color: "6B7280", size: 26 }).forEach(function (x) { rr.push(x); }); }
-          return cell(pl || [para(rr, { alignment: isTh ? CEN : alignOf(c), spacing: { after: 0 } })], cols[ci], o);
+          if (cspan > 1) o.columnSpan = cspan;
+          if (rspan > 1) o.rowSpan = rspan;
+          return cell(pl || [para(rr, { alignment: isTh ? CEN : alignOf(c), spacing: { after: 0 } })], gw, o);
         });
+        occ = newOcc;
         var hasTh = r.cells.length && r.cells[0].tagName === "TH";
         return new D.TableRow({
-          tableHeader: ri === 0 && hasTh, cantSplit: true,
+          tableHeader: hdrN ? ri < hdrN : (ri === 0 && hasTh), cantSplit: true,
           height: { value: (r.classList && r.classList.contains("hr")) ? Math.max(240, Math.round(r.getBoundingClientRect().height * 15)) : (hasTh ? 360 : 400), rule: D.HeightRule.ATLEAST }, children: cells
         });
       });
