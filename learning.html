@@ -158,8 +158,7 @@ var QDEF=[
 {t:"أراجع دروسي بإعادة قراءتها وإعادة كتابتها بأسلوبي.",s:3}
 ];
 var Q=QDEF.map(function(q){return{t:q.t,s:q.s}});
-try{var _q=JSON.parse(sto("lrn_q2")||"null");if(Array.isArray(_q)&&_q.length){Q=_q.slice(0,60).map(function(q){return{t:String(q&&q.t||"").slice(0,200),s:[0,1,2,3].indexOf(+(q&&q.s))>-1?+q.s:0}})}}catch(e){}
-function saveQ(){sto("lrn_q2",JSON.stringify(Q))}
+function saveQ(){}
 SAVED.forEach(function(k){if(SET[k])$(k).value=SET[k]});
 (function(){if(location.pathname.indexOf("/demo")===0)return;var G=$("gender")?"gender":"gv";fetch("/api/profile",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!d||!d.saved)return;var M={dept:d.dept,school:d.school,principal:d.principal};M[G]=d.gv;for(var k in M){if(M[k]&&$(k))$(k).value=M[k]}render()}).catch(function(){})})();
 if(!$("dept").value)$("dept").value="الإدارة العامة للتعليم بمنطقة الرياض";
