@@ -47,7 +47,9 @@ const SCHEMA = [
 ];
 let ready = null;
 function init(env) {
-  if (!ready) ready = env.DB.batch(SCHEMA.map(s => env.DB.prepare(s))).catch(e => { ready = null; throw e; });
+  if (!ready) ready = env.DB.batch(SCHEMA.map(s => env.DB.prepare(s)))
+    .then(() => env.DB.prepare("ALTER TABLE profiles ADD COLUMN teacher TEXT DEFAULT ''").run().catch(() => {}))
+    .catch(e => { ready = null; throw e; });
   return ready;
 }
 
@@ -373,15 +375,15 @@ async function api(req, env, ctx, url, p) {
     if (p === "/api/profile") {
       // «بيانات مدرستي»: اختيارية، تُحفظ فقط بما يدخله المشترك بنفسه في «حسابي»
       if (m === "GET") {
-        const r = await env.DB.prepare("SELECT dept,school,principal,gv,updated_at FROM profiles WHERE user_id=?").bind(u.id).first();
-        return json({ saved: !!r, updated: r ? r.updated_at : 0, dept: r ? r.dept : "", school: r ? r.school : "", principal: r ? r.principal : "", gv: r ? r.gv : "" });
+        const r = await env.DB.prepare("SELECT dept,school,principal,teacher,gv,updated_at FROM profiles WHERE user_id=?").bind(u.id).first();
+        return json({ saved: !!r, updated: r ? r.updated_at : 0, dept: r ? r.dept : "", school: r ? r.school : "", principal: r ? r.principal : "", teacher: r ? (r.teacher || "") : "", gv: r ? r.gv : "" });
       }
       if (m === "POST") {
         const b = await body(req), cl = x => String(x || "").replace(/\s+/g, " ").trim().slice(0, 80);
-        const dept = cl(b.dept), school = cl(b.school), principal = cl(b.principal), gv = b.gv === "m" || b.gv === "f" ? b.gv : "";
-        if (!dept && !school && !principal && !gv) return json({ error: "اكتب بيانًا واحدًا على الأقل" }, 400);
-        await env.DB.prepare("INSERT INTO profiles(user_id,dept,school,principal,gv,updated_at) VALUES(?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET dept=excluded.dept,school=excluded.school,principal=excluded.principal,gv=excluded.gv,updated_at=excluded.updated_at").bind(u.id, dept, school, principal, gv, now).run();
-        return json({ ok: true, dept, school, principal, gv });
+        const dept = cl(b.dept), school = cl(b.school), principal = cl(b.principal), teacher = cl(b.teacher), gv = b.gv === "m" || b.gv === "f" ? b.gv : "";
+        if (!dept && !school && !principal && !teacher && !gv) return json({ error: "اكتب بيانًا واحدًا على الأقل" }, 400);
+        await env.DB.prepare("INSERT INTO profiles(user_id,dept,school,principal,teacher,gv,updated_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET dept=excluded.dept,school=excluded.school,principal=excluded.principal,teacher=excluded.teacher,gv=excluded.gv,updated_at=excluded.updated_at").bind(u.id, dept, school, principal, teacher, gv, now).run();
+        return json({ ok: true, dept, school, principal, teacher, gv });
       }
       if (m === "DELETE") {
         await env.DB.prepare("DELETE FROM profiles WHERE user_id=?").bind(u.id).run();
