@@ -343,6 +343,19 @@
         else if (/\bg\b/.test(cn)) out.push(para([inline(c)], { alignment: alignOf(c), spacing: { after: 40 } }));
         else if (tg === "TABLE") { var tt = tableFrom(c, iw); if (tt) { out.push(tt); out.push(empty()); } }
         else if (tg === "UL") Array.prototype.forEach.call(c.children, function (li) { out.push(para([inline(li)], { alignment: alignOf(li), spacing: { after: 40 } })); });
+        else if (/\bcircs\b/.test(cn)) {
+          var cc = Array.prototype.slice.call(c.children), cwid = Math.floor(iw / cc.length), cv = document.createElement("canvas");
+          cv.width = 160; cv.height = 160; var cx = cv.getContext("2d"); cx.strokeStyle = "#" + CL; cx.lineWidth = 6; cx.beginPath(); cx.arc(80, 80, 72, 0, 6.2832); cx.stroke();
+          var cpng = u8(cv.toDataURL("image/png"));
+          out.push(table([new D.TableRow({ cantSplit: true, children: cc.map(function (d) {
+            var bt = d.querySelector("b"), sp = d.querySelector("span");
+            return cell([
+              new D.Paragraph({ alignment: CEN, spacing: { after: 40 }, children: [new D.ImageRun({ type: "png", data: cpng, transformation: { width: 62, height: 62 }, altText: { title: "دائرة", description: "دائرة", name: "circle" } })] }),
+              para([runs(bt ? bt.textContent.trim() : "", { bold: true, color: CL, size: 26 })], { alignment: CEN, spacing: { after: 0 } }),
+              para([runs(sp ? sp.textContent.trim() : "", { size: 20 })], { alignment: CEN, spacing: { after: 0 } })
+            ], cwid[0] === undefined ? cwid : cwid);
+          }) })], cc.map(function () { return cwid; }))); out.push(empty());
+        }
         else if (/\bev\b/.test(cn)) { out.push(evGrid(c, iw)); out.push(empty()); }
         else if (/\bstats\b/.test(cn)) { out.push(statsTable(c, iw)); out.push(empty()); }
         else if (/\b(lv|dn)\b/.test(cn)) { if (!lvDone) {
@@ -422,7 +435,10 @@
           return /\bsec\b/.test(s.className) ? cell(secContent(s, half - 500), half, { borders: BOX, margins: BIGM }) : cell([empty()], half);
         }) })], [half, half]), 100);
       } else if (/\bsec\b/.test(cn)) {
-        add(secBox(el), 100);
+        var bigT = el.querySelector("table.q");
+        if (bigT && bigT.rows.length > 10) {
+          secContent(el, W).forEach(function (x) { add(x, 60); });
+        } else add(secBox(el), 100);
       } else if (el.tagName === "TABLE") {
         var tt2 = tableFrom(el, W); if (tt2) add(tt2, 100);
       } else if (/\bnb\b/.test(cn)) {
