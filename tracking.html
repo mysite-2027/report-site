@@ -44,7 +44,7 @@ button.del{border-color:var(--border);color:var(--muted);padding:3px 10px;margin
 .info div{border:1.5px solid var(--p);border-radius:10px;padding:5px 10px;display:flex;gap:6px;justify-content:center;text-align:center}
 .info b{color:var(--g2);white-space:nowrap}
 .info .w{grid-column:1/-1}
-.info.row1{grid-template-columns:repeat(2,1fr)}.info.row1 div{flex-wrap:wrap;font-size:.94em;padding:5px 6px}
+.info.row1{grid-template-columns:repeat(4,1fr)}.info.row1 div{flex-wrap:wrap;font-size:.94em;padding:5px 6px}
 .sec{border:2px solid var(--p);border-radius:18px;padding:8px 14px;break-inside:avoid}
 .sec h3{margin:0 0 6px;color:var(--g1);font-size:1.05em}
 .sec p{margin:2px 0;text-align:right;white-space:pre-wrap}
@@ -62,8 +62,8 @@ table.t td{border:1px solid var(--l);padding:5px 6px;text-align:center;vertical-
 table.t td.n{text-align:right}
 .sig{margin-top:auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center;padding-top:10px}
 .sig b{display:block;color:var(--g1)}
-.sig .st{height:26mm;display:flex;align-items:center;justify-content:center}
-.sig .st img{max-height:26mm;max-width:100%;object-fit:contain}
+.sig .st{height:15mm;display:flex;align-items:center;justify-content:center}
+.sig .st img{max-height:15mm;max-width:100%;object-fit:contain}
 .band{height:20px;margin:0 -14mm -12mm;background:linear-gradient(to bottom,var(--p) 65%,transparent 65%),linear-gradient(90deg,var(--b),var(--gr))}
 .sheet.al-r .info div{justify-content:flex-start;text-align:right}.sheet.al-r .sec h3,.sheet.al-r .sec p,.sheet.al-r .lst li,.sheet.al-r table.t td,.sheet.al-r table.v td,.sheet.al-r table.at td,.sheet.al-r table.at2 td{text-align:right}.sheet.al-r .g{justify-content:flex-start}.sheet.al-r .ev div{justify-content:flex-start}.sheet.al-r .ev img{object-position:right center}
 .sheet.al-c .sec h3,.sheet.al-c .sec p,.sheet.al-c .lst li,.sheet.al-c table.t td,.sheet.al-c table.v td,.sheet.al-c table.at td,.sheet.al-c table.at2 td{text-align:center}.sheet.al-c .g{justify-content:center}
@@ -98,7 +98,7 @@ body{background:#fff}
 <label>اسم المدرسة</label><input id="school">
 <label>عنوان السجل</label><input id="ttl" maxlength="80" value="سجل متابعة الطلاب">
 <div class="two"><div><label>الصف (اختياري)</label><input id="cls" placeholder="ثاني متوسط"></div><div><label>الفصل/الشعبة (اختياري)</label><input id="sect" placeholder="2/ب"></div></div>
-<div class="two"><div><label>الفصل الدراسي</label><select id="sem"><option value="الأول">الأول</option><option value="الثاني">الثاني</option><option value="الثالث">الثالث</option></select></div><div><label>العام الدراسي</label><input id="year" placeholder="1448 هـ"></div></div>
+<div class="two"><div><label>الفصل الدراسي</label><select id="sem"><option value="الأول">الأول</option><option value="الثاني">الثاني</option></select></div><div><label>العام الدراسي</label><input id="year" placeholder="1448 هـ"></div></div>
 <label>اسم المادة</label><input id="subj" placeholder="مثال: الرياضيات">
 <label>اسم المعلمة / المعلم</label><input id="teacher">
 <label>الصيغة</label><select id="gender"><option value="f">مؤنث</option><option value="m">مذكر</option></select>
@@ -118,8 +118,10 @@ body{background:#fff}
 <fieldset><legend>الطلاب والصفحة</legend>
 <label>عدد الصفوف</label><input id="rows" type="number" min="1" max="80" value="30">
 <p class="hint" style="margin-top:2px">اتركها فارغة للتعبئة بالقلم، أو الصق الأسماء في المربع التالي وتُملأ الصفوف بها (ويزيد العدد تلقائيًا إن زادت الأسماء).</p>
+<button type="button" id="fill" style="width:100%;margin:6px 0 2px">ملء الصفحة الأخيرة بصفوف فارغة</button>
+<p class="hint" id="fillm" style="margin-top:2px"></p>
 <label>أسماء الطلاب (اختياري)</label><textarea id="names" style="min-height:110px" placeholder="الصق الأسماء هنا، كل اسم في سطر. يمكنك نسخ عمود الأسماء من Excel أو من نظام نور."></textarea>
-<div class="two"><div><label>اتجاه الصفحة</label><select id="ori"><option value="p">طولية</option><option value="l" selected>عرضية</option></select></div><div><label>ارتفاع الصف</label><select id="rh"><option value="s" selected>مضغوط</option><option value="n">عادي</option><option value="l">مريح</option></select></div></div>
+<div class="two"><div><label>اتجاه الصفحة</label><select id="ori"><option value="p">طولية</option><option value="l" selected>عرضية</option></select></div><div><label>ارتفاع الصف</label><select id="rh"><option value="s" selected>مضغوط</option><option value="n">عادي</option></select></div></div>
 <p class="hint" id="rcnt"></p></fieldset>
 <fieldset><legend>التوقيعات</legend>
 <label>اسم مديرة / مدير المدرسة</label><input id="principal">
@@ -166,7 +168,7 @@ function render(){
 var _s=$("sheet");_s.style.setProperty("--p",CLR[$("clr").value]||CLR.n);var _g=CLG[$("clr").value];_s.style.setProperty("--g1",_g?_g[0]:"");_s.style.setProperty("--g2",_g?_g[1]:"");_s.style.setProperty("--tl",_g?_g[1]:"");(function(){var e=$("sheet"),k=$("clr").value,l=CLL[k]||[CLR[k]||"",CLR[k]||""];e.style.setProperty("--bt",CLB[k]||"");e.style.setProperty("--bp",CLBG[k]||"");e.style.setProperty("--b",l[0]);e.style.setProperty("--gr",l[1])})();_s.classList.toggle("al-r",$("alx").value==="r");_s.classList.toggle("al-c",$("alx").value==="c");
 var f=$("gender").value==="f",v=function(i){return $(i).value.trim()},DOT="..............................",dv=function(i){return v(i)||DOT};
 var land=$("ori").value==="l";_s.classList.toggle("land",land);$("pgst").textContent="@page{size:A4 "+(land?"landscape":"portrait")+";margin:0}";
-_s.style.setProperty("--rh",{s:"5.2mm",n:"6.6mm",l:"8.2mm"}[$("rh").value]||"5.2mm");
+if($("rh").selectedIndex<0)$("rh").value="s";_s.style.setProperty("--rh",{s:"5.2mm",n:"6.6mm"}[$("rh").value]||"5.2mm");
 var cols=C.filter(function(c){return c.n.trim()}),nm=$("names").value.split(/\r?\n/).map(function(x){return x.replace(/\t+/g," ").replace(/^\s*[0-9\u0660-\u0669]+[\s.\-)\u060c]+/,"").trim().slice(0,70)}).filter(Boolean).slice(0,80);
 var n=Math.max(1,Math.min(80,Math.max(parseInt($("rows").value,10)||0,nm.length)));
 $("rcnt").textContent="عدد الصفوف في السجل: "+n+(nm.length?" (منها "+nm.length+" أسماء)":"");
@@ -177,8 +179,7 @@ var L=logo;
 $("sheet").innerHTML=
 '<div class="sh-head rep"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
 '<div class="bar rep">'+esc(TT)+(v("subj")?" لمادة "+esc(v("subj")):"")+"</div>"+
-'<div class="info row1 rep"><div><b>العام الدراسي:</b>'+esc(dv("year"))+"</div><div><b>الفصل الدراسي:</b>"+esc($("sem").value)+"</div></div>"+
-'<div class="info rep"><div><b>الصف:</b>'+esc(dv("cls"))+"</div><div><b>الفصل/الشعبة:</b>"+esc(dv("sect"))+"</div></div>"+
+'<div class="info row1 rep"><div><b>العام الدراسي:</b>'+esc(dv("year"))+"</div><div><b>الفصل الدراسي:</b>"+esc($("sem").value)+"</div><div><b>الصف:</b>"+esc(dv("cls"))+"</div><div><b>الفصل/الشعبة:</b>"+esc(dv("sect"))+"</div></div>"+
 '<table class="t trk'+(cols.length>9?' dense':'')+'">'+th+tb+"</table>"+
 '<div class="sig"><div><b>'+(f?"المعلمة":"المعلم")+"</b>"+esc(v("teacher")||"..................")+'</div><div><b>الختم</b><div class="st">'+(stamp?'<img alt="" src="'+stamp+'">':"")+"</div></div><div><b>"+(f?"مديرة المدرسة":"مدير المدرسة")+"</b>"+esc(v("principal")||"..................")+"</div></div>"+
 '<div class="band"></div>'
@@ -187,6 +188,8 @@ $("sheet").innerHTML=
 $("crows").addEventListener("input",function(e){var d=e.target.closest(".row"),k=e.target.dataset.k;if(d&&k){C[+d.dataset.i][k]=e.target.value;saveT();render()}});
 $("crows").addEventListener("click",function(e){var i=e.target.dataset.del;if(i!=null){C.splice(+i,1);saveT();drawC();render()}});
 $("addC").onclick=function(){if(C.length>=20){$("ccnt").textContent="الحد الأقصى 20 عمودًا.";return}C.push({n:"",m:""});saveT();drawC();render();var r=$("crows").querySelectorAll('input[data-k="n"]');if(r.length)r[r.length-1].focus()};
+$("fill").onclick=function(){var s=$("sheet"),t=s.querySelector("table.trk"),m=$("fillm");if(!t)return;var R=function(e){return e.getBoundingClientRect()},sr=R(s),land=s.classList.contains("land"),H=sr.width*(land?210/297:297/210),tr=t.querySelectorAll("tr"),K=s.children,band=R(K[K.length-1]).height,sg=R(K[K.length-2]).height,gp=10,thH=R(tr[0]).height,rh=R(tr[1]||tr[0]).height,tt=R(tr[0]).top-sr.top,hb=R(t.previousElementSibling).bottom-sr.top,n0=tr.length-1;
+var r1=Math.floor((H-band-gp-sg-tt-thH-3)/rh),r2=Math.floor((H-hb-thH-band-gp-sg-3)/rh);if(r1<1||r2<1)return;var tg=n0<=r1?r1:r1+Math.ceil((n0-r1)/r2)*r2;tg=Math.min(80,tg);$("rows").value=tg;$("rows").dispatchEvent(new Event("input",{bubbles:true}));m.textContent="صارت الصفوف "+tg+" لتمتلئ الصفحة الأخيرة. (الصفحة الأولى تتسع "+r1+" صفًا وكل صفحة تليها "+r2+"). الحساب لملف PDF؛ وقد يختلف العدد قليلًا في Word."};
 $("resetC").onclick=function(){C=CDEF.map(function(c){return{n:c.n,m:c.m}});saveT();drawC();render()};
 $("reset").onclick=function(){["cls","sect","year","subj","names"].forEach(function(i){$(i).value=""});$("rows").value="30";$("sem").value="الأول";$("ttl").value="سجل متابعة الطلاب";C=CDEF.map(function(c){return{n:c.n,m:c.m}});saveT();drawC();render()};
 $("logoIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render()})};
@@ -220,7 +223,7 @@ var mkPage=function(){var c=document.createElement("canvas");c.width=cv.width;c.
 var addSig=function(P){P.x.drawImage(cv,0,sigTop,cv.width,sigPx,0,H-bandPx-gap-sigPx,cv.width,sigPx)};
 var addBand=function(P){P.x.drawImage(cv,0,bandY,cv.width,bandPx,0,H-bandPx,cv.width,bandPx)};
 var push=function(P){if(!first)pdf.addPage();pdf.addImage(P.c.toDataURL("image/jpeg",.95),"JPEG",0,0,pw,ph);first=false};
-while(!_one&&y<cEnd-5){var useTh=!first&&TH&&y>=thB-2,cap=(first?H:H-hb-(useTh?thH:0))-bandPx-gap-sigPx,end=Math.min(y+cap,cEnd);
+var _tE=Math.max.apply(null,br.concat([0]))||cEnd;while(!_one&&y<Math.min(cEnd,_tE)-3){var useTh=!first&&TH&&y>=thB-2,cap=(first?H:H-hb-(useTh?thH:0))-bandPx-gap-sigPx,end=Math.min(y+cap,cEnd);
 if(end<cEnd){var pick=function(arr,lo){var c=arr.filter(function(z){return z>lo&&z<=end+1});return c.length?Math.max.apply(null,c):null};var e1=pick(bs,y+cap*.7)||pick(br,y+cap*.4)||pick(bs,y+cap*.4);if(e1)end=Math.min(cEnd,Math.round(e1))}
 var P=mkPage(),oy=0;if(!first){P.x.drawImage(cv,0,0,cv.width,hb,0,0,cv.width,hb);oy=hb;if(useTh){P.x.drawImage(cv,0,thTop,cv.width,thH,0,hb,cv.width,thH);oy=hb+thH}}
 P.x.drawImage(cv,0,y,cv.width,end-y,0,oy,cv.width,end-y);
