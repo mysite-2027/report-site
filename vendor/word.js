@@ -145,11 +145,17 @@
           if (isTh) o.shading = fill(hexOf(s.backgroundColor) || CL);
           var fsz = 20;
           if (!isTh && r.classList && r.classList.contains("hr")) o.margins = { top: 10, bottom: 10, left: 110, right: 110 };
-          if (dense && isTh) { o.margins = { top: 30, bottom: 30, left: 10, right: 10 }; fsz = cols[ci] < 520 ? 11 : (cols[ci] < 800 ? 14 : 18); }
+          if (dense && isTh) { o.margins = { top: 30, bottom: 30, left: 10, right: 10 }; fsz = cols[ci] < 520 ? 12 : (cols[ci] < 800 ? 16 : 18); }
           var color = isTh ? "FFFFFF" : (hexOf(s.color) || "0B1620");
           var rr = [];
           var t0 = c.textContent.replace(/\s+/g, " ").trim();
-          if (t0) {
+          var parts = (dense && isTh && /<br/i.test(c.innerHTML)) ? c.innerHTML.split(/<br\s*\/?>/i).map(function (p) { return p.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim(); }).filter(Boolean) : null;
+          if (parts && parts.length > 1) {
+            parts.forEach(function (p, pi) {
+              runs(p, { bold: true, color: color, size: fsz, br: pi > 0 }).forEach(function (x) { rr.push(x); });
+            });
+          }
+          else if (t0) {
             runs(t0, { bold: isTh || parseInt(s.fontWeight, 10) >= 600, color: color, size: fsz }).forEach(function (x) { rr.push(x); });
           }
           else if (c.querySelector(".bx")) { runs("□", { font: SYM, color: "6B7280", size: 26 }).forEach(function (x) { rr.push(x); }); }
