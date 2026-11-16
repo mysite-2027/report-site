@@ -150,16 +150,15 @@
           var rr = [];
           var t0 = c.textContent.replace(/\s+/g, " ").trim();
           var parts = (dense && isTh && /<br/i.test(c.innerHTML)) ? c.innerHTML.split(/<br\s*\/?>/i).map(function (p) { return p.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim(); }).filter(Boolean) : null;
+          var pl = null;
           if (parts && parts.length > 1) {
-            parts.forEach(function (p, pi) {
-              runs(p, { bold: true, color: color, size: fsz, br: pi > 0 }).forEach(function (x) { rr.push(x); });
-            });
+            pl = parts.map(function (p) { return para(runs(p, { bold: false, color: color, size: fsz }), { alignment: CEN, spacing: { after: 0 } }); });
           }
           else if (t0) {
-            runs(t0, { bold: isTh || parseInt(s.fontWeight, 10) >= 600, color: color, size: fsz }).forEach(function (x) { rr.push(x); });
+            runs(t0, { bold: (dense && isTh) ? false : (isTh || parseInt(s.fontWeight, 10) >= 600), color: color, size: fsz }).forEach(function (x) { rr.push(x); });
           }
           else if (c.querySelector(".bx")) { runs("□", { font: SYM, color: "6B7280", size: 26 }).forEach(function (x) { rr.push(x); }); }
-          return cell([para(rr, { alignment: isTh ? CEN : alignOf(c), spacing: { after: 0 } })], cols[ci], o);
+          return cell(pl || [para(rr, { alignment: isTh ? CEN : alignOf(c), spacing: { after: 0 } })], cols[ci], o);
         });
         var hasTh = r.cells.length && r.cells[0].tagName === "TH";
         return new D.TableRow({
