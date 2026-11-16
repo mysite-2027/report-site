@@ -110,7 +110,7 @@ body{background:#fff}
 <p class="hint">لا يتضمن هذا الموقع أي شعار حكومي. افتح <a href="https://www.moe.gov.sa/assets/logos/moe-logo.png" target="_blank" rel="noopener">رابط الشعار</a> ثم: <b>من الكمبيوتر</b> انقر على الصورة بالزر الأيمن واختر «نسخ الصورة»، وارجع هنا واضغط Ctrl + V. أو <b>من الجوال أو الكمبيوتر</b> اختر «حفظ الصورة» ثم اضغط «Choose File» أعلاه واختر الصورة من جهازك. تأكد أن استخدامك للشعار مسموح في جهتك.</p>
 </fieldset>
 <fieldset><legend>أعمدة السجل</legend>
-<p class="hint" style="margin-top:0">عدّل اسم أي عمود أو احذفه، أو أضف أعمدة جديدة (حتى 20). اكتب الدرجة العظمى إن أردت أن تظهر تحت اسم العمود، أو اتركها فارغة.</p>
+<p class="hint" style="margin-top:0">عدّل اسم أي عمود أو احذفه، أو أضف أعمدة جديدة (حتى 20).</p>
 <div id="crows"></div>
 <button type="button" id="addC" style="margin-top:8px">+ إضافة عمود</button>
 <button type="button" class="del" id="resetC" style="width:100%">استعادة الأعمدة الافتراضية</button>
@@ -161,7 +161,7 @@ for(var y=0;y<c.height;y++)for(var x=0;x<c.width;x++){var o=(y*c.width+x)*4;if(d
 if(x1>x0&&y1>y0){var pd=Math.round(Math.max(c.width,c.height)*.02),c2=document.createElement("canvas");c2.width=x1-x0+1+2*pd;c2.height=y1-y0+1+2*pd;c2.getContext("2d").drawImage(c,x0,y0,x1-x0+1,y1-y0+1,pd,pd,x1-x0+1,y1-y0+1);c=c2}}
 cb(c.toDataURL(type,.82))};im.src=src};
 sv?r.readAsText(file):r.readAsDataURL(file)}
-function drawC(){$("crows").innerHTML=C.map(function(c,i){return '<div class="row" data-i="'+i+'"><div style="display:flex;gap:6px;align-items:flex-end"><div style="flex:1"><label>العمود '+(i+1)+'</label><input data-k="n" maxlength="30" value="'+esc(c.n)+'"></div><div style="width:84px"><label>الدرجة</label><input data-k="m" maxlength="8" value="'+esc(c.m)+'"></div><button type="button" class="del" data-del="'+i+'" style="margin-top:0;width:auto">حذف</button></div></div>'}).join("");$("ccnt").textContent="عدد الأعمدة: "+C.length}
+function drawC(){$("crows").innerHTML=C.map(function(c,i){return '<div class="row" data-i="'+i+'"><div style="display:flex;gap:6px;align-items:flex-end"><div style="flex:1"><label>العمود '+(i+1)+'</label><input data-k="n" maxlength="30" value="'+esc(c.n)+'"></div><button type="button" class="del" data-del="'+i+'" style="margin-top:0;width:auto">حذف</button></div></div>'}).join("");$("ccnt").textContent="عدد الأعمدة: "+C.length}
 function render(){
 var _s=$("sheet");_s.style.setProperty("--p",CLR[$("clr").value]||CLR.n);var _g=CLG[$("clr").value];_s.style.setProperty("--g1",_g?_g[0]:"");_s.style.setProperty("--g2",_g?_g[1]:"");_s.style.setProperty("--tl",_g?_g[1]:"");(function(){var e=$("sheet"),k=$("clr").value,l=CLL[k]||[CLR[k]||"",CLR[k]||""];e.style.setProperty("--bt",CLB[k]||"");e.style.setProperty("--bp",CLBG[k]||"");e.style.setProperty("--b",l[0]);e.style.setProperty("--gr",l[1])})();_s.classList.toggle("al-r",$("alx").value==="r");_s.classList.toggle("al-c",$("alx").value==="c");
 var f=$("gender").value==="f",v=function(i){return $(i).value.trim()},DOT="..............................",dv=function(i){return v(i)||DOT};
@@ -170,7 +170,7 @@ _s.style.setProperty("--rh",{s:"5.2mm",n:"6.6mm",l:"8.2mm"}[$("rh").value]||"5.2
 var cols=C.filter(function(c){return c.n.trim()}),nm=$("names").value.split(/\r?\n/).map(function(x){return x.replace(/\t+/g," ").replace(/^\s*[0-9\u0660-\u0669]+[\s.\-)\u060c]+/,"").trim().slice(0,70)}).filter(Boolean).slice(0,80);
 var n=Math.max(1,Math.min(80,Math.max(parseInt($("rows").value,10)||0,nm.length)));
 $("rcnt").textContent="عدد الصفوف في السجل: "+n+(nm.length?" (منها "+nm.length+" أسماء)":"");
-var th='<tr><th style="width:5.5%">الرقم</th><th style="width:'+(land?20:24)+'%">'+(f?"اسم الطالبة":"اسم الطالب")+"</th>"+cols.map(function(c){return "<th>"+(cols.length>9?esc(c.n).replace(/ +/," <br>"):esc(c.n))+(c.m.trim()?'<span class="mx"> ('+esc(c.m.trim())+")</span>":"")+"</th>"}).join("")+"</tr>",tb="";
+var th='<tr><th style="width:5.5%">الرقم</th><th style="width:'+(land?20:24)+'%">'+(f?"اسم الطالبة":"اسم الطالب")+"</th>"+cols.map(function(c){return "<th>"+(cols.length>9?esc(c.n).replace(/ +/," <br>"):esc(c.n))+"</th>"}).join("")+"</tr>",tb="";
 for(var i=0;i<n;i++)tb+='<tr class="hr"><td>'+(i+1)+'</td><td class="n">'+esc(nm[i]||"")+"</td>"+cols.map(function(){return "<td></td>"}).join("")+"</tr>";
 var TT=v("ttl")||"سجل متابعة الطلاب";if(TT==="سجل متابعة الطلاب"&&f)TT="سجل متابعة الطالبات";
 var L=logo;
@@ -193,7 +193,7 @@ $("logoIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,400,"imag
 $("logoDel").onclick=function(){logo=null;$("logoIn").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
 $("stampIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,500,"image/png",function(d){stamp=d;sto("rpt_stamp",d);render()})};
 $("stampDel").onclick=function(){stamp=null;$("stampIn").value="";try{localStorage.removeItem("rpt_stamp")}catch(e){}render()};
-document.addEventListener("paste",function(e){var cd=e.clipboardData;if(!cd)return;var m=$("moeMsg"),
+document.addEventListener("paste",function(e){var cd=e.clipboardData;if(!cd)return;var ae=document.activeElement;if(ae&&/^(INPUT|TEXTAREA)$/.test(ae.tagName)&&ae.type!=="file")return;var m=$("moeMsg"),
 done=function(f){e.preventDefault();shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render();m.textContent="تمت إضافة الشعار من الحافظة."})},fs=cd.files||[],i,mm;
 for(i=0;i<fs.length;i++){if(/^image\//.test(fs[i].type)){done(fs[i]);return}}
 var tx=cd.getData("text/plain")||"",ht=cd.getData("text/html")||"";
