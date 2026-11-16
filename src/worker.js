@@ -12,7 +12,7 @@ const okEmail = e => e.length <= 120 && /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(e);
 const DV = n => n === 1 ? "جهاز واحد" : n === 2 ? "جهازين" : n + " أجهزة";
 const SESSION_DAYS = 30, DEVICE_WINDOW = 30 * DAY;
 const enc = new TextEncoder();
-const FORM_NAMES = { report: "تقرير تنفيذ برنامج", analysis: "تحليل نتائج الدرجات", remedial: "الخطة العلاجية", enrichment: "الخطة الإثرائية", certificate: "الشهادات", visit: "تبادل الزيارات", plc: "المجتمعات المهنية", waiting: "حصص الانتظار", attendance: "كشف حضور وتوقيع", minutes: "المحاضر", learning: "استبانة أنماط التعلم", tracking: "سجل متابعة الطلاب", grades: "سجل درجات أعمال السنة" };
+const FORM_NAMES = { report: "تقرير تنفيذ برنامج", analysis: "تحليل نتائج الدرجات", remedial: "الخطة العلاجية", enrichment: "الخطة الإثرائية", certificate: "الشهادات", visit: "تبادل الزيارات", plc: "المجتمعات المهنية", waiting: "حصص الانتظار", attendance: "كشف حضور وتوقيع", minutes: "المحاضر", learning: "استبانة أنماط التعلم", tracking: "سجل متابعة الطلاب", grades: "سجل درجات أعمال السنة تقويم تكويني", gradesfinal: "سجل درجات أعمال السنة تقويم ختامي" };
 const USE_KINDS = ["pdf", "word", "print"];
 const PUB_PAGES = { "/login": "login", "/subscribe": "subscribe", "/faq": "faq", "/terms": "terms", "/demo": "demo" };
 const PUB_NAMES = { login: "صفحة الدخول (الصفحة الأولى)", subscribe: "صفحة الاشتراك", faq: "الأسئلة الشائعة", terms: "الشروط", demo: "المعاينة المجانية" };
