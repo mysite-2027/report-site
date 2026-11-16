@@ -71,6 +71,7 @@ table.trk{table-layout:fixed;width:100%;border-collapse:collapse}
 table.trk th{padding:4px 3px;font-size:.92em;line-height:1.3;text-align:center}
 table.trk th .mx{display:block;font-weight:500;font-size:.85em}
 table.trk.dense th{font-size:.78em;padding:3px 1px}
+.sheet table.trk.dense th.numth,.sheet table.trk.dense th:nth-child(-n+2){font-size:.9em}
 .sheet:not(.land) table.trk.dense th{font-size:.62em;padding:3px 0}
 table.trk td{height:var(--rh,6.6mm);padding:0 4px;text-align:center;font-size:.95em}
 table.trk td.n{text-align:right;padding:0 7px;white-space:nowrap;overflow:hidden}
@@ -172,7 +173,7 @@ if($("rh").selectedIndex<0)$("rh").value="s";_s.style.setProperty("--rh",{s:"5.2
 var cols=C.filter(function(c){return c.n.trim()}),nm=$("names").value.split(/\r?\n/).map(function(x){return x.replace(/\t+/g," ").replace(/^\s*[0-9\u0660-\u0669]+[\s.\-)\u060c]+/,"").trim().slice(0,70)}).filter(Boolean).slice(0,80);
 var n=Math.max(1,Math.min(80,Math.max(parseInt($("rows").value,10)||0,nm.length)));
 $("rcnt").textContent="عدد الصفوف في السجل: "+n+(nm.length?" (منها "+nm.length+" أسماء)":"");
-var th='<tr><th style="width:5.5%">الرقم</th><th style="width:'+(land?20:24)+'%">'+(f?"اسم الطالبة":"اسم الطالب")+"</th>"+cols.map(function(c){return "<th>"+(cols.length>9?esc(c.n).replace(/ +/," <br>"):esc(c.n))+"</th>"}).join("")+"</tr>",tb="";
+var th='<tr><th style="width:5.5%">الرقم</th><th style="width:'+(land?20:24)+'%">'+(f?"اسم الطالبة":"اسم الطالب")+"</th>"+cols.map(function(c){var mw=(!land&&cols.length>12)?c.n.trim().match(/^(?:ال)?[أا]سبوع\s*([0-9\u0660-\u0669]+)$/):null;if(mw)return '<th class="numth">'+esc(mw[1])+"</th>";return "<th>"+(cols.length>9?esc(c.n).replace(/ +/," <br>"):esc(c.n))+"</th>"}).join("")+"</tr>",tb="";
 for(var i=0;i<n;i++)tb+='<tr class="hr"><td>'+(i+1)+'</td><td class="n">'+esc(nm[i]||"")+"</td>"+cols.map(function(){return "<td></td>"}).join("")+"</tr>";
 var TT=v("ttl")||"سجل متابعة الطلاب";if(TT==="سجل متابعة الطلاب"&&f)TT="سجل متابعة الطالبات";
 var L=logo;
