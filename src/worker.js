@@ -508,6 +508,16 @@ async function api(req, env, ctx, url, p) {
       try { const r = await sendMail(env, "اختبار التنبيهات", "إذا وصلتك هذه الرسالة فالتنبيهات تعمل.\n" + fmt(now)); return json({ ok: r.status < 300, status: r.status, detail: r.body }); }
       catch (e) { return json({ ok: false, detail: String(e).slice(0, 200) }); }
     }
+    if (p === "/api/admin/linkcheck" && m === "GET") {
+      // فحص رابط شعار وزارة التعليم المذكور في صفحات النماذج
+      const url = "https://www.moe.gov.sa/assets/logos/moe-logo.png", t0 = Date.now();
+      try {
+        const r = await fetch(url, { redirect: "follow", signal: AbortSignal.timeout(8000), headers: { "user-agent": "Mozilla/5.0 (link-check)" } });
+        const type = r.headers.get("content-type") || "";
+        const ok = r.status >= 200 && r.status < 300 && /^image\//i.test(type);
+        return json({ ok, status: r.status, type, ms: Date.now() - t0, url, checked: now });
+      } catch (e) { return json({ ok: false, status: 0, type: "", ms: Date.now() - t0, url, error: String(e).slice(0, 120), checked: now }); }
+    }
     if (p === "/api/admin/backup" && m === "POST") {
       const r = await backupJob(env);
       return json(r, r.ok ? 200 : 400);
