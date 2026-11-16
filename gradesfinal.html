@@ -153,7 +153,7 @@ function saveT(){var o={};TV.forEach(function(i){o[i]=$(i).value});sto("grdf_v",
 var _T=null;try{_T=JSON.parse(sto("grdf_v")||"null")}catch(e){}
 SAVED.forEach(function(k){if(SET[k])$(k).value=SET[k]});
 if(_T)TV.forEach(function(i){if(_T[i]!=null&&$(i)&&!(i==="ttl"&&!_T[i]))$(i).value=_T[i]});$("ttl").value=$("ttl").value.replace(/ تقويم (تكويني|ختامي)$/,"");
-(function(){if(location.pathname.indexOf("/demo")===0)return;var G=$("gender")?"gender":"gv";fetch("/api/profile",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!d||!d.saved)return;var M={dept:d.dept,school:d.school,principal:d.principal};M[G]=d.gv;for(var k in M){if(M[k]&&$(k))$(k).value=M[k]}render()}).catch(function(){})})();
+(function(){if(location.pathname.indexOf("/demo")===0)return;var G=$("gender")?"gender":"gv";fetch("/api/profile",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!d||!d.saved)return;var M={dept:d.dept,school:d.school,principal:d.principal,teacher:d.teacher};M[G]=d.gv;for(var k in M){if(M[k]&&$(k))$(k).value=M[k]}render()}).catch(function(){})})();
 if(!$("dept").value)$("dept").value="الإدارة العامة للتعليم بمنطقة الرياض";
 function shrink(file,max,type,cb){if(type==="image/png")max*=2;var r=new FileReader(),sv=/svg/i.test(file.type)||/\.svg$/i.test(file.name);
 r.onload=function(){var src=r.result;

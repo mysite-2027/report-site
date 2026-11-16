@@ -45,11 +45,12 @@ button,.btn{display:inline-block;margin-top:12px;padding:10px 20px;border:0;bord
   <div class="card"><h2>الأجهزة المسجّلة (<span id="dc">0</span> من <span id="mx">3</span>)</h2><div id="devs"></div></div>
   <div class="card" id="schoolCard">
     <h2>بيانات مدرستي (اختياري)</h2>
-    <p class="sub">اكتب اسم الإدارة والمدرسة والمديرة مرة واحدة، وتظهر جاهزة في النماذج على كل أجهزتك، ولتغييرها عدّلها من هنا. لا تريد؟ اتركها فارغة، والموقع يعمل كالمعتاد. وتحذفها متى شئت.</p>
+    <p class="sub">اكتب اسم الإدارة والمدرسة والمديرة واسمك مرة واحدة، وتظهر جاهزة في النماذج على كل أجهزتك، ولتغييرها عدّلها من هنا. لا تريد؟ اتركها فارغة، والموقع يعمل كالمعتاد. وتحذفها متى شئت.</p>
     <form id="sf">
       <label for="sd">اسم إدارة التعليم</label><input id="sd" maxlength="80" autocomplete="off" placeholder="الإدارة العامة للتعليم بمنطقة الرياض">
       <label for="ss">اسم المدرسة</label><input id="ss" maxlength="80" autocomplete="off">
       <label for="sp">اسم المدير أو المديرة</label><input id="sp" maxlength="80" autocomplete="off">
+      <label for="st">اسم المعلم أو المعلمة</label><input id="st" maxlength="80" autocomplete="off">
       <label for="sg">الصيغة</label><select id="sg"><option value="">بدون تحديد</option><option value="f">مؤنث</option><option value="m">مذكر</option></select>
       <button type="submit">حفظ</button><button type="button" class="dl" id="sdel" hidden>حذف بياناتي المحفوظة</button>
       <div class="msg" id="sm"></div>
@@ -95,10 +96,10 @@ $("devs").onclick=function(e){var b=e.target.closest(".rm");if(!b||!confirm("ح�
  fetch("/api/device",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({did:b.getAttribute("data-d")})}).then(function(r){if(r.ok)location.reload();else alert("تعذّر الحذف")})};
 $("out").onclick=function(){fetch("/api/logout",{method:"POST",headers:{"content-type":"application/json"},body:"{}"}).then(function(){location.href="/login"})};
 var J={"content-type":"application/json"};
-function sFill(d){$("sd").value=d.dept||"";$("ss").value=d.school||"";$("sp").value=d.principal||"";$("sg").value=d.gv||"";$("sdel").hidden=!d.saved}
+function sFill(d){$("sd").value=d.dept||"";$("ss").value=d.school||"";$("sp").value=d.principal||"";$("st").value=d.teacher||"";$("sg").value=d.gv||"";$("sdel").hidden=!d.saved}
 fetch("/api/profile").then(function(r){return r.ok?r.json():null}).then(function(d){if(d)sFill(d)}).catch(function(){});
 $("sf").onsubmit=function(e){e.preventDefault();var m=$("sm");m.className="msg";m.textContent="…";
- fetch("/api/profile",{method:"POST",headers:J,body:JSON.stringify({dept:$("sd").value,school:$("ss").value,principal:$("sp").value,gv:$("sg").value})})
+ fetch("/api/profile",{method:"POST",headers:J,body:JSON.stringify({dept:$("sd").value,school:$("ss").value,principal:$("sp").value,teacher:$("st").value,gv:$("sg").value})})
  .then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})}).then(function(x){
   if(x.ok){x.j.saved=true;sFill(x.j);m.textContent="تم الحفظ. ستظهر في النماذج عند فتحها."}else{m.className="msg warn";m.textContent=x.j.error||"تعذّر الحفظ"}
  }).catch(function(){m.className="msg warn";m.textContent="تعذّر الاتصال"})};
