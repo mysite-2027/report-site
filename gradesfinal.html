@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>سجل درجات أعمال السنة تقويم ختامي | مُيَسِّر التقارير المدرسية</title>
-<meta name="description" content="سجل درجات أعمال السنة تقويم ختامي جاهز للطباعة: فترتان بأعمدة ودرجات عظمى وألوان يعدّلها المعلم، وأسماء تُلصق من Excel، وصفحة طولية أو عرضية.">
+<title>سجل درجات أعمال السنة | مُيَسِّر التقارير المدرسية</title>
+<meta name="description" content="سجل درجات أعمال السنة جاهز للطباعة: فترتان بأعمدة ودرجات عظمى وألوان يعدّلها المعلم، وأسماء تُلصق من Excel، وصفحة طولية أو عرضية.">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f3f6f8;--surface:#fff;--text:#16242f;--muted:#5b6b78;--border:#d5dde3;--accent:#17445a;--onaccent:#fff;-webkit-text-size-adjust:100%;text-size-adjust:100%}
@@ -94,13 +94,13 @@ body{background:#fff}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-<header class="top"><a href="index.html">← الصفحة الرئيسية</a><h1>سجل درجات أعمال السنة تقويم ختامي</h1><p>حدّد الأعمدة والصفوف، والصق الأسماء من Excel، ثم اطبعه طوليًا أو عرضيًا أو احفظه.</p></header>
+<header class="top"><a href="index.html">← الصفحة الرئيسية</a><h1>سجل درجات أعمال السنة</h1><p>حدّد الأعمدة والصفوف، والصق الأسماء من Excel، ثم اطبعه طوليًا أو عرضيًا أو احفظه.</p></header>
 <main class="app">
 <section class="panel">
 <fieldset><legend>بيانات السجل (تُحفظ في متصفحك)</legend>
 <label>الإدارة العامة للتعليم</label><input id="dept">
 <label>اسم المدرسة</label><input id="school">
-<label>عنوان السجل</label><input id="ttl" maxlength="80" value="سجل درجات أعمال السنة تقويم ختامي">
+<label>عنوان السجل</label><input id="ttl" maxlength="80" value="سجل درجات أعمال السنة">
 <div class="two"><div><label>الصف (اختياري)</label><input id="cls" placeholder="ثاني متوسط"></div><div><label>الفصل/الشعبة (اختياري)</label><input id="sect" placeholder="2/ب"></div></div>
 <div class="two"><div><label>الفصل الدراسي</label><select id="sem"><option value="الأول">الأول</option><option value="الثاني">الثاني</option></select></div><div><label>العام الدراسي</label><input id="year" placeholder="1448 هـ"></div></div>
 <label>اسم المادة</label><input id="subj" placeholder="مثال: الرياضيات">
@@ -152,7 +152,7 @@ var TV=["ttl","cls","sect","sem","year","subj","rows","rh","ori","names"];
 function saveT(){var o={};TV.forEach(function(i){o[i]=$(i).value});sto("grdf_v",JSON.stringify(o))}
 var _T=null;try{_T=JSON.parse(sto("grdf_v")||"null")}catch(e){}
 SAVED.forEach(function(k){if(SET[k])$(k).value=SET[k]});
-if(_T)TV.forEach(function(i){if(_T[i]!=null&&$(i)&&!(i==="ttl"&&!_T[i]))$(i).value=_T[i]});
+if(_T)TV.forEach(function(i){if(_T[i]!=null&&$(i)&&!(i==="ttl"&&!_T[i]))$(i).value=_T[i]});$("ttl").value=$("ttl").value.replace(/ تقويم (تكويني|ختامي)$/,"");
 (function(){if(location.pathname.indexOf("/demo")===0)return;var G=$("gender")?"gender":"gv";fetch("/api/profile",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(d){if(!d||!d.saved)return;var M={dept:d.dept,school:d.school,principal:d.principal};M[G]=d.gv;for(var k in M){if(M[k]&&$(k))$(k).value=M[k]}render()}).catch(function(){})})();
 if(!$("dept").value)$("dept").value="الإدارة العامة للتعليم بمنطقة الرياض";
 function shrink(file,max,type,cb){if(type==="image/png")max*=2;var r=new FileReader(),sv=/svg/i.test(file.type)||/\.svg$/i.test(file.name);
@@ -182,7 +182,7 @@ if(hasG){for(var a=0;a<cols.length;){var gg=(cols[a].g||"").trim();if(!gg){c1.pu
 var RS=hasG?' rowspan="2"':"";
 var th='<tr class="hh"><th'+RS+' style="width:5.5%">الرقم</th><th'+RS+' style="width:'+(land?20:24)+'%">'+(f?"اسم الطالبة":"اسم الطالب")+"</th>"+(hasG?c1.join("")+'</tr><tr class="hh">'+c2.join(""):cols.map(function(c){return hcell(c,0)}).join(""))+"</tr>",tb="";
 for(var i=0;i<n;i++)tb+='<tr class="hr"><td>'+(i+1)+'</td><td class="n">'+esc(nm[i]||"")+"</td>"+cols.map(function(c){return "<td"+(KL[c.k]?' class="'+KL[c.k]+'"':"")+"></td>"}).join("")+"</tr>";
-var TT=v("ttl")||"سجل درجات أعمال السنة تقويم ختامي";
+var TT=v("ttl")||"سجل درجات أعمال السنة";
 var L=logo;
 $("sheet").innerHTML=
 '<div class="sh-head rep"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
@@ -199,7 +199,7 @@ $("addC").onclick=function(){if(C.length>=20){$("ccnt").textContent="الحد ا
 $("fill").onclick=function(){var s=$("sheet"),t=s.querySelector("table.trk"),m=$("fillm");if(!t)return;var R=function(e){return e.getBoundingClientRect()},sr=R(s),land=s.classList.contains("land"),H=sr.width*(land?210/297:297/210),tr=t.querySelectorAll("tr"),K=s.children,band=R(K[K.length-1]).height,sg=R(K[K.length-2]).height,gp=10,hh=t.querySelectorAll("tr.hh"),thH=R(hh[hh.length-1]).bottom-R(hh[0]).top,rh=R(t.querySelector("tr.hr")||tr[1]).height,tt=R(hh[0]).top-sr.top,hb=R(t.previousElementSibling).bottom-sr.top,n0=t.querySelectorAll("tr.hr").length;
 var r1=Math.floor((H-band-gp-sg-tt-thH-3)/rh),r2=Math.floor((H-hb-thH-band-gp-sg-3)/rh);if(r1<1||r2<1)return;var tg=n0<=r1?r1:r1+Math.ceil((n0-r1)/r2)*r2;tg=Math.min(80,tg);$("rows").value=tg;$("rows").dispatchEvent(new Event("input",{bubbles:true}));m.textContent="صارت الصفوف "+tg+" لتمتلئ الصفحة الأخيرة. (الصفحة الأولى تتسع "+r1+" صفًا وكل صفحة تليها "+r2+"). الحساب لملف PDF؛ وقد يختلف العدد قليلًا في Word."};
 $("resetC").onclick=function(){C=CDEF.map(function(c){return{n:c.n,m:c.m,k:c.k||"",g:c.g||""}});saveT();drawC();render()};
-$("reset").onclick=function(){["cls","sect","year","subj","names"].forEach(function(i){$(i).value=""});$("rows").value="30";$("sem").value="الأول";$("ttl").value="سجل درجات أعمال السنة تقويم ختامي";C=CDEF.map(function(c){return{n:c.n,m:c.m,k:c.k||"",g:c.g||""}});saveT();drawC();render()};
+$("reset").onclick=function(){["cls","sect","year","subj","names"].forEach(function(i){$(i).value=""});$("rows").value="30";$("sem").value="الأول";$("ttl").value="سجل درجات أعمال السنة";C=CDEF.map(function(c){return{n:c.n,m:c.m,k:c.k||"",g:c.g||""}});saveT();drawC();render()};
 $("logoIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render()})};
 $("logoDel").onclick=function(){logo=null;$("logoIn").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
 $("stampIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,500,"image/png",function(d){stamp=d;sto("rpt_stamp",d);render()})};
