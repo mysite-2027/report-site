@@ -12,7 +12,7 @@ const okEmail = e => e.length <= 120 && /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(e);
 const DV = n => n === 1 ? "جهاز واحد" : n === 2 ? "جهازين" : n + " أجهزة";
 const SESSION_DAYS = 30, DEVICE_WINDOW = 30 * DAY;
 const enc = new TextEncoder();
-const FORM_NAMES = { report: "تقرير تنفيذ برنامج", analysis: "تحليل نتائج الدرجات", remedial: "الخطة العلاجية", enrichment: "الخطة الإثرائية", certificate: "الشهادات", visit: "تبادل الزيارات", plc: "المجتمعات المهنية", waiting: "حصص الانتظار", attendance: "كشف حضور وتوقيع", minutes: "المحاضر", learning: "استبانة أنماط التعلم", tracking: "سجل متابعة الطلاب", grades: "سجل درجات أعمال السنة تقويم تكويني", gradesfinal: "سجل درجات أعمال السنة تقويم ختامي" };
+const FORM_NAMES = { report: "تقرير تنفيذ برنامج", analysis: "تحليل نتائج الدرجات", remedial: "الخطة العلاجية", enrichment: "الخطة الإثرائية", certificate: "الشهادات", visit: "تبادل الزيارات", plc: "المجتمعات المهنية", waiting: "حصص الانتظار", attendance: "كشف حضور وتوقيع", minutes: "المحاضر", learning: "استبانة أنماط التعلم", tracking: "سجل متابعة الطلاب", grades: "سجل درجات أعمال السنة تقويم تكويني", gradesfinal: "سجل درجات أعمال السنة تقويم ختامي", portfolio: "ملف الإنجاز" };
 const USE_KINDS = ["pdf", "word", "print"];
 const PUB_PAGES = { "/login": "login", "/subscribe": "subscribe", "/faq": "faq", "/terms": "terms", "/demo": "demo" };
 const PUB_NAMES = { login: "صفحة الدخول (الصفحة الأولى)", subscribe: "صفحة الاشتراك", faq: "الأسئلة الشائعة", terms: "الشروط", demo: "المعاينة المجانية" };
@@ -652,7 +652,7 @@ function demoJs(f) {
 
 
 const DEMO_OPEN = "analysis";
-const DEMO_FORMS_ALL = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes", "learning", "tracking", "grades", "gradesfinal"];
+const DEMO_FORMS_ALL = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes", "learning", "tracking", "grades", "gradesfinal", "portfolio"];
 const COMMON_P = { dept: "إدارة تعليم الأحساء", school: "مدرسة الأمل المتوسطة", principal: "نور فهد" };
 const PREVIEW_DATA = {
   report: { pname: "أدوات الذكاء الاصطناعي", executor: "نورة خالد", place: "المختبر الرقمي", target: "طالبات الصف الثاني المتوسط", count: "28", pdate: "الأحد 17-3-1448 هـ", goal: "تعريف الطالبات بأدوات الذكاء الاصطناعي وكيفية توظيفها في التعلم بصورة آمنة ومسؤولة", goals: "التعريف بأبرز أدوات الذكاء الاصطناعي التعليمية\nالتدريب على صياغة الأوامر والاستفادة من نتائجها\nتعزيز الاستخدام المسؤول والآمن للأدوات", teacher: "نورة خالد", principal: "نور فهد" },
@@ -667,6 +667,7 @@ const PREVIEW_DATA = {
   tracking: { subj: "الرياضيات", cls: "ثاني متوسط", sect: "2/ب", year: "1448 هـ", teacher: "نورة خالد", rows: "20", names: "علياء محمد\nالجازي محمد\nأسماء فيصل\nرغداء نايف\nلمى سعد\nريماس خالد\nجوري عبدالله\nشهد ناصر\nملاك فهد\nلجين العمري\nهتون صالح\nغدير علي" },
   grades: { subj: "الرياضيات", cls: "ثاني متوسط", sect: "2/ب", year: "1448 هـ", teacher: "نورة خالد", rows: "20", names: "علياء محمد\nالجازي محمد\nأسماء فيصل\nرغداء نايف\nلمى سعد\nريماس خالد\nجوري عبدالله\nشهد ناصر\nملاك فهد\nلجين العمري\nهتون صالح\nغدير علي" },
   gradesfinal: { subj: "الرياضيات", cls: "ثاني متوسط", sect: "2/ب", year: "1448 هـ", teacher: "نورة خالد", rows: "20", names: "علياء محمد\nالجازي محمد\nأسماء فيصل\nرغداء نايف\nلمى سعد\nريماس خالد\nجوري عبدالله\nشهد ناصر\nملاك فهد\nلجين العمري\nهتون صالح\nغدير علي" },
+  portfolio: { _rows: [{ ax: 5, t: "تخطيط وتنفيذ درس المعادلات الخطية", d: "الأحد 17-3-1448 هـ", desc: "أعددت خطة الدرس وفق أهداف الوحدة ونفّذتها بتسلسل واضح مع أنشطة متدرجة.", imp: "أتقنت 85% من الطالبات المهارة" }, { ax: 3, t: "تطبيق استراتيجية التعلم التعاوني", d: "الثلاثاء 26-3-1448 هـ", desc: "نفّذت الدرس بمجموعات من 4 طالبات لكل واحدة دور محدد.", imp: "ارتفعت المشاركة والتفاعل" }, { ax: 6, t: "استخدام الوسائل الرقمية في الشرح", d: "الأحد 3-4-1448 هـ", desc: "عرض تفاعلي وأوراق عمل رقمية.", imp: "تحسّن سرعة الإنجاز" }, { ax: 4, t: "علاج ضعف مهارة الكسور", d: "الأحد 10-4-1448 هـ", desc: "خطة علاجية لمجموعة من الطالبات مع متابعة أسبوعية.", imp: "تحسّن 70% من المجموعة" }, { ax: 2, t: "لقاء أولياء الأمور", d: "الخميس 14-4-1448 هـ", desc: "لقاء لعرض مستوى الطالبات وسبل الدعم المنزلي.", imp: "تفاعل إيجابي من الأسر" }], subj: "الرياضيات", cls: "ثاني متوسط", year: "1448 هـ", term: "الأول", teacher: "نورة خالد" },
   minutes: { dept: "إدارة تعليم مكة المكرمة", year: "1447 / 1448 هـ", kind: "لجنة التميز", _names: ["نور فهد", "نورة خالد", "هند الشمري", "سارة الدوسري", "منى الزهراني", "هدى القرني", "أمل الغامدي", "لمى العتيبي"], num: "الأول", vdate: "1448/3/27 هـ", vtime: "من 8:00 إلى 9:00", place: "غرفة الاجتماعات", disc: "مراجعة مؤشرات الأداء\nتوزيع المهام على الأعضاء", dec: "اعتماد الخطة المقترحة\nرفع تقرير المتابعة نهاية الشهر" }
 };
 const PREVIEW_CORE = `
@@ -767,7 +768,7 @@ export default {
         if (pk && !/\.[a-z0-9]+$/i.test(p.replace(/\.html$/, ""))) ctx.waitUntil(trackVisit(req, env, pk).catch(() => {}));
       }
       if (p === "/_demo.js") return new Response(demoJs(DEMO_FORMS_ALL.includes(url.searchParams.get("f") || "") ? url.searchParams.get("f") : ""), { headers: { "content-type": "application/javascript; charset=utf-8", ...NOSTORE } });
-      const DEMO_FORMS = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes", "learning", "tracking", "grades", "gradesfinal"];
+      const DEMO_FORMS = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes", "learning", "tracking", "grades", "gradesfinal", "portfolio"];
       const dm = p === "/demo" ? "index" : (/^\/demo\/[a-z]+$/.test(p) ? p.slice(6) : null);
       if (dm && (dm === "index" || DEMO_FORMS.includes(dm))) {
         const dr = await env.ASSETS.fetch(new Request(new URL("/" + dm + ".html", url), req));
