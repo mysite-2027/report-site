@@ -640,7 +640,7 @@ function demoJs(f) {
 
 
 const DEMO_OPEN = "analysis";
-const DEMO_FORMS_ALL = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes"];
+const DEMO_FORMS_ALL = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes", "learning", "tracking", "grades", "gradesfinal"];
 const COMMON_P = { dept: "إدارة تعليم الأحساء", school: "مدرسة الأمل المتوسطة", principal: "نور فهد" };
 const PREVIEW_DATA = {
   report: { pname: "أدوات الذكاء الاصطناعي", executor: "نورة خالد", place: "المختبر الرقمي", target: "طالبات الصف الثاني المتوسط", count: "28", pdate: "الأحد 17-3-1448 هـ", goal: "تعريف الطالبات بأدوات الذكاء الاصطناعي وكيفية توظيفها في التعلم بصورة آمنة ومسؤولة", goals: "التعريف بأبرز أدوات الذكاء الاصطناعي التعليمية\nالتدريب على صياغة الأوامر والاستفادة من نتائجها\nتعزيز الاستخدام المسؤول والآمن للأدوات", teacher: "نورة خالد", principal: "نور فهد" },
@@ -651,6 +651,10 @@ const PREVIEW_DATA = {
   plc: { dept: "إدارة تعليم حائل", year: "1448 هـ", term: "الأول", num: "الجلسة الأولى", vdate: "الأحد 1448/3/27", topic: "استراتيجيات تدريس الرياضيات", tool: "عصف ذهني", place: "غرفة المعلمات", nextd: "الأحد 1448/4/4", target: "معلمات بتخصصات مختلفة", goals: "تبادل الخبرات في تدريس الرياضيات\nاقتراح أنشطة صفية مبتكرة", res: "عرض تجربتين ناجحتين في تدريس الكسور\nمناقشة التحديات وطرق معالجتها", recs: "تعميم التجربتين على بقية المعلمات\nعقد ورشة تطبيقية الأسبوع القادم", names: "نورة خالد\nهند الشمري\nسارة الدوسري\nأمل الغامدي", coord: "منى الزهراني" },
   waiting: { _checks: [1, 2, 4, 5], tname: "نورة خالد", vdate: "الأحد 1448/3/27", period: "الثالثة", cls: "ثاني متوسط / 2", cnt: "26", subj: "الرياضيات", topic: "مراجعة وحدة الكسور", goals: "تثبيت مفاهيم الوحدة\nتنمية مهارات الحوار", notes: "تفاعل الطالبات إيجابي وانضباط جيد" },
   attendance: { dept: "إدارة تعليم الباحة", prog: "حصة إثرائية في الرياضيات", tname: "نورة خالد", vdate: "الأحد 1448/3/27", vtime: "الثالثة", place: "قاعة الاجتماعات", cls: "ثالث أول", names: "علياء محمد\nالجازي محمد\nأسماء فيصل\nرغداء نايف\nلمى سعد\nريماس خالد\nجوري عبدالله\nشهد ناصر\nملاك فهد\nلجين العمري\nهتون صالح\nغدير علي\nسلمى راشد\nدانة سلطان\nتالا ماجد", blank: "0" },
+  learning: { cls: "ثاني متوسط", sect: "2/ب", pdate: "الأحد 1448/3/27", subj: "", teacher: "نورة خالد" },
+  tracking: { subj: "الرياضيات", cls: "ثاني متوسط", sect: "2/ب", year: "1448 هـ", teacher: "نورة خالد", rows: "20", names: "علياء محمد\nالجازي محمد\nأسماء فيصل\nرغداء نايف\nلمى سعد\nريماس خالد\nجوري عبدالله\nشهد ناصر\nملاك فهد\nلجين العمري\nهتون صالح\nغدير علي" },
+  grades: { subj: "الرياضيات", cls: "ثاني متوسط", sect: "2/ب", year: "1448 هـ", teacher: "نورة خالد", rows: "20", names: "علياء محمد\nالجازي محمد\nأسماء فيصل\nرغداء نايف\nلمى سعد\nريماس خالد\nجوري عبدالله\nشهد ناصر\nملاك فهد\nلجين العمري\nهتون صالح\nغدير علي" },
+  gradesfinal: { subj: "الرياضيات", cls: "ثاني متوسط", sect: "2/ب", year: "1448 هـ", teacher: "نورة خالد", rows: "20", names: "علياء محمد\nالجازي محمد\nأسماء فيصل\nرغداء نايف\nلمى سعد\nريماس خالد\nجوري عبدالله\nشهد ناصر\nملاك فهد\nلجين العمري\nهتون صالح\nغدير علي" },
   minutes: { dept: "إدارة تعليم مكة المكرمة", year: "1447 / 1448 هـ", kind: "لجنة التميز", _names: ["نور فهد", "نورة خالد", "هند الشمري", "سارة الدوسري", "منى الزهراني", "هدى القرني", "أمل الغامدي", "لمى العتيبي"], num: "الأول", vdate: "1448/3/27 هـ", vtime: "من 8:00 إلى 9:00", place: "غرفة الاجتماعات", disc: "مراجعة مؤشرات الأداء\nتوزيع المهام على الأعضاء", dec: "اعتماد الخطة المقترحة\nرفع تقرير المتابعة نهاية الشهر" }
 };
 const PREVIEW_CORE = `
@@ -751,7 +755,7 @@ export default {
         if (pk && !/\.[a-z0-9]+$/i.test(p.replace(/\.html$/, ""))) ctx.waitUntil(trackVisit(req, env, pk).catch(() => {}));
       }
       if (p === "/_demo.js") return new Response(demoJs(DEMO_FORMS_ALL.includes(url.searchParams.get("f") || "") ? url.searchParams.get("f") : ""), { headers: { "content-type": "application/javascript; charset=utf-8", ...NOSTORE } });
-      const DEMO_FORMS = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes"];
+      const DEMO_FORMS = ["report", "analysis", "remedial", "enrichment", "certificate", "visit", "plc", "waiting", "attendance", "minutes", "learning", "tracking", "grades", "gradesfinal"];
       const dm = p === "/demo" ? "index" : (/^\/demo\/[a-z]+$/.test(p) ? p.slice(6) : null);
       if (dm && (dm === "index" || DEMO_FORMS.includes(dm))) {
         const dr = await env.ASSETS.fetch(new Request(new URL("/" + dm + ".html", url), req));
