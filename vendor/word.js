@@ -13,6 +13,8 @@
   }
 
   window.muyassirWord = async function (sheet, opt) {
+    var LAND = !!(sheet && sheet.classList && sheet.classList.contains("land"));
+    W = LAND ? 15138 : 10206;
     opt = opt || {};
     var D = window.docx;
     if (!D) throw new Error("docx missing");
@@ -134,17 +136,20 @@
       var cols = ws.map(function (w) { return Math.max(120, Math.floor(w / sum * total)); });
       var diff = total - cols.reduce(function (a, b) { return a + b; }, 0);
       cols[0] += diff;
+      var dense = /\bdense\b/.test(t.className);
       var rows = rowsEl.map(function (r, ri) {
         var cells = Array.prototype.slice.call(r.cells).map(function (c, ci) {
           var s = cs(c), isTh = c.tagName === "TH", isSp = /\bsp\b/.test(c.className);
           if (isSp) return cell([empty()], cols[ci], { margins: { top: 0, bottom: 0, left: 0, right: 0 } });
           var o = { borders: isTh ? bd(hexOf(s.borderTopColor) || CL, 4) : LINE };
           if (isTh) o.shading = fill(hexOf(s.backgroundColor) || CL);
+          var fsz = 20;
+          if (dense && isTh) { o.margins = { top: 30, bottom: 30, left: 10, right: 10 }; fsz = cols[ci] < 520 ? 11 : (cols[ci] < 800 ? 14 : 18); }
           var color = isTh ? "FFFFFF" : (hexOf(s.color) || "0B1620");
           var rr = [];
           var t0 = c.textContent.replace(/\s+/g, " ").trim();
           if (t0) {
-            runs(t0, { bold: isTh || parseInt(s.fontWeight, 10) >= 600, color: color, size: 20 }).forEach(function (x) { rr.push(x); });
+            runs(t0, { bold: isTh || parseInt(s.fontWeight, 10) >= 600, color: color, size: fsz }).forEach(function (x) { rr.push(x); });
           }
           else if (c.querySelector(".bx")) { runs("□", { font: SYM, color: "6B7280", size: 26 }).forEach(function (x) { rr.push(x); }); }
           return cell([para(rr, { alignment: isTh ? CEN : alignOf(c), spacing: { after: 0 } })], cols[ci], o);
@@ -152,7 +157,7 @@
         var hasTh = r.cells.length && r.cells[0].tagName === "TH";
         return new D.TableRow({
           tableHeader: ri === 0 && hasTh, cantSplit: true,
-          height: { value: hasTh ? 360 : 400, rule: D.HeightRule.ATLEAST }, children: cells
+          height: { value: (r.classList && r.classList.contains("hr")) ? Math.max(240, Math.round(r.getBoundingClientRect().height * 15)) : (hasTh ? 360 : 400), rule: D.HeightRule.ATLEAST }, children: cells
         });
       });
       return table(rows, cols);
@@ -337,11 +342,16 @@
 
     /* ===== بناء الصفحة ===== */
     var ch = [], footer = null, first = true, sigTable = null;
-    var add = function (x, g) { if (!first) ch.push(gap(Math.min(g || 100, 70))); ch.push(x); first = false; };
+    var hdrArr = [], hFirst = true, curRep = false;
+    var add = function (x, g) {
+      if (curRep) { if (!hFirst) hdrArr.push(gap(Math.min(g || 100, 70))); hdrArr.push(x); hFirst = false; return; }
+      if (!first) ch.push(gap(Math.min(g || 100, 70))); ch.push(x); first = false;
+    };
     var kids = Array.prototype.slice.call(sheet.children);
 
     for (var ki = 0; ki < kids.length; ki++) {
       var el = kids[ki], cn = el.className || "";
+      curRep = /\brep\b/.test(cn);
       if (/\bsh-head\b/.test(cn)) {
         var tx = el.querySelector(".tx"), sp = tx ? tx.querySelector("span") : null;
         var dept = "";
@@ -353,12 +363,18 @@
         add(table([new D.TableRow({ children: [
           cell([para([runs(dept.trim(), { bold: true, color: tc, size: 24 })], { alignment: CEN, spacing: { after: 20 } }),
                 para([runs(school)], { alignment: CEN, spacing: { after: 0 } })], 3500, { borders: HB }),
-          cell([empty()], 3500, { borders: HB }),
+          cell([empty()], W - 6706, { borders: HB }),
           cell([new D.Paragraph({ alignment: D.AlignmentType.LEFT, spacing: { after: 0 }, children: lg ? [lg] : [] })], 3206, { borders: HB })
-        ] })], [3500, 3500, 3206]), 100);
+        ] })], [3500, W - 6706, 3206]), 100);
       } else if (/\bbar\b/.test(cn)) {
         add(table([new D.TableRow({ children: [cell([para([runs(el.textContent.trim(), { bold: true, color: "FFFFFF", size: 30 })],
           { alignment: CEN, spacing: { before: 40, after: 40 } })], W, { shading: fill(hexOf(cs(el).backgroundColor) || CL) })] })], [W]), 100);
+      } else if (/\binfo\b/.test(cn) && /\brow1\b/.test(cn)) {
+        var rc = Array.prototype.slice.call(el.children), cw1 = Math.floor(W / rc.length), ws1 = rc.map(function () { return cw1; });
+        ws1[0] += W - cw1 * rc.length;
+        add(table([new D.TableRow({ children: rc.map(function (d, k) {
+          return cell([para([inline(d)], { alignment: alignOf(d), spacing: { after: 0 } })], ws1[k], { borders: BOX });
+        }) })], ws1), 100);
       } else if (/\binfo\b/.test(cn)) {
         var cellsEl = Array.prototype.slice.call(el.children), rows = [], pend = null;
         var ic = function (d, w, span) {
@@ -415,8 +431,9 @@
     ch.push(empty());
     if (!footer && sigTable) footer = new D.Footer({ children: [sigTable, empty()] });
 
-    var sect = { properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 850, bottom: 900, left: 850, right: 850, footer: 360 } } }, children: ch };
+    var sect = { properties: { page: { size: LAND ? { width: 11906, height: 16838, orientation: D.PageOrientation.LANDSCAPE } : { width: 11906, height: 16838 }, margin: { top: 850, bottom: 900, left: 850, right: 850, footer: 360 } } }, children: ch };
     if (footer) sect.footers = { default: footer };
+    if (hdrArr.length) sect.headers = { default: new D.Header({ children: hdrArr.concat([gap(60)]) }) };
     var doc = new D.Document({
       creator: "مُيَسِّر التقارير المدرسية", title: opt.title || "تقرير",
       styles: { default: { document: { run: { font: FN, size: 22, rightToLeft: true } } } },
