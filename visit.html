@@ -179,7 +179,7 @@ $("logoIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,400,"imag
 $("logoDel").onclick=function(){logo=null;$("logoIn").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
 $("stampIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,500,"image/png",function(d){stamp=d;sto("rpt_stamp",d);render()})};
 $("stampDel").onclick=function(){stamp=null;$("stampIn").value="";try{localStorage.removeItem("rpt_stamp")}catch(e){}render()};
-document.addEventListener("paste",function(e){var cd=e.clipboardData;if(!cd)return;var ae=document.activeElement;if(ae&&/^(INPUT|TEXTAREA)$/.test(ae.tagName)&&ae.type!=="file")return;var m=$("moeMsg"),
+document.addEventListener("paste",function(e){var cd=e.clipboardData;if(!cd)return;if(e.defaultPrevented)return;var ae=e.target&&e.target.tagName?e.target:document.activeElement;if(ae&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)&&ae.type!=="file")return;var m=$("moeMsg"),
 done=function(f){e.preventDefault();shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render();m.textContent="تمت إضافة الشعار من الحافظة."})},fs=cd.files||[],i,mm;
 for(i=0;i<fs.length;i++){if(/^image\//.test(fs[i].type)){done(fs[i]);return}}
 var tx=cd.getData("text/plain")||"",ht=cd.getData("text/html")||"";
