@@ -144,6 +144,7 @@
           var o = { borders: isTh ? bd(hexOf(s.borderTopColor) || CL, 4) : LINE };
           if (isTh) o.shading = fill(hexOf(s.backgroundColor) || CL);
           var fsz = 20;
+          if (!isTh && r.classList && r.classList.contains("hr")) o.margins = { top: 10, bottom: 10, left: 110, right: 110 };
           if (dense && isTh) { o.margins = { top: 30, bottom: 30, left: 10, right: 10 }; fsz = cols[ci] < 520 ? 11 : (cols[ci] < 800 ? 14 : 18); }
           var color = isTh ? "FFFFFF" : (hexOf(s.color) || "0B1620");
           var rr = [];
