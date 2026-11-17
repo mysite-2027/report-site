@@ -116,10 +116,10 @@
     attach: function (o) {
       o = o || {};
       var st = document.createElement("style"); st.textContent = ".sheet.evbig .ev div{height:80mm}"; document.head.appendChild(st);
-      var anc = document.querySelector('#panel .hint[style*="rgba(44,125,181"]') || null, host = document.createElement("div");
-      host.innerHTML = '<div class="two"><div><label>الزخرفة الجانبية (ورد خفيف على الجانبين)</label><select id="decSel"><option value="0">بدون زخرفة</option><option value="1">١ — غصن ورد متعرّج</option><option value="2">٢ — غصن ناعم</option><option value="3">٣ — زهور متناثرة</option></select></div><div><label>أيقونات العناوين</label><select id="icoSel"><option value="0">بدون أيقونات</option><option value="1">إظهار الأيقونات</option></select></div></div>' +
+      var anc = document.querySelector('.panel .hint[style*="rgba(44,125,181"]') || null, host = document.createElement("div");
+      host.innerHTML = '<div class="two"><div><label>الزخرفة الجانبية</label><select id="decSel"><option value="0">بدون زخرفة</option><option value="1">١ — غصن ورد متعرّج</option><option value="2">٢ — غصن ناعم</option><option value="3">٣ — زهور متناثرة</option></select></div><div><label>أيقونات العناوين</label><select id="icoSel"><option value="0">بدون أيقونات</option><option value="1">إظهار الأيقونات</option></select></div></div>' +
         (o.ev ? '<div class="two"><div><label>حجم الشواهد (PDF وWord)</label><select id="evSel"><option value="0">مضغوطة (في نفس الصفحة)</option><option value="1">كبيرة (الشواهد في صفحة مستقلة)</option></select></div></div>' : "");
-      var par = anc ? anc.parentNode : ($("panel") || document.body);
+      var par = anc ? anc.parentNode : (document.querySelector(".panel fieldset") || document.querySelector(".panel") || document.body);
       while (host.firstChild) { if (anc) par.insertBefore(host.firstChild, anc); else par.appendChild(host.firstChild); }
       $("decSel").value = String(S.dec); $("icoSel").value = S.ico ? "1" : "0"; if ($("evSel")) $("evSel").value = S.evm;
       var again = function () { if (typeof window.render === "function") window.render(); else apply(); };
