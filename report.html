@@ -90,6 +90,7 @@ body{background:#fff}
 </div>
 <div class="two"><div><label>لون الإطارات والأشرطة</label><select id="clr"><option value="n">كحلي (الافتراضي)</option><option value="g">أخضر</option><option value="t">تركوازي</option><option value="b">أزرق</option><option value="d">بيج</option><option value="v">بنفسجي</option><option value="m">موف</option><option value="s">أزرق مخضر داكن</option><option value="k">رمادي</option></select></div><div><label>محاذاة النصوص</label><select id="aln"><option value="c">وسط (الافتراضي)</option><option value="r">يمين</option></select></div></div>
 <div class="two"><div><label>الزخرفة الجانبية (ورد خفيف على الجانبين)</label><select id="decSel"><option value="0">بدون زخرفة</option><option value="1">١ — غصن ورد متعرّج</option><option value="2">٢ — غصن ناعم</option><option value="3">٣ — زهور متناثرة</option></select></div><div><label>أيقونات العناوين</label><select id="icoSel"><option value="0">بدون أيقونات</option><option value="1">إظهار الأيقونات</option></select></div></div>
+<div class="two"><div><label>حجم الشواهد في ملف Word</label><select id="evSel"><option value="0">مضغوطة (في نفس الصفحة)</option><option value="1">كبيرة (الشواهد في صفحة مستقلة)</option></select></div></div>
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، انقر على الصورة بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
 <label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logo" accept="image/*">
@@ -180,7 +181,7 @@ $("sheet").innerHTML=
 function drawRows(){
 $("rows").innerHTML=rows.map(function(r,i){return '<div class="row" data-i="'+i+'"><label>المعيار</label><input data-k="c" value="'+esc(r.c)+'"><div class="two"><div><label>حالة التحقق</label><select data-k="s"><option'+(r.s==="تحقق"?" selected":"")+'>تحقق</option><option'+(r.s!=="تحقق"?" selected":"")+'>لم يتحقق</option></select></div><div><label>ملاحظات</label><input data-k="n" value="'+esc(r.n)+'"></div></div><label>طريقة قياس الأثر</label><input data-k="m" value="'+esc(r.m)+'"><button type="button" class="del" data-del="'+i+'">حذف</button></div>'}).join("")
 }
-$("icoSel").value=ICO.on?"1":"0";$("icoSel").onchange=function(){ICO.on=this.value==="1";sto("rpt_ico",JSON.stringify(ICO));render()};
+$("evSel").value=sto("rpt_evm")==="1"?"1":"0";$("evSel").onchange=function(){sto("rpt_evm",this.value)};$("icoSel").value=ICO.on?"1":"0";$("icoSel").onchange=function(){ICO.on=this.value==="1";sto("rpt_ico",JSON.stringify(ICO));render()};
 $("decSel").onchange=function(){DEC.s=+this.value|0;decSave();render()};decUi();
 $("rows").addEventListener("input",function(e){var d=e.target.closest(".row");if(d&&e.target.dataset.k){rows[+d.dataset.i][e.target.dataset.k]=e.target.value;render()}});
 $("rows").addEventListener("click",function(e){var i=e.target.dataset.del;if(i!=null){rows.splice(+i,1);drawRows();render()}});
@@ -238,9 +239,9 @@ try{var s=JSON.parse(sto("rpt_settings")||"{}");KEEP.forEach(function(k){if(s[k]
 drawRows();render();
 $("word").onclick=async function(){var b=$("word"),old=b.textContent,m=$("pm")||$("msg");if(m)m.textContent="";b.disabled=true;b.textContent="جارٍ إنشاء ملف Word…";
 try{var ld=function(u){return new Promise(function(ok,no){var s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)})};
-if(!window.docx)await ld("/vendor/docx.min.js?v=1");if(!window.muyassirWord)await ld("/vendor/word.js?v=7");
+if(!window.docx)await ld("/vendor/docx.min.js?v=1");if(!window.muyassirWord)await ld("/vendor/word.js?v=8");
 var nm=($("pname").value.replace("اسم البرنامج/النشاط:","").trim()||"تقرير-برنامج").replace(/[\\/:*?"<>|]/g,"-");
-var _dc={};Array.prototype.forEach.call($("sheet").querySelectorAll(".dec"),function(e){var _u=e.getAttribute("data-t");if(_u)_dc[e.getAttribute("data-s")]=_u;e.remove()});var blob;try{blob=await window.muyassirWord($("sheet"),{title:nm,evH:130,deco:(_dc.r||_dc.l)?_dc:null})}finally{icons();decorate()}
+var _dc={};Array.prototype.forEach.call($("sheet").querySelectorAll(".dec"),function(e){var _u=e.getAttribute("data-t");if(_u)_dc[e.getAttribute("data-s")]=_u;e.remove()});var blob;try{blob=await window.muyassirWord($("sheet"),{title:nm,evH:($("evSel").value==="1"?340:130),evBig:$("evSel").value==="1",deco:(_dc.r||_dc.l)?_dc:null})}finally{icons();decorate()}
 var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nm+".docx";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
 if(m)m.textContent="تم تجهيز ملف Word. افتحه وعدّل ما تشاء.";
 }catch(e){if(m)m.textContent="تعذّر إنشاء ملف Word. تأكد من اتصالك بالإنترنت ثم أعد المحاولة، أو استخدم حفظ PDF."}
