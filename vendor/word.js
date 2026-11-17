@@ -395,7 +395,7 @@
 
     var BIGM = { top: 100, bottom: 100, left: 200, right: 200 };
     var secBox = function (sec) {
-      return table([new D.TableRow({ cantSplit: false, children: [cell(secContent(sec, W - 500), W, { borders: BOX, margins: BIGM })] })], [W]);
+      return table([new D.TableRow({ cantSplit: !!(sec.querySelector && sec.querySelector(".ev")), children: [cell(secContent(sec, W - 500), W, { borders: BOX, margins: BIGM })] })], [W]);
     };
 
     /* زخرفة جانبية: عمودان جانبيان في جدول خارجي (صور داخل الخلايا، تعمل في كل برامج العرض) */
@@ -415,7 +415,7 @@
     };
     var mkFooter = function (kids) { return new D.Footer({ children: DECO ? wrapDeco(kids, null, null) : kids }); };
 
-    var evBreak = -1;
+    var evBreak = -1, evSplit = -1, evH0 = 0, evT0 = 0;
     var PB = function () { return new D.Paragraph({ pageBreakBefore: true, spacing: { before: 0, after: 0, line: 20, lineRule: D.LineRuleType.EXACT }, children: [] }); };
 
     /* ===== بناء الصفحة ===== */
@@ -480,7 +480,7 @@
           return /\bsec\b/.test(s.className) ? cell(secContent(s, half - 500), half, { borders: BOX, margins: BIGM }) : cell([empty()], half);
         }) })], [half, half]), 100);
       } else if (/\bsec\b/.test(cn)) {
-        if (opt.evBig && el.querySelector(".ev")) { evBreak = ch.length; first = true; }
+        if (el.querySelector(".ev")) { evSplit = ch.length; evH0 = el.offsetHeight || 300; evT0 = el.offsetTop || 0; if (opt.evBig) { evBreak = ch.length; first = true; } }
         var bigT = el.querySelector("table.q");
         if (bigT && bigT.rows.length > 10) {
           secContent(el, W).forEach(function (x) { add(x, 60); });
@@ -536,6 +536,11 @@
           if (evBreak > 0) {
             var pr2 = await mkPng(opt.deco.r, 6), pl2 = await mkPng(opt.deco.l, 6);
             decoBody = wrapDeco(ch.slice(0, evBreak), pr, pl, 2100, DNT).concat([PB()]).concat(wrapDeco(ch.slice(evBreak), pr2, pl2, 300, 6));
+          } else if (evSplit > 0 && evT0 > 0) {
+            var hd0 = sheet.querySelector(".sh-head"), tp0 = hd0 ? hd0.offsetTop + hd0.offsetHeight : 0;
+            var nA = Math.max(1, Math.min(DNT, Math.floor((evT0 - tp0 - 18) * 0.85 / 120))), nB = Math.max(1, Math.min(5, Math.floor(evH0 * 0.85 / 120)));
+            var prA = nA === DNT ? pr : await mkPng(opt.deco.r, nA), plA = nA === DNT ? pl : await mkPng(opt.deco.l, nA), prB = await mkPng(opt.deco.r, nB), plB = await mkPng(opt.deco.l, nB);
+            decoBody = wrapDeco(ch.slice(0, evSplit), prA, plA, 2100, nA).concat(wrapDeco(ch.slice(evSplit), prB, plB, 300, nB));
           } else decoBody = wrapDeco(ch, pr, pl, 2100, DNT);
         }
       } catch (e) { decoBody = null; }
