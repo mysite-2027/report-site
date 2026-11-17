@@ -497,12 +497,31 @@
     ch.push(empty());
     if (!footer && sigTable) footer = new D.Footer({ children: [sigTable, empty()] });
 
+    var decoP = null;
+    if (opt.deco && (opt.deco.r || opt.deco.l)) {
+      try {
+        var NT = 6, TW = 30, TH = 120, SC = 3;
+        var loadI = function (u) { return new Promise(function (ok) { var im = new Image(); im.onload = function () { ok(im); }; im.onerror = function () { ok(null); }; im.src = u; }); };
+        var mkSide = async function (uri, xpx) {
+          if (!uri) return null;
+          var im = await loadI(uri); if (!im) return null;
+          var c = document.createElement("canvas"); c.width = TW * SC; c.height = TH * SC * NT; var x = c.getContext("2d");
+          for (var t = 0; t < NT; t++) x.drawImage(im, 0, t * TH * SC, TW * SC, TH * SC);
+          return new D.ImageRun({ type: "png", data: u8(c.toDataURL("image/png")), transformation: { width: TW, height: TH * NT },
+            floating: { horizontalPosition: { relative: D.HorizontalPositionRelativeFrom.PAGE, offset: Math.round(xpx * 9525) }, verticalPosition: { relative: D.VerticalPositionRelativeFrom.PAGE, offset: Math.round(200 * 9525) }, behindDocument: true, allowOverlap: true, wrap: { type: D.TextWrappingType.NONE } },
+            altText: { title: "زخرفة", description: "زخرفة جانبية", name: "deco" } });
+        };
+        var dr = await mkSide(opt.deco.r, 794 - 7 - TW), dl = await mkSide(opt.deco.l, 7), dk = [dr, dl].filter(Boolean);
+        if (dk.length) decoP = new D.Paragraph({ spacing: { after: 0, line: 20, lineRule: D.LineRuleType.EXACT }, children: dk });
+      } catch (e) { decoP = null; }
+    }
     var sect = { properties: { page: { size: LAND ? { width: 11906, height: 16838, orientation: D.PageOrientation.LANDSCAPE } : { width: 11906, height: 16838 }, margin: { top: 850, bottom: 900, left: 850, right: 850, footer: 360 } } }, children: ch };
     var DEMO = location.pathname.indexOf("/demo") === 0;
     var demoP = function () { return new D.Paragraph({ alignment: CEN, bidirectional: true, spacing: { before: 40, after: 40 }, children: runs("نسخة تجريبية — مُيَسِّر التقارير المدرسية — اشترك للحصول على النسخة الكاملة", { bold: true, color: "B42318", size: 26 }) }); };
     if (footer) sect.footers = { default: footer };
-    if (DEMO) sect.headers = { default: new D.Header({ children: [demoP()].concat(hdrArr.length ? hdrArr.concat([gap(60)]) : []) }) };
-    else if (hdrArr.length) sect.headers = { default: new D.Header({ children: hdrArr.concat([gap(60)]) }) };
+    if (DEMO) sect.headers = { default: new D.Header({ children: (decoP ? [decoP] : []).concat([demoP()]).concat(hdrArr.length ? hdrArr.concat([gap(60)]) : []) }) };
+    else if (hdrArr.length) sect.headers = { default: new D.Header({ children: (decoP ? [decoP] : []).concat(hdrArr).concat([gap(60)]) }) };
+    else if (decoP) sect.headers = { default: new D.Header({ children: [decoP] }) };
     var doc = new D.Document({
       creator: "مُيَسِّر التقارير المدرسية", title: opt.title || "تقرير",
       styles: { default: { document: { run: { font: FN, size: 22, rightToLeft: true } } } },
