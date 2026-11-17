@@ -15,7 +15,21 @@
   window.muyassirWord = async function (sheet, opt) {
     var LAND = !!(sheet && sheet.classList && sheet.classList.contains("land"));
     W = LAND ? 15138 : 10206;
-    opt = opt || {};
+    opt = Object.assign({}, opt || {});
+    /* وضع «مضغوطة»: ضبط ارتفاع الصور حسب المساحة المتبقية؛ وإن لم تتسع تنتقل الشواهد لصفحة مستقلة */
+    try {
+      var evE = sheet.querySelector(".ev");
+      if (!LAND && !opt.evBig && opt.evH && evE && !/\bpf\b/.test(evE.className || "")) {
+        var evS = evE.closest(".sec"), sgE = sheet.querySelector(".sig,.sig3"), cntE = evE.children.length, rowsE = Math.max(1, Math.ceil(cntE / 2));
+        if (evS && cntE) {
+          var shR = sheet.getBoundingClientRect(), sc = shR.width ? shR.width / 794 : 1, topE = (evS.getBoundingClientRect().top - shR.top) / sc;
+          var availE = 1006 - (topE - 53) * 0.85 - (sgE && sgE.querySelector("img") ? 110 : 50) - 40 - 65;
+          var perE = Math.floor(availE * 0.9 / rowsE) - 16;
+          if (perE >= 75) opt.evH = Math.min(opt.evH, perE);
+          else { opt.evBig = true; opt.evH = 340; }
+        }
+      }
+    } catch (e0) {}
     var D = window.docx;
     if (!D) throw new Error("docx missing");
     var cs = function (el) { return getComputedStyle(el); };
@@ -246,7 +260,7 @@
         var cs2;
         if (i + 1 < items.length) cs2 = [one(items[i]), one(items[i + 1])];
         else cs2 = [cell([empty()], q), one(items[i]), cell([empty()], q)];
-        rows.push(new D.TableRow({ cantSplit: true, height: { value: 1500, rule: D.HeightRule.ATLEAST }, children: cs2 }));
+        rows.push(new D.TableRow({ cantSplit: true, height: { value: Math.min(1500, Math.round(mhOf * 15)), rule: D.HeightRule.ATLEAST }, children: cs2 }));
       }
       return table(rows, [q, q, q, q]);
     };
