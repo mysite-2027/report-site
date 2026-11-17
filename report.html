@@ -56,6 +56,7 @@ table.imp td{overflow-wrap:anywhere}
 table.imp th{background:var(--p);color:#fff;padding:4px 6px;border:1px solid var(--p)}
 table.imp td{border:1px solid var(--l);padding:4px 6px;text-align:center;vertical-align:top}
 .ev{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sheet.evbig .ev div{height:80mm}
 .ev div{border:1.5px solid var(--p);border-radius:10px;height:34mm;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff;color:#9aa8b2}
 .ev img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
 .ev div:last-child:nth-child(odd){grid-column:1/-1;justify-self:center;width:calc(50% - 4px)}
@@ -90,7 +91,7 @@ body{background:#fff}
 </div>
 <div class="two"><div><label>لون الإطارات والأشرطة</label><select id="clr"><option value="n">كحلي (الافتراضي)</option><option value="g">أخضر</option><option value="t">تركوازي</option><option value="b">أزرق</option><option value="d">بيج</option><option value="v">بنفسجي</option><option value="m">موف</option><option value="s">أزرق مخضر داكن</option><option value="k">رمادي</option></select></div><div><label>محاذاة النصوص</label><select id="aln"><option value="c">وسط (الافتراضي)</option><option value="r">يمين</option></select></div></div>
 <div class="two"><div><label>الزخرفة الجانبية (ورد خفيف على الجانبين)</label><select id="decSel"><option value="0">بدون زخرفة</option><option value="1">١ — غصن ورد متعرّج</option><option value="2">٢ — غصن ناعم</option><option value="3">٣ — زهور متناثرة</option></select></div><div><label>أيقونات العناوين</label><select id="icoSel"><option value="0">بدون أيقونات</option><option value="1">إظهار الأيقونات</option></select></div></div>
-<div class="two"><div><label>حجم الشواهد في ملف Word</label><select id="evSel"><option value="0">مضغوطة (في نفس الصفحة)</option><option value="1">كبيرة (الشواهد في صفحة مستقلة)</option></select></div></div>
+<div class="two"><div><label>حجم الشواهد (PDF وWord)</label><select id="evSel"><option value="0">مضغوطة (في نفس الصفحة)</option><option value="1">كبيرة (الشواهد في صفحة مستقلة)</option></select></div></div>
 <p class="hint" style="background:rgba(44,125,181,.12);border-radius:8px;padding:6px 10px;margin:6px 0 4px">أسرع طريقة: افتح رابط الشعار في الأسفل، انقر على الصورة بالزر الأيمن واختر «نسخ الصورة»، ثم ارجع إلى هذه الصفحة واضغط Ctrl + V.</p>
 <p class="hint" id="moeMsg"></p>
 <label>أو ارفع ملف شعار وزارة التعليم (اختياري)</label><input type="file" id="logo" accept="image/*">
@@ -144,7 +145,7 @@ var DEC={s:0};try{var _dv=JSON.parse(sto("rpt_dec")||"{}");if(_dv&&typeof _dv===
 function decSave(){sto("rpt_dec",JSON.stringify(DEC))}
 function decUi(){var b=$("decSel");if(b)b.value=String(DEC.s)}
 function decorate(){var sh=$("sheet");Array.prototype.forEach.call(sh.querySelectorAll(".dec"),function(e){e.remove()});if(!DEC.s)return;var cs=getComputedStyle(sh),g=function(k,d){return(cs.getPropertyValue(k)||"").trim()||d},p=g("--p","#15445a"),b=g("--b","#3d7eb9"),gr=g("--gr","#07a869"),g2=g("--g2","#0a7f7d");
-var hd=sh.querySelector(".sh-head"),sg=sh.querySelector(".sig"),top=(hd?hd.offsetTop+hd.offsetHeight:90)+18,bot=(sg?sg.offsetTop:sh.scrollHeight-150)-18,H=120,hh=Math.floor((bot-top)/H)*H;if(hh<H)return;top+=((bot-top)-hh)/2;
+var hd=sh.querySelector(".sh-head"),sg=sh.querySelector(".sig"),top=(hd&&hd.offsetHeight?hd.offsetTop+hd.offsetHeight:30)+18,bot=(sg?sg.offsetTop:sh.scrollHeight-150)-18,H=120,hh=Math.floor((bot-top)/H)*H;if(hh<H)return;top+=((bot-top)-hh)/2;
 function lf(x,y,a,c){return '<ellipse cx="6" cy="0" rx="6" ry="2.4" fill="'+c+'" opacity=".5" transform="translate('+x+" "+y+") rotate("+a+')"/>'}
 function fl(cx,cy,r,c,o){var q="",i;for(i=0;i<5;i++)q+='<ellipse cx="'+cx+'" cy="'+(cy-r*.85)+'" rx="'+(r*.5)+'" ry="'+(r*.8)+'" fill="'+c+'" opacity="'+o+'" transform="rotate('+(i*72)+" "+cx+" "+cy+')"/>';return q+'<circle cx="'+cx+'" cy="'+cy+'" r="'+(r*.28)+'" fill="'+g2+'" opacity=".85"/>'}
 var B1='<path d="M15 0C5 20 25 40 15 60C5 80 25 100 15 120" fill="none" stroke="'+p+'" stroke-width="1.2" opacity=".45"/>'+lf(12,15,-35,g2)+lf(18,45,35,gr)+lf(12,75,-35,g2)+lf(18,105,35,gr)+fl(15,30,7.5,b,.4)+fl(15,90,6.5,gr,.45);
@@ -199,11 +200,28 @@ m.textContent=cd.types&&cd.types.length?"لم أجد صورة في الحافظ�
 $("logoDel").onclick=function(){logo=null;$("logo").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
 Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el,i){el.onchange=function(e){var f=e.target.files[0];if(f)shrink(f,1400,"image/jpeg",function(d){imgs[i]=d;render()});else{imgs[i]=null;render()}}});
 $("print").onclick=function(){window.print();$("msg").textContent="إن لم تظهر نافذة الطباعة فافتح الصفحة في نافذة متصفح مستقلة وليس داخل معاينة."};
+async function pdfBig(dl){
+var sh=$("sheet"),ev=null;Array.prototype.forEach.call(sh.querySelectorAll(".sec"),function(s){if(s.querySelector(".ev"))ev=s});
+var body=Array.prototype.filter.call(sh.children,function(k){return k!==ev&&!/\b(dec|sig|band)\b/.test(k.className||"")});
+var hide=function(l,h){l.forEach(function(e){e.style.display=h?"none":""})};
+var shot=async function(){return await html2canvas(sh,{scale:Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight))),backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}})};
+var A,B;
+try{
+if(ev)hide([ev],true);decorate();A=await shot();if(ev)hide([ev],false);
+hide(body,true);sh.classList.add("evbig");decorate();B=await shot();
+}finally{hide(body,false);if(ev)hide([ev],false);sh.classList.remove("evbig");decorate()}
+var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true});
+[A,B].forEach(function(cv,i){if(i)pdf.addPage();var h=cv.height*210/cv.width,k=h>297?297/h:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(210-210*k)/2,0,210*k,h*k)});
+var nm=($("pname").value.replace("اسم البرنامج/النشاط:","").trim()||"تقرير-برنامج").replace(/[\\/:*?"<>|]/g,"-");
+var blob=pdf.output("blob");
+if(dl){await dl.save({filename:nm+".pdf",data:blob})}else{var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nm+".pdf";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500)}
+}
 $("pdf").onclick=async function(){
 var b=$("pdf"),old=b.textContent,m=$("msg");m.textContent="";b.disabled=true;b.textContent="جارٍ إنشاء الملف…";
 try{
 var dl=window.claude?await window.claude.use("downloads"):null;
 if(!window.html2canvas||!window.jspdf){m.textContent="سيفتح مربع الطباعة، اختر منه «حفظ بصيغة PDF».";window.print();return}
+if($("evSel").value==="1"){await pdfBig(dl);m.textContent="تم تجهيز الملف.";return}
 var _one=0,_e=document.getElementById("sheet"),_o={w:_e.style.width,m:_e.style.minHeight};try{var _W0=_e.offsetWidth,_H0=_e.offsetHeight,_R=297/210,_ok=0;if(_H0>_W0*_R+1&&_H0<=_W0*_R*1.3){for(var _w=_W0*1.02;_w<=_W0*1.31;_w+=_W0*.01){_e.style.width=_w+"px";_e.style.minHeight="0";if(_e.offsetHeight<=_w*_R){_e.style.minHeight=(_w*_R)+"px";_ok=1;break}}if(!_ok){_e.style.width=_o.w;_e.style.minHeight=_o.m}}}catch(_x){_e.style.width=_o.w;_e.style.minHeight=_o.m}
 var cv;try{cv=await html2canvas($("sheet"),{scale:Math.min(3,Math.sqrt(12e6/($("sheet").offsetWidth*$("sheet").offsetHeight))),backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});}finally{_e.style.width=_o.w;_e.style.minHeight=_o.m}
 var sh=$("sheet");
@@ -239,7 +257,7 @@ try{var s=JSON.parse(sto("rpt_settings")||"{}");KEEP.forEach(function(k){if(s[k]
 drawRows();render();
 $("word").onclick=async function(){var b=$("word"),old=b.textContent,m=$("pm")||$("msg");if(m)m.textContent="";b.disabled=true;b.textContent="جارٍ إنشاء ملف Word…";
 try{var ld=function(u){return new Promise(function(ok,no){var s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)})};
-if(!window.docx)await ld("/vendor/docx.min.js?v=1");if(!window.muyassirWord)await ld("/vendor/word.js?v=8");
+if(!window.docx)await ld("/vendor/docx.min.js?v=1");if(!window.muyassirWord)await ld("/vendor/word.js?v=9");
 var nm=($("pname").value.replace("اسم البرنامج/النشاط:","").trim()||"تقرير-برنامج").replace(/[\\/:*?"<>|]/g,"-");
 var _dc={};Array.prototype.forEach.call($("sheet").querySelectorAll(".dec"),function(e){var _u=e.getAttribute("data-t");if(_u)_dc[e.getAttribute("data-s")]=_u;e.remove()});var blob;try{blob=await window.muyassirWord($("sheet"),{title:nm,evH:($("evSel").value==="1"?340:130),evBig:$("evSel").value==="1",deco:(_dc.r||_dc.l)?_dc:null})}finally{icons();decorate()}
 var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nm+".docx";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
