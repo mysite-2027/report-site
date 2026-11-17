@@ -114,7 +114,6 @@ body{background:#fff}
 <p class="hint">تُحفظ في متصفحك فتظهر في كل تقرير، وتبقى على جهازك فقط.</p></fieldset>
 <button class="main" id="pdf" type="button">حفظ PDF</button>
 <button class="del" id="word" type="button" style="width:100%">حفظ Word (قابل للتعديل)</button>
-<button class="del" id="print" type="button" style="width:100%">طباعة</button>
 <p class="hint" id="msg"></p>
 <button class="del" id="reset" type="button" style="width:100%">مسح بيانات البرنامج</button>
 </section>
@@ -199,7 +198,6 @@ var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!
 m.textContent=cd.types&&cd.types.length?"لم أجد صورة في الحافظة (المحتوى: "+Array.prototype.join.call(cd.types,"، ")+"). احفظ الصورة بدل نسخها ثم ارفعها.":"الحافظة فارغة."});
 $("logoDel").onclick=function(){logo=null;$("logo").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
 Array.prototype.forEach.call(document.querySelectorAll(".ev-in"),function(el,i){el.onchange=function(e){var f=e.target.files[0];if(f)shrink(f,1400,"image/jpeg",function(d){imgs[i]=d;render()});else{imgs[i]=null;render()}}});
-$("print").onclick=function(){window.print();$("msg").textContent="إن لم تظهر نافذة الطباعة فافتح الصفحة في نافذة متصفح مستقلة وليس داخل معاينة."};
 async function pdfBig(dl){
 var sh=$("sheet"),ev=null;Array.prototype.forEach.call(sh.querySelectorAll(".sec"),function(s){if(s.querySelector(".ev"))ev=s});
 var body=Array.prototype.filter.call(sh.children,function(k){return k!==ev&&!/\b(dec|sig|band)\b/.test(k.className||"")});

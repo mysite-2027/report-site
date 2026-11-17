@@ -127,7 +127,6 @@ table.at th.sp,table.at td.sp{border:0;background:#fff;padding:0;width:2%}
 <p class="hint">يُحفظ الختم والشعار في متصفحك ويظهران أيضًا في بقية النماذج.</p></fieldset>
 <button class="main" id="pdf" type="button">حفظ PDF</button>
 <button class="del" id="word" type="button" style="width:100%">حفظ Word (قابل للتعديل)</button>
-<button class="del" id="print" type="button" style="width:100%">طباعة</button>
 <button class="del" id="reset" type="button" style="width:100%">مسح بيانات التقرير</button>
 <p class="hint" id="pm"></p>
 </section>
@@ -199,7 +198,6 @@ var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!
 m.textContent=cd.types&&cd.types.length?"لم أجد صورة في الحافظة (المحتوى: "+Array.prototype.join.call(cd.types,"، ")+"). احفظ الصورة بدل نسخها ثم ارفعها.":"الحافظة فارغة."});
 
 function need(){if(!$("topic").value.trim()){$("pm").textContent="اكتب العنوان أولًا (حقل إلزامي).";$("topic").focus();return false}return true}
-$("print").onclick=function(){if(!need())return;window.print();$("pm").textContent="إن لم تظهر نافذة الطباعة فافتح الصفحة في نافذة متصفح مستقلة."};
 $("pdf").onclick=async function(){
 var b=$("pdf"),old=b.textContent,m=$("pm"),sh=$("sheet");m.textContent="";if(!need())return;
 if(!window.html2canvas||!window.jspdf){m.textContent="تعذّر تحميل مكتبة الحفظ. تأكد من اتصالك بالإنترنت أو استخدم زر الطباعة.";return}

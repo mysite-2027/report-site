@@ -82,6 +82,10 @@ button.del{border-color:var(--border);color:var(--muted);padding:3px 10px;margin
 .cf.x-cut{padding:19mm 32mm 10mm}
 .cf.x-leaves{padding:19mm 36mm 9mm}
 .cf.x-split{padding:15mm 20mm 8mm 20mm;padding-left:calc(130px + 10mm)}
+.cf.x-custom{padding:24mm 36mm 13mm;z-index:0;background-color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cf .veil{position:absolute;z-index:-1;top:10%;bottom:7%;left:8%;right:8%;border-radius:14px}
+.cf .guide{position:absolute;top:15%;bottom:8%;left:9%;right:9%;border:2px dashed #e53935;pointer-events:none;z-index:5}
+@media print{.guide{display:none}}
 .gal{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
 .gal button{padding:4px;border:2px solid var(--border);border-radius:10px;background:var(--bg);display:flex;flex-direction:column;gap:4px;align-items:stretch;color:var(--text);font-size:.8rem}
 .gal button.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
@@ -131,6 +135,14 @@ body{background:#fff}
 </fieldset>
 <fieldset><legend>لون الشهادة وزخرفتها</legend><div class="themes" id="themes"></div><p class="hint" id="thName"></p>
 <label>شكل الشهادة (اضغط على الشكل الذي يعجبك)</label><div class="gal" id="gal"></div></fieldset>
+<fieldset><legend>خلفية مخصصة (صمّمها في Canva أو أي برنامج)</legend>
+<p class="hint">صمّم الشهادة بمقاس A4 أفقي (29.7 × 21 سم) واترك وسطها فارغًا للنصوص، ثم صدّرها PNG أو JPG وارفعها هنا. تُحفظ في متصفحك فقط ولا تُرفع إلى الموقع.</p>
+<input type="file" id="bgIn" accept="image/png,image/jpeg,image/webp">
+<label>تفتيح خلف النصوص (إذا كانت الخلفية مزدحمة)</label><select id="bgVeil"><option value="0">بدون</option><option value="0.45">خفيف</option><option value="0.7">متوسط</option><option value="0.88">قوي</option></select>
+<label><input type="checkbox" id="bgGuide"> إظهار حدود المنطقة الآمنة للنصوص (للمعاينة فقط ولا تظهر في الملف)</label>
+<button type="button" class="del" id="bgDel" style="width:100%">إزالة الخلفية</button>
+<p class="hint" id="bgMsg"></p>
+<p class="hint">تأكد أن لديك حق استخدام عناصر التصميم المرفوعة (بعض عناصر Canva وقوالبه لها شروط ترخيص). مسؤولية الصورة على من يرفعها.</p></fieldset>
 <fieldset><legend>بيانات الشهادة</legend>
 <label>صفة المكرَّم</label><select id="rtype"><option>الطالبة</option><option>الطالب</option><option>المعلمة</option><option>المعلم</option><option>ولي أمر الطالب</option><option>ولي أمر الطالبة</option><option value="">بدون صفة</option></select>
 <label>اسم من تُهدى إليه الشهادة (أو الأسماء، كل اسم في سطر)</label><textarea id="names" rows="3" placeholder="اكتب الاسم&#10;أو عدة أسماء، اسم في كل سطر"></textarea><input id="rname" type="hidden">
@@ -156,7 +168,6 @@ body{background:#fff}
 <label>صورة الختم (اختياري)</label><input type="file" id="stampIn" accept="image/*"><button type="button" class="del" id="stampDel" style="width:100%">إزالة الختم</button>
 <p class="hint">يُحفظ الختم والشعار في متصفحك ويظهران أيضًا في بقية النماذج.</p></fieldset>
 <button class="main" id="pdf" type="button">حفظ PDF</button>
-<button class="del" id="print" type="button" style="width:100%">طباعة</button>
 <button class="del" id="reset" type="button" style="width:100%">مسح بيانات الشهادة</button>
 <p class="hint" id="pm"></p>
 </section>
@@ -167,7 +178,7 @@ var $=function(i){return document.getElementById(i)};
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 function sto(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 var SET={};try{SET=JSON.parse(sto("rpt_settings")||"{}")}catch(e){}
-var logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["dept","school","gender","teacher","principal","role"];
+var bg=sto("rpt_cert_bg")||null,veilK=sto("rpt_cert_veil")||"0",logo=sto("rpt_logo")||null,stamp=sto("rpt_stamp")||null,SAVED=["dept","school","gender","teacher","principal","role"];
 var ROLES=[["المعلم","المعلمة"],["الموجّه الطلابي","الموجّهة الطلابية"],["وكيل المدرسة","وكيلة المدرسة"],["رائد النشاط","رائدة النشاط"]];
 var CT={ctitle:"شهادة شكر وتقدير",copen:"تتقدّم {المدرسة} بخالص الشكر والتقدير إلى",rpre:"وذلك على",rwish:"متمنّين لكم دوام التوفيق والنجاح.",roleC:"",prinC:""};
 var CTP={ctitle:["شهادة شكر وتقدير","شهادة تقدير","شهادة شكر","شهادة تميّز","شهادة تفوّق","شهادة إنجاز","شهادة مشاركة","شهادة حضور","شهادة إتمام"],
@@ -200,7 +211,7 @@ var ORN=[
  mid:function(c){return '<path d="M150 9H178M150 17H178M202 9H230M202 17H230" stroke="'+c.g2+'" stroke-width="1.4" fill="none"/><rect x="183" y="6" width="14" height="14" fill="'+c.g2+'"/><rect x="186.5" y="9.5" width="7" height="7" fill="#fff"/>'},
  tile:function(c){return '<path d="M0 3H20M0 7H20" stroke="'+c.gr+'" stroke-width="1" fill="none"/>'}},
 {k:"none",n:"بدون زخرفة (إطار فقط)"}];
-var TPL=[{k:"classic"},{k:"waves"},{k:"rings"},{k:"frame"},{k:"cream"},{k:"facets"},{k:"bands"},{k:"circles"},{k:"stars"},{k:"mosaic"},{k:"diamonds"},{k:"hex"},{k:"brackets"},{k:"gframe"},{k:"ribbons"},{k:"dots"},{k:"arch"},{k:"leaves"},{k:"cut"},{k:"chevron"},{k:"octa"}];
+var TPL=[{k:"classic"},{k:"waves"},{k:"rings"},{k:"frame"},{k:"cream"},{k:"facets"},{k:"bands"},{k:"circles"},{k:"stars"},{k:"mosaic"},{k:"diamonds"},{k:"hex"},{k:"brackets"},{k:"gframe"},{k:"ribbons"},{k:"dots"},{k:"arch"},{k:"leaves"},{k:"cut"},{k:"chevron"},{k:"octa"},{k:"custom"}];
 var tplK=sto("rpt_cert_tpl")||"classic";if(!TPL.some(function(t){return t.k===tplK}))tplK="classic";
 function rgba(h,a){var n=parseInt(h.slice(1),16);return "rgba("+(n>>16)+","+((n>>8)&255)+","+(n&255)+","+a+")"}
 function wavesSvg(){var c=TC;return '<svg class="decor" style="top:0;left:0;width:100%;height:92px" viewBox="0 0 1000 92" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="wA'+SFX+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="'+c.p+'"/><stop offset="1" stop-color="'+c.b+'"/></linearGradient><linearGradient id="wB'+SFX+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="'+c.b+'"/><stop offset="1" stop-color="'+c.gr+'"/></linearGradient></defs><path d="M0 0H1000V44C840 88 660 16 470 52C300 84 140 76 0 34Z" fill="url(#wA'+SFX+')"/><path d="M0 0H1000V24C810 62 640 6 450 36C280 62 130 54 0 14Z" fill="url(#wB'+SFX+')" opacity="0.85"/><path d="M0 44C150 86 300 94 470 62C650 28 830 92 1000 54" stroke="'+c.g2+'" stroke-width="2" fill="none" opacity="0.9"/></svg>'+'<svg class="decor" style="bottom:0;left:0;width:100%;height:56px" viewBox="0 0 1000 56" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 56) scale(1 -1)"><path d="M0 0H1000V26C830 56 650 6 470 30C300 52 140 46 0 20Z" fill="url(#wA'+SFX+')"/><path d="M0 0H1000V12C810 38 640 2 450 20C280 36 130 32 0 8Z" fill="url(#wB'+SFX+')" opacity="0.85"/></g></svg>'}
@@ -227,7 +238,10 @@ function cutSvg(){var c=TC;function P(i){return "M"+(36+i)+" "+i+"H"+(964-i)+"L"
 function chevSvg(){var c=TC;function strip(pos,fl,id){return '<svg class="decor" style="'+pos+';left:0;width:100%;height:30px" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="'+id+SFX+'" width="44" height="30" patternUnits="userSpaceOnUse"'+(fl?' patternTransform="translate(0 30) scale(1 -1)"':"")+'><polygon points="0,0 22,14 44,0 44,8 22,22 0,8" fill="'+c.p+'"/><polygon points="0,11 22,25 44,11 44,15 22,29 0,15" fill="'+c.gr+'"/></pattern></defs><rect width="100%" height="100%" fill="url(#'+id+SFX+')"/></svg>'}return strip("top:0",0,"cvT")+strip("bottom:0",1,"cvB")}
 function octaSvg(){var c=TC;function strip(pos,ly,id){return '<svg class="decor" style="'+pos+';left:0;width:100%;height:46px" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="'+id+SFX+'" width="56" height="44" patternUnits="userSpaceOnUse"><rect x="17" y="11" width="22" height="22" fill="'+c.p+'"/><rect x="17" y="11" width="22" height="22" transform="rotate(45 28 22)" fill="'+c.b+'" opacity=".85"/><circle cx="28" cy="22" r="4" fill="'+c.gr+'"/></pattern></defs><rect width="100%" height="44" fill="url(#'+id+SFX+')"/><rect y="'+ly+'" width="100%" height="2" fill="'+c.gr+'"/></svg>'}return strip("top:0",44,"ocT")+strip("bottom:0",0,"ocB")}
 function splitSvg(){var c=TC;return '<svg class="decor" style="top:0;left:0;width:160px;height:100%" viewBox="0 0 160 700" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="spA'+SFX+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c.p+'"/><stop offset="1" stop-color="'+c.b+'"/></linearGradient></defs><polygon points="0,0 160,0 60,700 0,700" fill="url(#spA'+SFX+')"/><polygon points="160,0 176,0 76,700 60,700" fill="'+c.gr+'"/></svg><svg class="decor" style="top:30px;left:22px;width:92px;height:92px" viewBox="0 0 118 118" xmlns="http://www.w3.org/2000/svg"><circle cx="59" cy="59" r="40" fill="none" stroke="#fff" stroke-width="3"/><circle cx="59" cy="59" r="33" fill="'+c.gr+'"/>'+star(59,59,25,"#fff")+star(59,59,11,c.p)+'</svg>'}
-function tplDecor(){return tplK==="ribbons"?ribbonsSvg():tplK==="dots"?dotsSvg():tplK==="arch"?archSvg():tplK==="leaves"?leavesSvg():tplK==="cut"?cutSvg():tplK==="chevron"?chevSvg():tplK==="octa"?octaSvg():tplK==="split"?splitSvg():tplK==="side"?sideSvg():tplK==="diamonds"?diamondsSvg():tplK==="hex"?hexSvg():tplK==="brackets"?bracketsSvg():tplK==="gframe"?gframeSvg():tplK==="bands"?bandsSvg():tplK==="circles"?circlesSvg():tplK==="stars"?starsSvg():tplK==="mosaic"?mosaicSvg():tplK==="waves"?wavesSvg():tplK==="rings"?ringsSvg():tplK==="frame"?ribbonSvg():tplK==="cream"?zigSvg():tplK==="facets"?facetsSvg():edgesAll()+cornerSvg(0,"top:2px;left:2px")+cornerSvg(90,"top:2px;right:2px")+cornerSvg(180,"bottom:2px;right:2px")+cornerSvg(270,"bottom:2px;left:2px")}
+function bgStyle(){return tplK==="custom"&&bg?' style="background-image:url('+bg+');background-size:cover;background-position:center;background-repeat:no-repeat"':""}
+function veilHtml(){var o=parseFloat(veilK)||0;return tplK==="custom"&&o>0?'<div class="veil" style="background:rgba(255,255,255,'+o+')"></div>':""}
+function bgLoad(f,cb){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var k=Math.min(1,1754/im.width),w=Math.round(im.width*k),h=Math.round(im.height*k),c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);cb(c.toDataURL("image/jpeg",.88),im.width/im.height)};im.onerror=function(){cb(null)};im.src=r.result};r.onerror=function(){cb(null)};r.readAsDataURL(f)}
+function tplDecor(){return tplK==="custom"?"":tplK==="ribbons"?ribbonsSvg():tplK==="dots"?dotsSvg():tplK==="arch"?archSvg():tplK==="leaves"?leavesSvg():tplK==="cut"?cutSvg():tplK==="chevron"?chevSvg():tplK==="octa"?octaSvg():tplK==="split"?splitSvg():tplK==="side"?sideSvg():tplK==="diamonds"?diamondsSvg():tplK==="hex"?hexSvg():tplK==="brackets"?bracketsSvg():tplK==="gframe"?gframeSvg():tplK==="bands"?bandsSvg():tplK==="circles"?circlesSvg():tplK==="stars"?starsSvg():tplK==="mosaic"?mosaicSvg():tplK==="waves"?wavesSvg():tplK==="rings"?ringsSvg():tplK==="frame"?ribbonSvg():tplK==="cream"?zigSvg():tplK==="facets"?facetsSvg():edgesAll()+cornerSvg(0,"top:2px;left:2px")+cornerSvg(90,"top:2px;right:2px")+cornerSvg(180,"bottom:2px;right:2px")+cornerSvg(270,"bottom:2px;left:2px")}
 var SFX="";
 var ornK=sto("rpt_cert_orn")||"star";if(ornK==="floral")ornK="star";
 function curOrn(){return ORN.filter(function(o){return o.k===ornK})[0]||ORN[0]}
@@ -253,10 +267,10 @@ if(x1>x0&&y1>y0){var pd=Math.round(Math.max(c.width,c.height)*.02),c2=document.c
 cb(c.toDataURL(type,.82))};im.src=src};
 sv?r.readAsText(file):r.readAsDataURL(file)}
 if(ornK==="classic"||ornK==="geo"||ornK==="floral")ornK="star";
-var GAL=[{t:"classic",o:"star",n:"إطار نجمة"},{t:"classic",o:"formal",n:"إطار رسمي"},{t:"classic",o:"none",n:"إطار بسيط"},{t:"waves",o:"star",n:"موجات"},{t:"rings",o:"star",n:"حلقات"},{t:"frame",o:"star",n:"إطار ملوّن بشرائط"},{t:"cream",o:"star",n:"أوجه مثلثة"},{t:"facets",o:"star",n:"أوجه هندسية"},{t:"bands",o:"star",n:"أشرطة أفقية"},{t:"circles",o:"star",n:"دوائر الزوايا"},{t:"stars",o:"star",n:"صف نجوم"},{t:"mosaic",o:"star",n:"فسيفساء"},{t:"diamonds",o:"star",n:"زوايا مائلة"},{t:"hex",o:"star",n:"خلايا سداسية"},{t:"brackets",o:"star",n:"زوايا عصرية"},{t:"gframe",o:"star",n:"إطار متدرّج"},{t:"ribbons",o:"star",n:"شريط قطري"},{t:"dots",o:"star",n:"نقاط متدرّجة"},{t:"arch",o:"star",n:"أقواس"},{t:"leaves",o:"star",n:"أغصان زيتون"},{t:"cut",o:"star",n:"زوايا مقطوعة"},{t:"chevron",o:"star",n:"أسهم متتابعة"},{t:"octa",o:"star",n:"نجوم ثمانية"}];
+var GAL=[{t:"classic",o:"star",n:"إطار نجمة"},{t:"classic",o:"formal",n:"إطار رسمي"},{t:"classic",o:"none",n:"إطار بسيط"},{t:"waves",o:"star",n:"موجات"},{t:"rings",o:"star",n:"حلقات"},{t:"frame",o:"star",n:"إطار ملوّن بشرائط"},{t:"cream",o:"star",n:"أوجه مثلثة"},{t:"facets",o:"star",n:"أوجه هندسية"},{t:"bands",o:"star",n:"أشرطة أفقية"},{t:"circles",o:"star",n:"دوائر الزوايا"},{t:"stars",o:"star",n:"صف نجوم"},{t:"mosaic",o:"star",n:"فسيفساء"},{t:"diamonds",o:"star",n:"زوايا مائلة"},{t:"hex",o:"star",n:"خلايا سداسية"},{t:"brackets",o:"star",n:"زوايا عصرية"},{t:"gframe",o:"star",n:"إطار متدرّج"},{t:"ribbons",o:"star",n:"شريط قطري"},{t:"dots",o:"star",n:"نقاط متدرّجة"},{t:"arch",o:"star",n:"أقواس"},{t:"leaves",o:"star",n:"أغصان زيتون"},{t:"cut",o:"star",n:"زوايا مقطوعة"},{t:"chevron",o:"star",n:"أسهم متتابعة"},{t:"octa",o:"star",n:"نجوم ثمانية"},{t:"custom",o:"none",n:"خلفيتي المخصصة"}];
 function fixSvg(h){return h.replace(/<svg ([^>]*?)style="([^"]*)"/g,function(m,pre,st){var w=(st.match(/(?:^|;)width:([^;]+)/)||[])[1],hh=(st.match(/(?:^|;)height:([^;]+)/)||[])[1];function n(v,full){if(!v)return null;if(/calc/.test(v))return full-200;if(/%/.test(v))return full;return parseFloat(v)}var W=n(w,1032),H=n(hh,500);return "<svg "+pre+(W&&!/\swidth=/.test(" "+pre)?'width="'+W+'" ':"")+(H&&!/\sheight=/.test(" "+pre)?'height="'+H+'" ':"")+'style="'+st+'"'})}
 function sheetHtml(t,o,sfx){var f=$("gender").value==="f",v=function(i){return $(i).value.trim()},L=logo,ty=v("rtypeC")||v("rtype"),nm=v("rname"),rs=(function(){var l0=parseNames()[0];return l0&&l0.r&&l0.n===v("rname")?l0.r:v("rreason")})(),wsh=v("rwish"),dt=v("rdate"),st=tplK,so=ornK,ss=SFX,out;tplK=t;ornK=o;SFX=sfx;try{out=
-'<div class="cf'+({waves:" tw",rings:" tr",frame:" tf",cream:" tc",facets:" tt",bands:" tb",circles:" tz",stars:" ts",mosaic:" tm",side:" tsd",diamonds:" tdm",hex:" thx",brackets:" tbk",gframe:" tgf",ribbons:" tx x-ribbons",dots:" tx x-dots",arch:" tx x-arch",leaves:" tx x-leaves",cut:" tx x-cut",chevron:" tx x-chevron",octa:" tx x-octa",split:" tx x-split"}[tplK]||"")+'"'+""+'>'+tplDecor()+'<div class="sh-head"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
+'<div class="cf'+({waves:" tw",rings:" tr",frame:" tf",cream:" tc",facets:" tt",bands:" tb",circles:" tz",stars:" ts",mosaic:" tm",side:" tsd",diamonds:" tdm",hex:" thx",brackets:" tbk",gframe:" tgf",custom:" tx x-custom",ribbons:" tx x-ribbons",dots:" tx x-dots",arch:" tx x-arch",leaves:" tx x-leaves",cut:" tx x-cut",chevron:" tx x-chevron",octa:" tx x-octa",split:" tx x-split"}[tplK]||"")+'"'+bgStyle()+'>'+tplDecor()+veilHtml()+'<div class="sh-head"><div class="tx">'+esc(v("dept")||"الإدارة العامة للتعليم بمنطقة الرياض")+"<span>"+esc(v("school")||"اسم المدرسة")+"</span></div><div>"+(L?'<img alt="" src="'+L+'">':"")+"</div></div>"+
 '<div class="ct">'+esc(v("ctitle")||CT.ctitle)+'</div>'+dividerSvg()+
 '<div class="cb"><p>'+esc((v("copen")||CT.copen).replace(/\{المدرسة\}/g,v("school")||"المدرسة"))+"</p>"+
 '<p class="to">'+(ty?esc(ty)+" / ":"")+'<span class="nm">'+(nm?esc(nm):"……………………")+"</span></p>"+
@@ -271,12 +285,16 @@ function fitThumbs(){Array.prototype.forEach.call(document.querySelectorAll("#ga
 $("gal").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;var g=GAL[+b.dataset.i];tplK=g.t;ornK=g.o;sto("rpt_cert_tpl",tplK);sto("rpt_cert_orn",ornK);render()});
 function render(){
 applyTheme();
-$("sheet").innerHTML=sheetHtml(tplK,ornK,"");buildGal()
+$("sheet").innerHTML=sheetHtml(tplK,ornK,"");var cf=$("sheet").querySelector(".cf");if(cf&&tplK==="custom"&&$("bgGuide").checked){var gd=document.createElement("div");gd.className="guide";cf.appendChild(gd)}buildGal()
 }
 function syncType(){var f=$("gender").value==="f",c=$("rtype").value;if(c==="الطالبة"||c==="الطالب")$("rtype").value=f?"الطالبة":"الطالب";else if(c==="المعلمة"||c==="المعلم")$("rtype").value=f?"المعلمة":"المعلم";else if(c==="ولي أمر الطالب"||c==="ولي أمر الطالبة")$("rtype").value=f?"ولي أمر الطالبة":"ولي أمر الطالب"}
 $("gender").addEventListener("change",syncType);
 ["dept","school","teacher","gender","principal","role","rtype","rtypeC","rname","rreason","rwish","rdate"].forEach(function(i){var h=function(){if(SAVED.indexOf(i)>-1){SET[i]=$(i).value;sto("rpt_settings",JSON.stringify(SET))}render()};$(i).addEventListener("input",h);$(i).addEventListener("change",h)});
 $("reset").onclick=function(){$("names").value="";$("rname").value="";cntNames();["rreason","rdate"].forEach(function(i){$(i).value=""});render()};
+$("bgIn").onchange=function(e){var f=e.target.files[0],m=$("bgMsg");if(!f)return;m.textContent="جارٍ تجهيز الصورة…";bgLoad(f,function(d,ratio){if(!d){m.textContent="تعذّر قراءة الصورة. جرّب ملف PNG أو JPG آخر.";return}bg=d;var ok=true;try{localStorage.setItem("rpt_cert_bg",d)}catch(x){ok=false}tplK="custom";ornK="none";sto("rpt_cert_tpl",tplK);sto("rpt_cert_orn",ornK);m.textContent=(ok?"تم حفظ الخلفية في متصفحك.":"الصورة كبيرة على تخزين المتصفح فلن تُحفظ بعد إغلاق الصفحة، لكنها تعمل الآن. جرّب صورة أخف.")+(Math.abs(ratio-1.414)>.12?" نسبة الصورة تختلف عن A4 الأفقي فسيُقصّ جزء من أطرافها.":"");render()})};
+$("bgDel").onclick=function(){bg=null;$("bgIn").value="";$("bgMsg").textContent="";try{localStorage.removeItem("rpt_cert_bg")}catch(e){}if(tplK==="custom"){tplK="classic";ornK="star";sto("rpt_cert_tpl",tplK);sto("rpt_cert_orn",ornK)}render()};
+$("bgVeil").value=veilK;$("bgVeil").onchange=function(){veilK=$("bgVeil").value;sto("rpt_cert_veil",veilK);render()};
+$("bgGuide").onchange=render;
 $("logoIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,400,"image/png",function(d){logo=d;sto("rpt_logo",d);render()})};
 $("logoDel").onclick=function(){logo=null;$("logoIn").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
 $("stampIn").onchange=function(e){var f=e.target.files[0];if(f)shrink(f,500,"image/png",function(d){stamp=d;sto("rpt_stamp",d);render()})};
@@ -290,7 +308,6 @@ if((mm=ht.match(/<img[^>]+src=["'](data:image\/[^"']+)["']/i))){e.preventDefault
 var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!=="file")return;
 m.textContent=cd.types&&cd.types.length?"لم أجد صورة في الحافظة (المحتوى: "+Array.prototype.join.call(cd.types,"، ")+"). احفظ الصورة بدل نسخها ثم ارفعها.":"الحافظة فارغة."});
 
-$("print").onclick=function(){window.print();$("pm").textContent="إن لم تظهر نافذة الطباعة فافتح الصفحة في نافذة متصفح مستقلة."};
 function parseNames(){return $("names").value.split(/\n/).map(function(l){return l.trim()}).filter(Boolean).map(function(l){var i=l.indexOf("|");return i<0?{n:l,r:""}:{n:l.slice(0,i).trim(),r:l.slice(i+1).trim()}}).filter(function(x){return x.n})}
 function cntNames(){var c=parseNames().length;$("namesCnt").textContent=c>1?"عدد الشهادات: "+c:"";$("pdf").textContent=c>1?"حفظ PDF ("+c+" شهادة)":"حفظ PDF"}
 function syncName(){var l=parseNames();$("rname").value=l.length?l[0].n:""}
@@ -311,7 +328,7 @@ b.textContent="جارٍ إنشاء "+(i+1)+" من "+list.length+"…";
 $("rname").value=list[i].n;$("rreason").value=list[i].r||keepR;render();
 sh.style.transform="none";await new Promise(function(r){setTimeout(r,60)});await rasterAll(sh);
 var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
-var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1400,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
+var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1400,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none";d.querySelectorAll(".guide").forEach(function(e){e.remove()})}});
 if(i>0)pdf.addPage("a4","landscape");
 pdf.addImage(cv.toDataURL("image/jpeg",.92),"JPEG",0,0,297,210);
 }
@@ -328,7 +345,7 @@ b.disabled=true;b.textContent="جارٍ إنشاء الملف…";
 try{
 sh.style.transform="none";await new Promise(function(r){setTimeout(r,60)});await rasterAll(sh);
 var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
-var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1400,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});
+var cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1400,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none";d.querySelectorAll(".guide").forEach(function(e){e.remove()})}});
 var pdf=new window.jspdf.jsPDF({orientation:"landscape",unit:"mm",format:"a4",compress:true});
 pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",0,0,297,210);
 var nm=("شهادة شكر "+($("rname").value.trim()||"")).trim().replace(/[\\\/:*?"<>|]/g,"-");

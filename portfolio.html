@@ -121,7 +121,6 @@ body{background:#fff}
 <div id="keepNote" style="background:#fff4d6;color:#4a3500;border:1px solid #e0b100;border-radius:10px;padding:8px 12px;margin:10px 0 6px;font-size:.88rem;line-height:1.7"><b>تنبيه:</b> الموقع لا يحفظ نسخة من ملف إنجازك. احفظه PDF أو Word واحتفظ به عندك. وقد تضيع الشواهد المؤقتة في المتصفح إن مسحت بياناته أو غيّرت الجهاز.</div>
 <button class="main" id="pdf" type="button">حفظ PDF</button>
 <button class="del" id="word" type="button" style="width:100%">حفظ Word (قابل للتعديل)</button>
-<button class="del" id="print" type="button" style="width:100%">طباعة</button>
 <p class="hint" id="msg"></p>
 <button class="del" id="reset" type="button" style="width:100%">مسح الشواهد وبيانات الملف</button>
 </section>
@@ -210,7 +209,6 @@ if((mm=ht.match(/<img[^>]+src=["'](data:image\/[^"']+)["']/i))){e.preventDefault
 var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&a.type!=="file")return;
 m.textContent=cd.types&&cd.types.length?"لم أجد صورة في الحافظة (المحتوى: "+Array.prototype.join.call(cd.types,"، ")+"). احفظ الصورة بدل نسخها ثم ارفعها.":"الحافظة فارغة."});
 $("logoDel").onclick=function(){logo=null;$("logo").value="";$("moeMsg").textContent="";try{localStorage.removeItem("rpt_logo")}catch(e){}render()};
-$("print").onclick=function(){window.print();$("msg").textContent="إن لم تظهر نافذة الطباعة فافتح الصفحة في نافذة متصفح مستقلة وليس داخل معاينة."};
 function dlBlob(blob,name){var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500)}
 function fname(){return("ملف الإنجاز"+($("teacher").value.trim()?" "+$("teacher").value.trim():"")).replace(/[\\/:*?"<>|]/g,"-")}
 /* PDF: تُبنى صفحات A4 مستقلة ثم تُصوَّر صفحة صفحة، فتبقى الجودة عالية مهما كثرت الشواهد */
