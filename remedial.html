@@ -227,7 +227,7 @@ if(window.MuyassirDeco)MuyassirDeco.attach({ev:true});
 drawRows();render();
 $("word").onclick=async function(){var b=$("word"),old=b.textContent,m=$("pm")||$("msg");if(m)m.textContent="";b.disabled=true;b.textContent="جارٍ إنشاء ملف Word…";
 try{var ld=function(u){return new Promise(function(ok,no){var s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)})};
-if(!window.docx)await ld("/vendor/docx.min.js?v=1");if(!window.muyassirWord)await ld("/vendor/word.js?v=10");
+if(!window.docx)await ld("/vendor/docx.min.js?v=1");if(!window.muyassirWord)await ld("/vendor/word.js?v=12");
 var nm=("الخطة العلاجية "+($("subj").value.trim()||"")).trim().replace(/[\\\/:*?"<>|]/g,"-");
 var blob;try{blob=await window.muyassirWord($("sheet"),(window.MuyassirDeco?MuyassirDeco.wordOpts({title:nm}):{title:nm}))}finally{if(window.MuyassirDeco)MuyassirDeco.apply()}
 var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nm+".docx";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
