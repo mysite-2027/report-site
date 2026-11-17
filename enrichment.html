@@ -201,15 +201,15 @@ $("print").onclick=function(){window.print();$("pm").textContent="إن لم تظ
 $("pdf").onclick=async function(){
 var b=$("pdf"),old=b.textContent,m=$("pm"),sh=$("sheet");m.textContent="";
 if(!window.html2canvas||!window.jspdf){m.textContent="تعذّر تحميل مكتبة الحفظ. تأكد من اتصالك بالإنترنت أو استخدم زر الطباعة.";return}
-if(MuyassirDeco.big()){b.disabled=true;b.textContent="جارٍ إنشاء الملف…";try{await MuyassirDeco.pdfBig({nm:("الخطة الإثرائية "+($("subj").value.trim()||"")).trim().replace(/[\\\/:*?"<>|]/g,"-")});m.textContent="تم تجهيز الملف."}catch(e){m.textContent="تعذّر إنشاء الملف تلقائيًا. استخدم زر الطباعة ثم اختر «حفظ بصيغة PDF»."}finally{b.disabled=false;b.textContent=old}return}
+if(window.MuyassirDeco&&MuyassirDeco.big()){b.disabled=true;b.textContent="جارٍ إنشاء الملف…";try{await MuyassirDeco.pdfBig({nm:("الخطة الإثرائية "+($("subj").value.trim()||"")).trim().replace(/[\\\/:*?"<>|]/g,"-")});m.textContent="تم تجهيز الملف."}catch(e){m.textContent="تعذّر إنشاء الملف تلقائيًا. استخدم زر الطباعة ثم اختر «حفظ بصيغة PDF»."}finally{b.disabled=false;b.textContent=old}return}
 b.disabled=true;b.textContent="جارٍ إنشاء الملف…";
 try{
 var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
 var _one=0,_e=document.getElementById("sheet"),_o={w:_e.style.width,m:_e.style.minHeight};try{var _W0=_e.offsetWidth,_H0=_e.offsetHeight,_R=297/210,_ok=0;if(_H0>_W0*_R+1&&_H0<=_W0*_R*1.3){for(var _w=_W0*1.02;_w<=_W0*1.31;_w+=_W0*.01){_e.style.width=_w+"px";_e.style.minHeight="0";if(_e.offsetHeight<=_w*_R){_e.style.minHeight=(_w*_R)+"px";_ok=1;break}}if(!_ok){_e.style.width=_o.w;_e.style.minHeight=_o.m}}}catch(_x){_e.style.width=_o.w;_e.style.minHeight=_o.m}
 var cv;try{cv=await html2canvas(sh,{scale:sc0,backgroundColor:"#ffffff",useCORS:true,windowWidth:1200,scrollX:0,scrollY:-window.scrollY,onclone:function(d){d.getElementById("sheet").style.boxShadow="none"}});}finally{_e.style.width=_o.w;_e.style.minHeight=_o.m}
 var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true}),pw=210,ph=297,H=Math.round(cv.width*ph/pw),y=0,first=true,imgH=cv.height*pw/cv.width;
-if(imgH<=ph*1.3){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);if(k<.97){var _sh=document.getElementById("sheet"),_K=_sh.children,_bh=Math.round(_K[_K.length-1].getBoundingClientRect().height*cv.width/_sh.offsetWidth),_bc=document.createElement("canvas");_bc.width=cv.width;_bc.height=_bh;_bc.getContext("2d").drawImage(cv,0,cv.height-_bh,cv.width,_bh,0,0,cv.width,_bh);var _mm=_bh*pw/cv.width;pdf.addImage(_bc.toDataURL("image/jpeg",.95),"JPEG",0,ph-_mm,pw,_mm)}y=cv.height;_one=1}
-var sc=cv.width/sh.offsetWidth,K=sh.children,R=function(e){return e.getBoundingClientRect()},t0=R(sh).top,nk=K.length,hb=Math.round((R(K[0]).bottom-t0)*sc),bandPx=Math.round(R(K[nk-1]).height*sc),bandY=cv.height-bandPx,SG=K[nk-2],sigTop=Math.round((R(SG).top-t0)*sc),sigPx=Math.round(R(SG).height*sc),gap=Math.round(10*sc),cEnd=sigTop,bs=[],br=[],extra=false;
+if(imgH<=ph*1.3){var k=imgH>ph?ph/imgH:1;pdf.addImage(cv.toDataURL("image/jpeg",.95),"JPEG",(pw-pw*k)/2,0,pw*k,imgH*k);if(k<.97){var _sh=document.getElementById("sheet"),_K=Array.prototype.filter.call(_sh.children,function(e){return !/\bdec\b/.test(e.className||"")}),_bh=Math.round(_K[_K.length-1].getBoundingClientRect().height*cv.width/_sh.offsetWidth),_bc=document.createElement("canvas");_bc.width=cv.width;_bc.height=_bh;_bc.getContext("2d").drawImage(cv,0,cv.height-_bh,cv.width,_bh,0,0,cv.width,_bh);var _mm=_bh*pw/cv.width;pdf.addImage(_bc.toDataURL("image/jpeg",.95),"JPEG",0,ph-_mm,pw,_mm)}y=cv.height;_one=1}
+var sc=cv.width/sh.offsetWidth,K=Array.prototype.filter.call(sh.children,function(e){return !/\bdec\b/.test(e.className||"")}),R=function(e){return e.getBoundingClientRect()},t0=R(sh).top,nk=K.length,hb=Math.round((R(K[0]).bottom-t0)*sc),bandPx=Math.round(R(K[nk-1]).height*sc),bandY=cv.height-bandPx,SG=K[nk-2],sigTop=Math.round((R(SG).top-t0)*sc),sigPx=Math.round(R(SG).height*sc),gap=Math.round(10*sc),cEnd=sigTop,bs=[],br=[],extra=false;
 for(var q=0;q<nk-2;q++)bs.push((R(K[q]).bottom-t0)*sc);
 Array.prototype.forEach.call(sh.querySelectorAll("tr"),function(e){br.push((R(e).bottom-t0)*sc)});
 var mkPage=function(){var c=document.createElement("canvas");c.width=cv.width;c.height=H;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,H);return{c:c,x:x}};
@@ -229,13 +229,13 @@ m.textContent="تم تجهيز الملف.";
 }catch(e){m.textContent="تعذّر إنشاء الملف تلقائيًا. استخدم زر الطباعة ثم اختر «حفظ بصيغة PDF»."}
 finally{b.disabled=false;b.textContent=old}
 };
-MuyassirDeco.attach({ev:true});
+if(window.MuyassirDeco)MuyassirDeco.attach({ev:true});
 drawRows();render();
 $("word").onclick=async function(){var b=$("word"),old=b.textContent,m=$("pm")||$("msg");if(m)m.textContent="";b.disabled=true;b.textContent="جارٍ إنشاء ملف Word…";
 try{var ld=function(u){return new Promise(function(ok,no){var s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)})};
 if(!window.docx)await ld("/vendor/docx.min.js?v=1");if(!window.muyassirWord)await ld("/vendor/word.js?v=10");
 var nm=("الخطة الإثرائية "+($("subj").value.trim()||"")).trim().replace(/[\\\/:*?"<>|]/g,"-");
-var blob;try{blob=await window.muyassirWord($("sheet"),MuyassirDeco.wordOpts({title:nm}))}finally{MuyassirDeco.apply()}
+var blob;try{blob=await window.muyassirWord($("sheet"),(window.MuyassirDeco?MuyassirDeco.wordOpts({title:nm}):{title:nm}))}finally{if(window.MuyassirDeco)MuyassirDeco.apply()}
 var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nm+".docx";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
 if(m)m.textContent="تم تجهيز ملف Word. افتحه وعدّل ما تشاء.";
 }catch(e){if(m)m.textContent="تعذّر إنشاء ملف Word. تأكد من اتصالك بالإنترنت ثم أعد المحاولة، أو استخدم حفظ PDF."}
