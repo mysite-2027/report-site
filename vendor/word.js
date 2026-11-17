@@ -188,8 +188,22 @@
       return table(rows, cols);
     };
 
+    var icoMap = (typeof Map === "function") ? new Map() : null;
+    var icoPng = function (svg) {
+      return new Promise(function (ok) {
+        try {
+          var x = new XMLSerializer().serializeToString(svg), im = new Image();
+          im.onload = function () { try { var c = document.createElement("canvas"); c.width = 96; c.height = 96; c.getContext("2d").drawImage(im, 0, 0, 96, 96); ok(c.toDataURL("image/png")); } catch (e) { ok(null); } };
+          im.onerror = function () { ok(null); };
+          im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(x);
+        } catch (e) { ok(null); }
+      });
+    };
     var h3 = function (el) {
-      return para([runs(el.textContent.trim(), { bold: true, color: hexOf(cs(el).color) || CL, size: 25 })],
+      var ip = icoMap && icoMap.get(el), kids3 = [];
+      if (ip) kids3.push(runs("\u200F", {}), new D.ImageRun({ type: "png", data: u8(ip), transformation: { width: 18, height: 18 }, altText: { title: "أيقونة", description: "أيقونة العنوان", name: "ico" } }), runs(" ", {}));
+      kids3.push(runs(el.textContent.trim(), { bold: true, color: hexOf(cs(el).color) || CL, size: 25 }));
+      return para(kids3,
         { keepNext: true, alignment: alignOf(el), spacing: { after: 80 } });
     };
 
@@ -392,6 +406,10 @@
       if (!first) ch.push(gap(Math.min(g || 100, 70))); ch.push(x); first = false;
     };
     var kids = Array.prototype.slice.call(sheet.children);
+    if (icoMap) {
+      var icoSv = sheet.querySelectorAll(".ico svg");
+      for (var ii = 0; ii < icoSv.length; ii++) { var hh3 = icoSv[ii].closest("h3"), pg3 = await icoPng(icoSv[ii]); if (hh3 && pg3) icoMap.set(hh3, pg3); }
+    }
 
     for (var ki = 0; ki < kids.length; ki++) {
       var el = kids[ki], cn = el.className || "";
