@@ -401,19 +401,22 @@
     /* زخرفة جانبية: عمودان جانبيان في جدول خارجي (صور داخل الخلايا، تعمل في كل برامج العرض) */
     var DECO = !!(opt.deco && (opt.deco.r || opt.deco.l)) && !LAND, SIDE = 500, DNT = 5;
     var ZERO = { top: 0, bottom: 0, left: 0, right: 0 };
-    var sideCell = function (png) {
+    var sideCell = function (png, sp, nt) {
       var kk = [];
       if (png) {
-        kk.push(new D.Paragraph({ spacing: { before: 0, after: 0, line: 2100, lineRule: D.LineRuleType.EXACT }, children: [] }));
-        kk.push(new D.Paragraph({ spacing: { before: 0, after: 0 }, alignment: CEN, children: [new D.ImageRun({ type: "png", data: u8(png), transformation: { width: 30, height: 120 * DNT }, altText: { title: "زخرفة", description: "زخرفة جانبية", name: "deco" } })] }));
+        kk.push(new D.Paragraph({ spacing: { before: 0, after: 0, line: sp || 2100, lineRule: D.LineRuleType.EXACT }, children: [] }));
+        kk.push(new D.Paragraph({ spacing: { before: 0, after: 0 }, alignment: CEN, children: [new D.ImageRun({ type: "png", data: u8(png), transformation: { width: 30, height: 120 * (nt || DNT) }, altText: { title: "زخرفة", description: "زخرفة جانبية", name: "deco" } })] }));
       }
       return cell(kk, SIDE, { margins: ZERO, verticalAlign: D.VerticalAlign.TOP });
     };
-    var wrapDeco = function (kids, rPng, lPng) {
-      return [table([new D.TableRow({ children: [sideCell(rPng), cell(kids, W, { margins: ZERO, verticalAlign: D.VerticalAlign.TOP }), sideCell(lPng)] })], [SIDE, W, SIDE]),
+    var wrapDeco = function (kids, rPng, lPng, sp, nt) {
+      return [table([new D.TableRow({ children: [sideCell(rPng, sp, nt), cell(kids, W, { margins: ZERO, verticalAlign: D.VerticalAlign.TOP }), sideCell(lPng, sp, nt)] })], [SIDE, W, SIDE]),
         new D.Paragraph({ spacing: { before: 0, after: 0, line: 20, lineRule: D.LineRuleType.EXACT }, children: [] })];
     };
     var mkFooter = function (kids) { return new D.Footer({ children: DECO ? wrapDeco(kids, null, null) : kids }); };
+
+    var evBreak = -1;
+    var PB = function () { return new D.Paragraph({ pageBreakBefore: true, spacing: { before: 0, after: 0, line: 20, lineRule: D.LineRuleType.EXACT }, children: [] }); };
 
     /* ===== بناء الصفحة ===== */
     var ch = [], footer = null, first = true, sigTable = null;
@@ -477,6 +480,7 @@
           return /\bsec\b/.test(s.className) ? cell(secContent(s, half - 500), half, { borders: BOX, margins: BIGM }) : cell([empty()], half);
         }) })], [half, half]), 100);
       } else if (/\bsec\b/.test(cn)) {
+        if (opt.evBig && el.querySelector(".ev")) { evBreak = ch.length; first = true; }
         var bigT = el.querySelector("table.q");
         if (bigT && bigT.rows.length > 10) {
           secContent(el, W).forEach(function (x) { add(x, 60); });
@@ -515,19 +519,25 @@
     if (!footer && sigTable) footer = mkFooter([sigTable, empty()]);
 
     var decoBody = null;
+    if (evBreak > 0 && !DECO) ch.splice(evBreak, 0, PB());
     if (DECO) {
       try {
         var TW = 30, TH = 120, SC = 3;
         var loadI = function (u) { return new Promise(function (ok) { var im = new Image(); im.onload = function () { ok(im); }; im.onerror = function () { ok(null); }; im.src = u; }); };
-        var mkPng = async function (uri) {
+        var mkPng = async function (uri, n) {
           if (!uri) return null;
           var im = await loadI(uri); if (!im) return null;
-          var c = document.createElement("canvas"); c.width = TW * SC; c.height = TH * SC * DNT; var x = c.getContext("2d");
-          for (var t = 0; t < DNT; t++) x.drawImage(im, 0, t * TH * SC, TW * SC, TH * SC);
+          var c = document.createElement("canvas"); c.width = TW * SC; c.height = TH * SC * n; var x = c.getContext("2d");
+          for (var t = 0; t < n; t++) x.drawImage(im, 0, t * TH * SC, TW * SC, TH * SC);
           return c.toDataURL("image/png");
         };
-        var pr = await mkPng(opt.deco.r), pl = await mkPng(opt.deco.l);
-        if (pr || pl) decoBody = wrapDeco(ch, pr, pl);
+        var pr = await mkPng(opt.deco.r, DNT), pl = await mkPng(opt.deco.l, DNT);
+        if (pr || pl) {
+          if (evBreak > 0) {
+            var pr2 = await mkPng(opt.deco.r, 6), pl2 = await mkPng(opt.deco.l, 6);
+            decoBody = wrapDeco(ch.slice(0, evBreak), pr, pl, 2100, DNT).concat([PB()]).concat(wrapDeco(ch.slice(evBreak), pr2, pl2, 300, 6));
+          } else decoBody = wrapDeco(ch, pr, pl, 2100, DNT);
+        }
       } catch (e) { decoBody = null; }
     }
     var sect = { properties: { page: { size: LAND ? { width: 11906, height: 16838, orientation: D.PageOrientation.LANDSCAPE } : { width: 11906, height: 16838 }, margin: { top: 850, bottom: 900, left: DECO && decoBody ? Math.round((11906 - W - 2 * SIDE) / 2) : 850, right: DECO && decoBody ? Math.round((11906 - W - 2 * SIDE) / 2) : 850, footer: 360 } } }, children: decoBody || ch };
