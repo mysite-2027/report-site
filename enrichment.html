@@ -77,6 +77,7 @@ body{background:#fff}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="vendor/deco.js?v=1"></script>
 </head>
 <body>
 <header class="top"><a href="index.html">← الصفحة الرئيسية</a><h1>الخطة الإثرائية</h1><p>اكتب اسم المادة والطلاب المتميزين وأساليب وطرق التحفيز، فيظهر التقرير جاهزًا للحفظ.</p></header>
@@ -200,6 +201,7 @@ $("print").onclick=function(){window.print();$("pm").textContent="إن لم تظ
 $("pdf").onclick=async function(){
 var b=$("pdf"),old=b.textContent,m=$("pm"),sh=$("sheet");m.textContent="";
 if(!window.html2canvas||!window.jspdf){m.textContent="تعذّر تحميل مكتبة الحفظ. تأكد من اتصالك بالإنترنت أو استخدم زر الطباعة.";return}
+if(MuyassirDeco.big()){b.disabled=true;b.textContent="جارٍ إنشاء الملف…";try{await MuyassirDeco.pdfBig({nm:("الخطة الإثرائية "+($("subj").value.trim()||"")).trim().replace(/[\\\/:*?"<>|]/g,"-")});m.textContent="تم تجهيز الملف."}catch(e){m.textContent="تعذّر إنشاء الملف تلقائيًا. استخدم زر الطباعة ثم اختر «حفظ بصيغة PDF»."}finally{b.disabled=false;b.textContent=old}return}
 b.disabled=true;b.textContent="جارٍ إنشاء الملف…";
 try{
 var sc0=Math.min(3,Math.sqrt(12e6/(sh.offsetWidth*sh.offsetHeight)));
@@ -227,12 +229,13 @@ m.textContent="تم تجهيز الملف.";
 }catch(e){m.textContent="تعذّر إنشاء الملف تلقائيًا. استخدم زر الطباعة ثم اختر «حفظ بصيغة PDF»."}
 finally{b.disabled=false;b.textContent=old}
 };
+MuyassirDeco.attach({ev:true});
 drawRows();render();
 $("word").onclick=async function(){var b=$("word"),old=b.textContent,m=$("pm")||$("msg");if(m)m.textContent="";b.disabled=true;b.textContent="جارٍ إنشاء ملف Word…";
 try{var ld=function(u){return new Promise(function(ok,no){var s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)})};
-if(!window.docx)await ld("/vendor/docx.min.js?v=1");if(!window.muyassirWord)await ld("/vendor/word.js?v=1");
+if(!window.docx)await ld("/vendor/docx.min.js?v=1");if(!window.muyassirWord)await ld("/vendor/word.js?v=10");
 var nm=("الخطة الإثرائية "+($("subj").value.trim()||"")).trim().replace(/[\\\/:*?"<>|]/g,"-");
-var blob=await window.muyassirWord($("sheet"),{title:nm});
+var blob;try{blob=await window.muyassirWord($("sheet"),MuyassirDeco.wordOpts({title:nm}))}finally{MuyassirDeco.apply()}
 var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nm+".docx";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
 if(m)m.textContent="تم تجهيز ملف Word. افتحه وعدّل ما تشاء.";
 }catch(e){if(m)m.textContent="تعذّر إنشاء ملف Word. تأكد من اتصالك بالإنترنت ثم أعد المحاولة، أو استخدم حفظ PDF."}
