@@ -240,7 +240,7 @@ $("word").onclick=async function(){var b=$("word"),old=b.textContent,m=$("pm")||
 try{var ld=function(u){return new Promise(function(ok,no){var s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=no;document.head.appendChild(s)})};
 if(!window.docx)await ld("/vendor/docx.min.js?v=1");if(!window.muyassirWord)await ld("/vendor/word.js?v=1");
 var nm=($("pname").value.replace("اسم البرنامج/النشاط:","").trim()||"تقرير-برنامج").replace(/[\\/:*?"<>|]/g,"-");
-Array.prototype.forEach.call($("sheet").querySelectorAll(".dec,.ico"),function(e){e.remove()});var blob;try{blob=await window.muyassirWord($("sheet"),{title:nm})}finally{icons();decorate()}
+Array.prototype.forEach.call($("sheet").querySelectorAll(".dec"),function(e){e.remove()});var blob;try{blob=await window.muyassirWord($("sheet"),{title:nm})}finally{icons();decorate()}
 var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nm+".docx";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
 if(m)m.textContent="تم تجهيز ملف Word. افتحه وعدّل ما تشاء.";
 }catch(e){if(m)m.textContent="تعذّر إنشاء ملف Word. تأكد من اتصالك بالإنترنت ثم أعد المحاولة، أو استخدم حفظ PDF."}
