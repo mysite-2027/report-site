@@ -458,7 +458,7 @@
         var tc = hexOf(tx ? cs(tx).color : "") || CL;
         add(table([new D.TableRow({ children: [
           cell([para([runs(dept.trim(), { bold: true, color: tc, size: 24 })], { alignment: CEN, spacing: { after: 20 } }),
-                para([runs(school)], { alignment: CEN, spacing: { after: 0 } })], 3500, { borders: HB }),
+                para([runs(school)], { alignment: CEN, spacing: { after: 0 } })], 3500, { borders: HB, verticalAlign: D.VerticalAlign.BOTTOM }),
           cell([empty()], W - 6706, { borders: HB }),
           cell([new D.Paragraph({ alignment: D.AlignmentType.LEFT, spacing: { after: 0 }, children: lg ? [lg] : [] })], 3206, { borders: HB })
         ] })], [3500, W - 6706, 3206]), 100);
