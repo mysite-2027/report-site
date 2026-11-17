@@ -231,7 +231,7 @@
     var evGrid = function (ev, iw) {
       var items = Array.prototype.slice.call(ev.children), q = Math.floor(iw / 4), half = q * 2, rows = [];
       var pf = /\bpf\b/.test(ev.className || ""), cnt = items.length;
-      var a1 = /\ba1\b/.test(ev.className || ""), mhOf = pf ? (a1 ? (cnt === 1 ? 520 : (cnt === 2 ? 380 : 290)) : (cnt === 1 ? 340 : (cnt === 2 ? 270 : 220))) : 200;
+      var a1 = /\ba1\b/.test(ev.className || ""), mhOf = pf ? (a1 ? (cnt === 1 ? 520 : (cnt === 2 ? 380 : 290)) : (cnt === 1 ? 340 : (cnt === 2 ? 270 : 220))) : (opt.evH || 200);
       var one = function (it, wide) {
         var kids = [], img = it.querySelector("img"), im = img ? pic(img, px(wide ? q * 4 : half) - 24, mhOf) : null;
         if (im) kids = [new D.Paragraph({ alignment: CEN, spacing: { after: 0 }, children: [im] })];
