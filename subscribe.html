@@ -28,6 +28,7 @@ ul,ol{margin:6px 0;padding-inline-start:22px}li{margin:4px 0}
 .plan input{position:absolute;opacity:0;pointer-events:none}
 .plan b{display:block;font-size:1.05rem}
 .plan .pr{font-size:1.7rem;font-weight:800;color:var(--green);line-height:1.4}
+.plan .old{display:block;color:var(--muted);font-weight:600;text-decoration:line-through;line-height:1.2;margin-top:4px}
 .plan small{color:var(--muted)}
 .plan:has(input:checked){border-color:var(--green);box-shadow:0 0 0 3px rgba(0,104,47,.15)}
 .plan .tag{position:absolute;top:-11px;left:12px;background:var(--lg);color:#fff;font-size:.78rem;font-weight:700;border-radius:99px;padding:0 10px}
@@ -134,7 +135,7 @@ input:focus{outline:2px solid var(--blue);border-color:var(--blue)}
 <script>
 // ===== عدّل هذه القيم فقط، واترك الفارغ لإخفائه =====
 var PLANS=[
-  {id:"m1",name:"شهر واحد",price:"15 ريالًا",note:"30 يومًا"}
+  {id:"m1",name:"شهر واحد",price:"9.90 ريالًا",old:"15 ريالًا",tag:"عرض حاليًا",note:"30 يومًا"}
 ];
 var BANK_NAME="مصرف الراجحي";                    // اسم البنك
 var ACCOUNT_NAME="عبدالله عبدالهادي";                 // اسم صاحب الحساب
@@ -145,7 +146,7 @@ var ETA_TEXT="(عادة خلال ساعات)";    // مدة التفعيل بع�
 var $=function(i){return document.getElementById(i)};
 var session=false,mode="trial";
 $("eta").textContent=ETA_TEXT;
-$("plans").innerHTML=PLANS.map(function(p,i){return '<label class="plan">'+(p.tag?'<span class="tag">'+p.tag+'</span>':'')+'<input type="radio" name="plan" value="'+p.id+'"'+(i===0?' checked':'')+'><b>'+p.name+'</b><span class="pr">'+p.price+'</span><small>'+p.note+'</small></label>'}).join("");
+$("plans").innerHTML=PLANS.map(function(p,i){return '<label class="plan">'+(p.tag?'<span class="tag">'+p.tag+'</span>':'')+'<input type="radio" name="plan" value="'+p.id+'"'+(i===0?' checked':'')+'><b>'+p.name+'</b>'+(p.old?'<span class="old">'+p.old+'</span>':'')+'<span class="pr">'+p.price+'</span><small>'+p.note+'</small></label>'}).join("");
 function show(v,r,t){if(v){$(t).textContent=v}else{$(r).hidden=true}}
 show(BANK_NAME,"rBank","bank");show(ACCOUNT_NAME,"rName","aname");show(IBAN,"rIban","iban");
 if(!BANK_NAME&&!ACCOUNT_NAME&&!IBAN){$("payRows").hidden=true;$("payNone").hidden=false}
