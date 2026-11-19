@@ -42,6 +42,7 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS trials(email TEXT PRIMARY KEY,ts INTEGER,iph TEXT)`,
   `CREATE TABLE IF NOT EXISTS reminders(user_id INTEGER,expires_at INTEGER,PRIMARY KEY(user_id,expires_at))`,
   `CREATE TABLE IF NOT EXISTS usage(day TEXT NOT NULL,form TEXT NOT NULL,kind TEXT NOT NULL,user_id INTEGER NOT NULL,n INTEGER DEFAULT 0,PRIMARY KEY(day,form,kind,user_id))`,
+  `CREATE TABLE IF NOT EXISTS demo_dl(day TEXT NOT NULL,form TEXT NOT NULL,kind TEXT NOT NULL,vh TEXT NOT NULL,n INTEGER DEFAULT 1,PRIMARY KEY(day,form,kind,vh))`,
   `CREATE TABLE IF NOT EXISTS visits(day TEXT NOT NULL,page TEXT NOT NULL,vh TEXT NOT NULL,n INTEGER DEFAULT 1,PRIMARY KEY(day,page,vh))`,
   `CREATE TABLE IF NOT EXISTS profiles(user_id INTEGER PRIMARY KEY,dept TEXT DEFAULT '',school TEXT DEFAULT '',principal TEXT DEFAULT '',gv TEXT DEFAULT '',updated_at INTEGER)`
 ];
@@ -232,6 +233,19 @@ async function api(req, env, ctx, url, p) {
       "البريد: " + email + " (تم التحقق منه)", ex ? "" : "الاسم: " + name, "الباقة: " + PLAN_NAME[plan], "مرجع التحويل: " + (ref || "—"),
       "افتح لوحة المسؤول للقبول بعد التأكد من وصول المبلغ.", "الوقت: " + fmt(now)
     ]));
+    return json({ ok: true });
+  }
+
+  if (p === "/api/demo-track" && m === "POST") {
+    try {
+      const ua = req.headers.get("user-agent") || "", ip = req.headers.get("cf-connecting-ip") || "";
+      if (!ua || BOT.test(ua)) return json({ ok: true });
+      const b = await body(req), f = String(b.form || ""), k = String(b.kind || "");
+      if (DEMO_FORMS_ALL.includes(f) && (k === "pdf" || k === "word")) {
+        const day = riyadhDay(), vh = (await sha(ip + "|" + ua + "|" + day + "|v1")).slice(0, 16);
+        await env.DB.prepare("INSERT INTO demo_dl(day,form,kind,vh,n) VALUES(?,?,?,?,1) ON CONFLICT(day,form,kind,vh) DO UPDATE SET n=n+1").bind(day, f, k, vh).run();
+      }
+    } catch (e) { }
     return json({ ok: true });
   }
 
@@ -537,7 +551,10 @@ async function api(req, env, ctx, url, p) {
       const vtot = await q("SELECT page,COUNT(*) u,SUM(n) v,SUM(CASE WHEN day>=? THEN 1 ELSE 0 END) u7,SUM(CASE WHEN day=? THEN 1 ELSE 0 END) u1 FROM visits WHERE day>=? GROUP BY page", d7, today, d30);
       const since = Date.now() - 30 * DAY;
       const fun = await q("SELECT kind,COUNT(*) c FROM events WHERE ts>? AND kind IN('trial_start','signup_request','signup_approved') GROUP BY kind", since);
-      return json({ forms, users, days, fd, ud, cities, vis, vtot, fun, pubnames: PUB_NAMES, rows, names: FORM_NAMES });
+      const dl = await q("SELECT form,kind,COUNT(*) u,SUM(n) n FROM demo_dl WHERE day>=? GROUP BY form,kind", d30);
+      const dlt = await q("SELECT kind,COUNT(*) u,SUM(n) n FROM demo_dl WHERE day>=? GROUP BY kind", d30);
+      const dl1 = await q("SELECT COUNT(*) u FROM demo_dl WHERE day=?", today);
+      return json({ forms, users, days, fd, ud, cities, vis, vtot, fun, dl, dlt, dl1: dl1[0] ? dl1[0].u : 0, pubnames: PUB_NAMES, rows, names: FORM_NAMES });
     }
     if (p === "/api/admin/events" && m === "GET") {
       const lim = Math.min(1000, Math.max(50, +new URL(req.url).searchParams.get("limit") || 150));
@@ -642,12 +659,17 @@ n.innerHTML=MSG+' <a href="/subscribe">اشترك للنسخة الكاملة</a
 document.body.insertBefore(n,document.body.firstChild);
 `;
 const GALLERY_JS = `var cs=document.querySelectorAll("a[href^='/demo/']");for(var g=0;g<cs.length;g++){var live=/\\/demo\\/analysis$/.test(cs[g].getAttribute("href"));var bd=document.createElement("span");bd.textContent=live?"تجربة مباشرة":"معاينة";bd.style.cssText="display:inline-block;margin:4px;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700;background:"+(live?"#17445a":"#e8eef2")+";color:"+(live?"#fff":"#17445a");cs[g].appendChild(bd)}`;
+const DEMO_TRACK = `(function(){var F=(location.pathname.match(/^\\/demo\\/([a-z]+)/)||[])[1];if(!F)return;var last="";
+function send(k){try{fetch("/api/demo-track",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({form:F,kind:k}),keepalive:true})}catch(e){}}
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("#pdf,#word");if(b)last=b.id},true);
+var pm=document.getElementById("pm")||document.getElementById("msg");
+if(pm)new MutationObserver(function(){var t=pm.textContent||"";if(/^تم تجهيز/.test(t)&&(last==="pdf"||last==="word")){send(last);last=""}}).observe(pm,{childList:true,characterData:true,subtree:true})})();`;
 function demoJs(f) {
   const preview = !!PREVIEW_DATA[f], gallery = !f;
   const msg = gallery ? "اضغط أي نموذج لمعاينته. وجرّب «تحليل الدرجات» مباشرة مجانًا وبدون تسجيل."
     : preview ? "معاينة جاهزة ببيانات تجريبية، ويمكن بعد الاشتراك تغيير الصيغة بين مؤنث ومذكر. جرّب «تحليل الدرجات» مباشرة مجانًا."
     : "تجربة مباشرة: اضغط «بيانات تجريبية» أو اكتب درجاتك، وسيُحفظ التقرير بعلامة مائية.";
-  return DEMO_PRE + "var MSG=" + JSON.stringify(msg) + ",DEMO_CSS=" + JSON.stringify(DEMO_CSS) + ",WMX=" + (f === DEMO_OPEN ? "WM_STRONG" : "WM_LIGHT") + ";" + DEMO_BODY + (preview ? previewJs(f) : "") + (gallery ? GALLERY_JS : "") + "})();";
+  return DEMO_PRE + "var MSG=" + JSON.stringify(msg) + ",DEMO_CSS=" + JSON.stringify(DEMO_CSS) + ",WMX=" + (f === DEMO_OPEN ? "WM_STRONG" : "WM_LIGHT") + ";" + DEMO_BODY + (preview ? previewJs(f) : "") + (gallery ? GALLERY_JS : "") + "})();" + (gallery ? "" : DEMO_TRACK);
 }
 
 
