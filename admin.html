@@ -89,7 +89,7 @@ body.pr-sub{background:#fff}body.pr-sub #subCard{border:0;box-shadow:none;paddin
   <div class="card" id="useCard"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 style="margin:0">استخدام النماذج <span id="usn" class="meta"></span></h2><button class="g noprint" id="usPrint" type="button">طباعة الإحصائيات</button></div>
     <h2 style="margin-top:12px">الزوار قبل الاشتراك <span id="vsn" class="meta"></span></h2>
     <div class="meta">الزيارات الفريدة يوميًا للصفحات المفتوحة لغير المشتركين (دون من سجّل دخوله)، وبلا حفظ لأي عنوان أو هوية، ولا تُحتسب محركات البحث والروبوتات. من يزور في أكثر من يوم يُحتسب في كل يوم.</div>
-    <div id="vsf"></div><div id="vsm" style="margin-top:8px"></div><div id="fun" style="margin-top:10px"></div>
+    <div id="vsf"></div><div id="vsm" style="margin-top:8px"></div><div id="fun" style="margin-top:10px"></div><div id="dlx" style="margin-top:10px"></div>
     <div class="meta" style="margin-top:14px">يُحتسب كل ملف PDF أو Word يُجهَّز بنجاح، وكل ضغطة طباعة. الأرقام منذ تفعيل هذه الميزة.</div>
     <div id="usf"></div>
     <h2 style="margin-top:16px">استخدام كل نموذج يوميًا (آخر 14 يومًا)</h2><div id="usm"></div>
@@ -158,6 +158,14 @@ function loadUse(){call("/api/admin/usage").then(function(x){if(!x.ok)return;var
  $("vsm").innerHTML='<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;min-width:100%"><tr><th style="text-align:right">زوار كل صفحة يوميًا</th>'+D2.map(function(d){return '<th style="padding:3px 6px">'+esc(d.slice(5))+'</th>'}).join("")+'</tr>'+pk.map(function(k){return '<tr style="border-top:1px solid #e3e8ec"><td style="white-space:nowrap"><b>'+esc(PN[k])+'</b></td>'+D2.map(function(d){var n=(VD[k]||{})[d]||0;return '<td style="text-align:center;padding:3px 6px;'+(n?'background:rgba(7,168,105,'+Math.min(.12+n*.03,.6)+');font-weight:700':'color:#b6bec6')+'">'+(n||'·')+'</td>'}).join("")+'</tr>'}).join("")+'</table></div>';
  var FN={};(j.fun||[]).forEach(function(r){FN[r.kind]=r.c});
  $("fun").innerHTML='<b>مسار الاشتراك خلال 30 يومًا:</b> زوار الصفحة الأولى <b>'+vt+'</b> ← تجارب مجانية <b>'+(FN.trial_start||0)+'</b> ← طلبات اشتراك وتجديد <b>'+(FN.signup_request||0)+'</b> ← اشتراكات مقبولة <b>'+(FN.signup_approved||0)+'</b>'+(vt?' <small class="meta">(نسبة التجربة إلى الزوار '+Math.round((FN.trial_start||0)/vt*100)+'%)</small>':'');
+ var DT={};(j.dlt||[]).forEach(function(r){DT[r.kind]=r});
+ var dlh='<b>تحميلات المعاينة المجانية (30 يومًا):</b> PDF: <b>'+((DT.pdf||{}).u||0)+'</b> زائر ('+((DT.pdf||{}).n||0)+' مرة) — Word: <b>'+((DT.word||{}).u||0)+'</b> زائر ('+((DT.word||{}).n||0)+' مرة) — اليوم: <b>'+(j.dl1||0)+'</b>';
+ var DF={};(j.dl||[]).forEach(function(r){(DF[r.form]||(DF[r.form]={}))[r.kind]=r});
+ var dfk=Object.keys(DF).sort(function(a,b){return ((DF[b].pdf||{}).u||0)+((DF[b].word||{}).u||0)-((DF[a].pdf||{}).u||0)-((DF[a].word||{}).u||0)});
+ if(dfk.length)dlh+='<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:6px"><tr style="text-align:right;color:#666"><th>النموذج</th><th>PDF</th><th>Word</th></tr>'+dfk.map(function(f){return '<tr style="border-top:1px solid #e3e8ec"><td>'+esc((j.names||{})[f]||f)+'</td><td>'+((DF[f].pdf||{}).u||0)+'</td><td>'+((DF[f].word||{}).u||0)+'</td></tr>'}).join("")+'</table>';
+ else dlh+=' <small class="meta">(لا توجد تحميلات مسجّلة بعد)</small>';
+ dlh+='<div class="meta" style="margin-top:4px">يُحسب الزائر مرة واحدة في اليوم لكل نموذج ونوع ملف، ولا تُحتسب الروبوتات.</div>';
+ $("dlx").innerHTML=dlh;
  var CN=function(c){try{return c?new Intl.DisplayNames(["ar"],{type:"region"}).of(c):""}catch(e){return c||""}};
  var cmx=Math.max.apply(null,[1].concat((j.cities||[]).map(function(c){return c.users}))),ct=0;
  (j.cities||[]).forEach(function(c){ct+=c.users});
